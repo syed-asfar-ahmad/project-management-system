@@ -12,7 +12,7 @@ const projectSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ['Pending', 'In Progress', 'Completed'],
+    enum: ['Not Started', 'Pending', 'In Progress', 'Completed'],
     default: 'Pending'
   },
 
@@ -26,6 +26,21 @@ const projectSchema = new mongoose.Schema({
       ref: 'User'
     }
   ],
+
+  // Added Comments Field
+  comments: [
+    {
+      text: String,
+      author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 
 }, { timestamps: true });
 

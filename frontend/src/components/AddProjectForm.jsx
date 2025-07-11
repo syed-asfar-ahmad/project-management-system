@@ -117,7 +117,6 @@ function AddProjectForm({ onProjectCreated }) {
         required
       />
 
-      {/* ✅ Improved Multi-select */}
       <div className="mb-3">
         <label className="block font-semibold mb-1">Assign Team Members:</label>
         <Select

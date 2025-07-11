@@ -1,27 +1,35 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware to verify JWT Token
+// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]; // Get token from header
+  const authHeader = req.headers.authorization;
 
-  if (!token) return res.status(401).json({ message: 'Access Denied. No token provided.' });
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Access denied. No token provided.' });
+  }
+
+  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user info to request
-    next(); // Go to next step
+    req.user = {
+      id: decoded.id || decoded._id,  // support either key
+      role: decoded.role
+    };
+    next(); // continue to route/controller
   } catch (err) {
-    res.status(401).json({ message: 'Invalid token' });
+    console.error('JWT verification error:', err);
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
-// Middleware to check if user has a specific role
+// Middleware to check specific roles (e.g., Admin, Manager)
 const checkRole = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden. You are not allowed.' });
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Forbidden. You do not have access.' });
     }
-    next(); // Role is allowed
+    next();
   };
 };
 

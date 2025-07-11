@@ -1,12 +1,14 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
-// Create Context
+// Create the context
 const AuthContext = createContext();
 
-// Provider Component
+// Provider component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // user info
+  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(true);
 
   const login = (userData, token) => {
     setUser(userData);
@@ -20,12 +22,35 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get("http://localhost:5000/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user info", err);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [token]);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom Hook
+// Named export
 export const useAuth = () => useContext(AuthContext);

@@ -3,8 +3,6 @@ const Project = require('../models/Project');
 // CREATE project
 const createProject = async (req, res) => {
   const { name, description, deadline, teamMembers, status } = req.body;
-  console.log("REQ.BODY STATUS:", req.body.status);
-  console.log("FULL REQ.BODY:", req.body);
   try {
     const project = new Project({
       name,
@@ -55,9 +53,44 @@ const deleteProject = async (req, res) => {
   }
 };
 
+// ADD COMMENT to a project
+const addCommentToProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const comment = {
+      text: req.body.text,
+      author: req.user.id,
+      createdAt: new Date()
+    };
+
+    project.comments.push(comment);
+    await project.save();
+
+    res.status(201).json({ message: 'Comment added successfully' });
+  } catch (err) {
+    console.error('Error adding comment:', err);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+};
+
+// GET comments for a project
+const getProjectComments = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id).populate('comments.author', 'name email');
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(project.comments || []);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching comments' });
+  }
+};
+
 module.exports = {
   createProject,
   getAllProjects,
   updateProject,
-  deleteProject
+  deleteProject,
+  addCommentToProject,
+  getProjectComments 
 };
