@@ -1,16 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Select from "react-select";
 import axios from "axios";
 
-function EditProjectForm({ project, token, onSuccess }) {
+function EditProjectForm({ project, token, onSuccess, onCancel }) {
+  const [teamOptions, setTeamOptions] = useState([]);
+
   const [form, setForm] = useState({
     name: project.name || "",
     description: project.description || "",
     deadline: project.deadline?.slice(0, 10) || "",
     status: project.status || "Not Started",
+    teamMembers: project.teamMembers?.map((member) => member._id) || [],
   });
 
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/users/team-members", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const options = res.data.map((member) => ({
+          value: member._id,
+          label: `${member.name} (${member.email})`,
+        }));
+        setTeamOptions(options);
+      } catch (err) {
+        console.error("Failed to fetch team members", err.response?.data);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [token]);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTeamChange = (selectedOptions) => {
+    const selectedIds = selectedOptions.map((opt) => opt.value);
+    setForm((prev) => ({ ...prev, teamMembers: selectedIds }));
   };
 
   const handleSubmit = async (e) => {
@@ -21,15 +51,18 @@ function EditProjectForm({ project, token, onSuccess }) {
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      onSuccess(); // refresh details
+      onSuccess();
     } catch (err) {
       console.error("Failed to update project", err.response?.data);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 p-4 border rounded">
-      <h2 className="text-lg font-semibold mb-2">Edit Project</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 shadow-md rounded-lg border w-full"
+    >
+      <h2 className="text-xl font-semibold mb-4 text-gray-800">Edit Project</h2>
 
       <input
         type="text"
@@ -37,7 +70,7 @@ function EditProjectForm({ project, token, onSuccess }) {
         value={form.name}
         onChange={handleChange}
         placeholder="Project name"
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full mb-3 p-2 border rounded"
         required
       />
 
@@ -46,7 +79,8 @@ function EditProjectForm({ project, token, onSuccess }) {
         value={form.description}
         onChange={handleChange}
         placeholder="Description"
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full mb-3 p-2 border rounded"
+        rows={4}
       />
 
       <input
@@ -54,26 +88,46 @@ function EditProjectForm({ project, token, onSuccess }) {
         name="deadline"
         value={form.deadline}
         onChange={handleChange}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full mb-3 p-2 border rounded"
       />
 
       <select
         name="status"
         value={form.status}
         onChange={handleChange}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full mb-4 p-2 border rounded"
       >
         <option value="Not Started">Not Started</option>
         <option value="In Progress">In Progress</option>
         <option value="Completed">Completed</option>
       </select>
 
-      <button
-        type="submit"
-        className="bg-green-500 text-white px-4 py-2 rounded"
-      >
-        Save Changes
-      </button>
+      <div className="mb-4">
+        <label className="block font-medium mb-1">Team Members</label>
+        <Select
+          isMulti
+          value={teamOptions.filter((opt) => form.teamMembers.includes(opt.value))}
+          options={teamOptions}
+          onChange={handleTeamChange}
+          placeholder="Select team members..."
+        />
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
+        >
+          Save Changes
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="bg-gray-300 text-gray-800 px-5 py-2 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }

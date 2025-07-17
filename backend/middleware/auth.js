@@ -13,10 +13,10 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = {
-      id: decoded.id || decoded._id,  // support either key
+      id: decoded.id || decoded._id,
       role: decoded.role
     };
-    next(); // continue to route/controller
+    next(); 
   } catch (err) {
     console.error('JWT verification error:', err);
     res.status(401).json({ message: 'Invalid or expired token' });

@@ -12,7 +12,7 @@ const createTask = async (req, res) => {
       assignedTo,
       status,
       priority,
-      dueDate
+      dueDate,
     });
 
     await task.save();
@@ -26,22 +26,59 @@ const createTask = async (req, res) => {
 // Get all tasks (Admin/Manager)
 const getAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.find()
+    const query = {};
+    if (req.query.projectId) {
+      query.project = req.query.projectId;
+    }
+
+    const tasks = await Task.find(query)
       .populate('project', 'name')
       .populate('assignedTo', 'name email role');
+
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: 'Error fetching tasks' });
   }
 };
 
+
 // Get tasks assigned to logged-in user
 const getMyTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ assignedTo: req.user.id }).populate('project', 'name');
+    const tasks = await Task.find({ assignedTo: req.user.id })
+      .populate('project', 'name')
+      .populate('assignedTo', 'name'); 
+
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: 'Error fetching your tasks' });
+  }
+};
+
+
+const getTaskById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const task = await Task.findById(id)
+      .populate('project', 'name')
+      .populate('assignedTo', 'name email role')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'author',
+          select: 'name email',
+        },
+      });
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.json(task);
+  } catch (err) {
+    console.error('Error fetching task:', err);
+    res.status(500).json({ error: 'Error fetching task' });
   }
 };
 
@@ -70,20 +107,32 @@ const deleteTask = async (req, res) => {
 };
 
 const addCommentToTask = async (req, res) => {
-  const { id } = req.params; // task ID
+  const { id } = req.params;
   const { text } = req.body;
 
   try {
     const task = await Task.findById(id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    task.comments.push({
-      user: req.user.id,
-      text
+    const newComment = {
+      text,
+      author: req.user.id,
+      createdAt: new Date(),
+    };
+
+    task.comments.push(newComment);
+    await task.save();
+
+    const updatedTask = await Task.findById(id).populate({
+      path: 'comments',
+      populate: {
+        path: 'author',
+        select: 'name email',
+      },
     });
 
-    await task.save();
-    res.status(200).json({ message: 'Comment added', comments: task.comments });
+    const lastComment = updatedTask.comments.at(-1);
+    res.status(200).json(lastComment);
   } catch (err) {
     console.error('Error adding comment:', err);
     res.status(500).json({ error: 'Failed to add comment' });
@@ -92,14 +141,40 @@ const addCommentToTask = async (req, res) => {
 
 const getTasksByDueDate = async (req, res) => {
   try {
-    const tasks = await Task.find({}, 'title dueDate status')
-      .populate('project', 'name')
-      .populate('assignedTo', 'name');
+    let tasks;
 
-    res.json(tasks);
+    if (req.user.role === 'Team Member') {
+      // Show only tasks assigned to the logged-in Team Member
+      tasks = await Task.find({ assignedTo: req.user.id }, 'title dueDate status')
+        .populate('project', 'name')
+        .populate('assignedTo', 'name');
+    } else {
+      // Admin/Manager can see all tasks
+      tasks = await Task.find({}, 'title dueDate status')
+        .populate('project', 'name')
+        .populate('assignedTo', 'name');
+    }
+
+    res.status(200).json(tasks);
   } catch (err) {
     console.error('Error fetching calendar tasks:', err);
     res.status(500).json({ error: 'Failed to fetch tasks for calendar' });
+  }
+};
+
+const getMyProjectTasks = async (req, res) => {
+  const { projectId } = req.params;
+
+  try {
+    const tasks = await Task.find({
+      project: projectId,
+      assignedTo: req.user.id,
+    }).populate('assignedTo', 'name');
+
+    res.status(200).json(tasks);
+  } catch (err) {
+    console.error("Error fetching member's project tasks:", err);
+    res.status(500).json({ error: 'Failed to fetch your assigned tasks for this project' });
   }
 };
 
@@ -108,11 +183,10 @@ module.exports = {
   createTask,
   getAllTasks,
   getMyTasks,
+  getTaskById,
   updateTask,
   deleteTask,
   addCommentToTask,
-  getTasksByDueDate
+  getTasksByDueDate,
+  getMyProjectTasks
 };
-
-
-

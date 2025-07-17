@@ -5,14 +5,14 @@ const {
   updateProject,
   deleteProject,
   addCommentToProject,
-  getProjectComments // add this here
+  getProjectComments,
+  getProjectTeamMembers
 } = require('../controllers/projectController');
 
 
 const { verifyToken, checkRole } = require('../middleware/auth');
 
-const Project = require('../models/Project'); // Add this if not already
-// This was likely missing, also causing 500 errors
+const Project = require('../models/Project'); 
 
 // GET all projects — Role-based logic inside
 router.get('/', verifyToken, async (req, res) => {
@@ -41,12 +41,11 @@ router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), updateProject);
 // Add Comment to a Project
 router.post('/:id/comments', verifyToken, addCommentToProject);
 
-// DELETE project — Admin only
-router.delete('/:id', verifyToken, checkRole('Admin'), deleteProject);
+// DELETE project — Admin or Manager
+router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), deleteProject);
 
 router.get('/:id/comments', verifyToken, getProjectComments);
 
-// OPTIONAL: Separate route for team member to fetch only their projects
 router.get('/my-projects', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -56,6 +55,8 @@ router.get('/my-projects', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch user projects' });
   }
 });
+
+router.get('/:projectId/team-members', getProjectTeamMembers);
 
 router.get('/:id', verifyToken, async (req, res) => {
   try {

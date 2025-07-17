@@ -3,12 +3,12 @@ import { useAuth } from "../context/AuthContext";
 import { createProject } from "../services/projectService";
 import axios from "axios";
 import Select from "react-select";
+import { CalendarDays, Users, ClipboardList, FileText, ListChecks } from "lucide-react";
 
 function AddProjectForm({ onProjectCreated }) {
   const { token } = useAuth();
 
   const [teamOptions, setTeamOptions] = useState([]);
-
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -17,17 +17,13 @@ function AddProjectForm({ onProjectCreated }) {
     teamMembers: [],
   });
 
-  // Fetch team members
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/users/team-members", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Map to format required by react-select
         const options = res.data.map((member) => ({
           value: member._id,
           label: `${member.name} (${member.email})`,
@@ -47,7 +43,6 @@ function AddProjectForm({ onProjectCreated }) {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle react-select multi select
   const handleTeamChange = (selectedOptions) => {
     const selectedIds = selectedOptions.map((opt) => opt.value);
     setForm((prev) => ({ ...prev, teamMembers: selectedIds }));
@@ -75,61 +70,94 @@ function AddProjectForm({ onProjectCreated }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded mb-6">
-      <h2 className="text-xl font-bold mb-4">Create New Project</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-white border border-gray-200 rounded-xl shadow-lg px-10 py-8"
+    >
+      <div className="flex items-center mb-6 text-blue-700">
+        <ClipboardList className="w-6 h-6 mr-2" />
+        <h2 className="text-2xl font-bold">Project Details</h2>
+      </div>
 
-      <input
-        type="text"
-        name="name"
-        placeholder="Project Name"
-        value={form.name}
-        onChange={handleChange}
-        className="w-full mb-3 p-2 border rounded"
-        required
-      />
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <FileText className="w-4 h-4 mr-1" />
+          Project Name
+        </label>
+        <input
+          type="text"
+          name="name"
+          placeholder="Enter project name"
+          value={form.name}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          required
+        />
+      </div>
 
-      <textarea
-        name="description"
-        placeholder="Project Description"
-        value={form.description}
-        onChange={handleChange}
-        className="w-full mb-3 p-2 border rounded"
-        required
-      ></textarea>
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <ListChecks className="w-4 h-4 mr-1" />
+          Description
+        </label>
+        <textarea
+          name="description"
+          placeholder="Brief project description"
+          value={form.description}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          rows={4}
+          required
+        />
+      </div>
 
-      <select
-        name="status"
-        value={form.status}
-        onChange={handleChange}
-        className="w-full mb-3 p-2 border rounded"
-      >
-        <option value="Pending">Pending</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Completed">Completed</option>
-      </select>
+      <div>
+        <label className="block mb-1 font-medium text-gray-700">Status</label>
+        <select
+          name="status"
+          value={form.status}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+        >
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
 
-      <input
-        type="date"
-        name="deadline"
-        value={form.deadline}
-        onChange={handleChange}
-        className="w-full mb-3 p-2 border rounded"
-        required
-      />
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <CalendarDays className="w-4 h-4 mr-1" />
+          Deadline
+        </label>
+        <input
+          type="date"
+          name="deadline"
+          value={form.deadline}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          required
+        />
+      </div>
 
-      <div className="mb-3">
-        <label className="block font-semibold mb-1">Assign Team Members:</label>
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <Users className="w-4 h-4 mr-1" />
+          Assign Team Members
+        </label>
         <Select
           isMulti
           options={teamOptions}
           onChange={handleTeamChange}
           placeholder="Select team members..."
+          className="react-select-container"
+          classNamePrefix="react-select"
         />
       </div>
 
       <button
         type="submit"
-        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition"
       >
         Create Project
       </button>

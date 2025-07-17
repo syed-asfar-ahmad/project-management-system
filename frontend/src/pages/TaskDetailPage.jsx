@@ -1,41 +1,54 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import BackButton from '../components/backButton';
 import axios from 'axios';
+import {
+  FileText,
+  MessageCircle,
+  Paperclip,
+  UploadCloud,
+  Send,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
+import Navbar from '../components/AuthNavbar';
+import Footer from '../components/Footer';
+import { toast } from 'react-toastify';
 
 function TaskDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [task, setTask] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-
   const token = localStorage.getItem('token');
+  const { user } = useAuth();
 
-  // Fetch task and comments
-  useEffect(() => {
-    const fetchTaskDetails = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/tasks/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTask(res.data);
-        setComments(res.data.comments || []);
-      } catch (err) {
-        console.error('Failed to load task details:', err);
-      }
-    };
-
-    fetchTaskDetails();
+  const fetchTaskDetails = useCallback(async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/tasks/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTask(res.data);
+      setComments(res.data.comments || []);
+    } catch (err) {
+      toast.error("Failed to load task details");
+    }
   }, [id, token]);
 
-  // Submit new comment
+  useEffect(() => {
+    fetchTaskDetails();
+  }, [fetchTaskDetails]);
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
     try {
-      await axios.post(
+      const res = await axios.post(
         `http://localhost:5000/api/tasks/${id}/comments`,
         { text: commentText },
         {
@@ -43,23 +56,27 @@ function TaskDetailPage() {
         }
       );
 
-      setComments([
-        ...comments,
-        {
-          text: commentText,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      const newComment = res.data;
+      setComments([...comments, newComment]);
       setCommentText('');
+      toast.success("Comment posted");
     } catch (err) {
-      console.error('Failed to post comment:', err);
-      alert('Error posting comment');
+      toast.error('Failed to post comment');
     }
   };
 
-  // Upload file
   const handleFileUpload = async () => {
-    if (!file) return;
+    if (!file) {
+      toast.warn("Please select a file to upload");
+      return;
+    }
+
+    // Optional: 10 MB max file size
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("File too large. Max size is 10MB");
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file);
@@ -73,102 +90,193 @@ function TaskDetailPage() {
         },
       });
 
-      alert('File uploaded!');
+      toast.success("File uploaded successfully");
       setFile(null);
-      // Refetch task to get updated attachments
-      const res = await axios.get(`http://localhost:5000/api/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTask(res.data);
+      fetchTaskDetails();
     } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Upload failed');
+      toast.error(`Upload failed: ${err.response?.data?.message || err.message}`);
     } finally {
       setUploading(false);
     }
   };
 
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Task Details</h2>
+  const handleEdit = () => {
+    navigate(`/tasks/${task._id}/edit`);
+  };
 
-      {task ? (
-        <div className="bg-white p-4 rounded shadow mb-6">
-          <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
-          <p className="mb-2">{task.description}</p>
-          <p>Status: <strong>{task.status}</strong></p>
-          <p>Priority: <strong>{task.priority}</strong></p>
-          <p>Due Date: <strong>{task.dueDate?.slice(0, 10)}</strong></p>
-
-          {/* Attachments */}
-          <div className="mt-4">
-            <h4 className="font-semibold mb-2">Attachments:</h4>
-            {task.attachments?.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {task.attachments.map((file, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={`http://localhost:5000/${file.path}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
-                    >
-                      {file.filename}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No attachments</p>
-            )}
+  const handleDelete = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div>
+          <p className="font-semibold text-gray-800 mb-2">
+            Are you sure you want to delete this task?
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={async () => {
+                closeToast(); // Close the toast before proceeding
+                try {
+                  await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  toast.success("Task deleted successfully!");
+                  navigate("/tasks");
+                } catch (err) {
+                  toast.error("Failed to delete task");
+                }
+              }}
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+            >
+              Yes, Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-400"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      ) : (
-        <p>Loading task...</p>
-      )}
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeButton: false,
+        draggable: false,
+        closeOnClick: false,
+      }
+    );
+  };
 
-      {/* Comments */}
-      <h3 className="text-lg font-bold mb-2">Comments</h3>
-      <div className="space-y-3 mb-4">
-        {comments.length === 0 ? (
-          <p className="text-gray-500">No comments yet.</p>
-        ) : (
-          comments.map((c, index) => (
-            <div key={index} className="bg-gray-100 p-2 rounded">
-              <p className="text-sm">{c.text}</p>
-              <p className="text-xs text-gray-500">Posted on {new Date(c.createdAt).toLocaleString()}</p>
+
+  return (
+    <>
+      <Navbar />
+      <BackButton />
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="flex items-center gap-2 text-3xl font-bold text-gray-800 mb-6">
+          <FileText size={28} />
+          <h2>Task Details</h2>
+        </div>
+
+        {task ? (
+          <div className="bg-white p-6 rounded-xl shadow-md mb-6 space-y-4">
+            <h3 className="text-2xl font-semibold text-indigo-700">{task.title}</h3>
+            <p className="text-gray-700">{task.description}</p>
+
+            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+              <p>Status: <span className="font-medium">{task.status}</span></p>
+              <p>Priority: <span className="font-medium">{task.priority}</span></p>
+              <p>Due Date: <span className="font-medium">{task.dueDate?.slice(0, 10)}</span></p>
+              <p>Assigned To: <span className="font-medium">{task.assignedTo?.[0]?.name || 'N/A'}</span></p>
             </div>
-          ))
+
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-2 font-semibold text-lg">
+                <Paperclip size={18} /> <span>Attachments</span>
+              </div>
+              {task.attachments?.length > 0 ? (
+                <ul className="list-disc ml-5 space-y-1 text-blue-600">
+                  {task.attachments.map((file, idx) => (
+                    <li key={idx}>
+                      <a
+                        href={`http://localhost:5000/${file.path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {file.filename}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No attachments</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p>Loading task...</p>
+        )}
+
+        {/* Comments */}
+        <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+          <div className="flex items-center gap-2 mb-4 text-xl font-bold text-gray-800">
+            <MessageCircle size={22} />
+            <h3>Comments</h3>
+          </div>
+
+          {comments.length === 0 ? (
+            <p className="text-gray-500">No comments yet.</p>
+          ) : (
+            <div className="space-y-3 mb-4">
+              {comments.map((c, index) => (
+                <div key={index} className="bg-gray-100 p-3 rounded-lg">
+                  <p className="text-sm text-gray-800">{c.text}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Posted by <strong>{c.author?.name || 'Unknown'}</strong> on{' '}
+                    {new Date(c.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="Write a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              className="flex-grow p-2 border border-gray-300 rounded-md"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-1"
+            >
+              <Send size={16} /> Post
+            </button>
+          </form>
+        </div>
+
+        {/* File Upload */}
+        <div className="bg-white p-6 rounded-xl shadow-md mb-6">
+          <div className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4">
+            <UploadCloud size={22} />
+            <h3>Upload Attachment</h3>
+          </div>
+
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="mb-3"
+          />
+          {file && <p className="text-sm text-gray-700 mb-2">Selected: {file.name}</p>}
+          <button
+            onClick={handleFileUpload}
+            className={`bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded flex items-center gap-2 ${uploading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            disabled={uploading}
+          >
+            <UploadCloud size={18} />
+            {uploading ? 'Uploading...' : 'Upload'}
+          </button>
+        </div>
+
+        {/* Action Buttons */}
+        {task && (user?.role === "Admin" || user?.role === "Manager") && (
+          <div className="flex justify-end gap-3 mt-4">
+            <button onClick={handleEdit} className="flex items-center gap-2 px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600">
+              <Pencil size={18} /> Edit Task
+            </button>
+            <button onClick={handleDelete} className="flex items-center gap-2 px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">
+              <Trash2 size={18} /> Delete Task
+            </button>
+          </div>
         )}
       </div>
 
-      {/* New Comment Form */}
-      <form onSubmit={handleCommentSubmit} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          placeholder="Add a comment..."
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          className="flex-grow p-2 border rounded"
-        />
-        <button type="submit" className="bg-blue-500 text-white px-3 py-2 rounded">
-          Post
-        </button>
-      </form>
-
-      {/* Upload Form */}
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="text-lg font-semibold mb-2">Upload Attachment</h3>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="mb-2" />
-        <button
-          onClick={handleFileUpload}
-          className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"
-          disabled={uploading}
-        >
-          {uploading ? 'Uploading...' : 'Upload'}
-        </button>
-      </div>
-    </div>
+      <Footer />
+    </>
   );
 }
 

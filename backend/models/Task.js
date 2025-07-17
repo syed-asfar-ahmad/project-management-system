@@ -41,9 +41,9 @@ const taskSchema = new mongoose.Schema({
 
   comments: [
     {
-      user: {
+      author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User'   
       },
       text: {
         type: String,

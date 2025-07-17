@@ -8,7 +8,7 @@ const User = require('../models/User');
 router.post('/register', register);
 router.post('/login', login);
 
-// 🔐 Get profile info of the logged-in user
+// Get profile info of the logged-in user
 router.get('/profile', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -22,7 +22,6 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
-// Example route for Admin only
 router.get('/admin-data', verifyToken, checkRole('Admin'), (req, res) => {
   res.json({ message: 'Only admins can see this' });
 });

@@ -5,58 +5,34 @@ const {
   createTask,
   getAllTasks,
   getMyTasks,
+  getTaskById,
   updateTask,
   deleteTask,
   addCommentToTask,
-  getTasksByDueDate
+  getTasksByDueDate,
+  getMyProjectTasks,
 } = require('../controllers/taskController');
 
 const { verifyToken, checkRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const Task = require('../models/Task');
 
 // Create Task - Admin or Manager
 router.post('/', verifyToken, checkRole('Admin', 'Manager'), createTask);
 
-// Get All Tasks - Admin or Manager (with assignedTo populated)
-router.get('/', verifyToken, checkRole('Admin', 'Manager'), async (req, res) => {
-  try {
-    const tasks = await Task.find()
-      .populate('assignedTo', 'name email')
-      .populate('project', 'name');
-    res.json(tasks);
-  } catch (err) {
-    console.error('Failed to fetch tasks', err);
-    res.status(500).json({ error: 'Failed to fetch tasks' });
-  }
-});
+// Get All Tasks - Admin or Manager
+router.get('/', verifyToken, checkRole('Admin', 'Manager'), getAllTasks);
 
-// Get My Tasks - Team Member (with assignedTo populated)
-router.get('/my-tasks', verifyToken, checkRole('Team Member'), async (req, res) => {
-  try {
-    const tasks = await Task.find({ assignedTo: req.user.id })
-      .populate('assignedTo', 'name email')
-      .populate('project', 'name');
-    res.json(tasks);
-  } catch (err) {
-    console.error('Failed to fetch my tasks', err);
-    res.status(500).json({ error: 'Failed to fetch my tasks' });
-  }
-});
+// Get My Tasks - Team Member
+router.get('/my-tasks', verifyToken, checkRole('Team Member'), getMyTasks);
+
+// Get project-specific tasks assigned to the team member
+router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), getMyProjectTasks);
+
+// Get Tasks for Calendar View - Any logged-in user
+router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
 
 // Get Task by ID - Any logged-in user
-router.get('/:id', verifyToken, async (req, res) => {
-  try {
-    const task = await Task.findById(req.params.id)
-      .populate('assignedTo', 'name email')
-      .populate('project', 'name');
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-    res.json(task);
-  } catch (err) {
-    console.error('Error fetching task by ID:', err);
-    res.status(500).json({ error: 'Error fetching task' });
-  }
-});
+router.get('/:id', verifyToken, getTaskById);
 
 // Update Task - Admin or Manager
 router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), updateTask);
@@ -67,18 +43,17 @@ router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), deleteTask);
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);
 
-// Get Tasks for Calendar View - Any logged-in user
-router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
-
 // Upload File to Task - Any logged-in user
 router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) => {
+  const Task = require('../models/Task');
+
   try {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     task.attachments.push({
       filename: req.file.originalname,
-      path: req.file.path
+      path: req.file.path,
     });
 
     await task.save();

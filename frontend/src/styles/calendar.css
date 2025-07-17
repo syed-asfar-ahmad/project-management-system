@@ -1,0 +1,13 @@
+.fc .fc-button {
+  background-color: #4f46e5 !important;
+  color: #fff !important;
+  border-radius: 6px;
+  border: none;
+  padding: 6px 12px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.fc .fc-button:hover {
+  background-color: #4338ca !important;
+}
