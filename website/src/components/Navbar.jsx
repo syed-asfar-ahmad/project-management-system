@@ -24,10 +24,10 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex space-x-3">
-          <a href="http://localhost:3000/login" className="px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
+          <a href="/login" className="px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
             Login
           </a>
-          <a href="http://localhost:3000/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
+          <a href="/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
             Sign Up
           </a>
         </div>
@@ -46,10 +46,10 @@ export default function Navbar() {
             <Link to="/features" onClick={() => setMobileOpen(false)} className={linkClass('/features')}>Features</Link>
             <Link to="/about" onClick={() => setMobileOpen(false)} className={linkClass('/about')}>About</Link>
             <Link to="/contact" onClick={() => setMobileOpen(false)} className={linkClass('/contact')}>Contact</Link>
-            <a href="http://localhost:3000/login" className="mt-3 px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
+            <a href="/login" className="mt-3 px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
               Login
             </a>
-            <a href="http://localhost:3000/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
+            <a href="/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
               Sign Up
             </a>
           </div>
