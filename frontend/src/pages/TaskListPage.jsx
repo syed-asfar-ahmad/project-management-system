@@ -98,19 +98,22 @@ function TaskListPage() {
   );
 };
 
-  const filteredTasks = tasks.filter((task) => {
-    const matchesStatus = filterStatus ? task.status === filterStatus : true;
-    const matchesPriority = filterPriority ? task.priority === filterPriority : true;
-    const matchesUser =
-      filterUser && Array.isArray(task.assignedTo)
-        ? task.assignedTo.some((u) => u?._id === filterUser)
-        : true;
-    const matchesSearch =
-      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTasks = Array.isArray(tasks)
+    ? tasks.filter((task) => {
+        const matchesStatus = filterStatus ? task.status === filterStatus : true;
+        const matchesPriority = filterPriority ? task.priority === filterPriority : true;
+        const matchesUser =
+          filterUser && Array.isArray(task.assignedTo)
+            ? task.assignedTo.some((u) => u?._id === filterUser)
+            : true;
+        const matchesSearch =
+          task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          task.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesStatus && matchesPriority && matchesUser && matchesSearch;
-  });
+        return matchesStatus && matchesPriority && matchesUser && matchesSearch;
+      })
+    : [];
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
