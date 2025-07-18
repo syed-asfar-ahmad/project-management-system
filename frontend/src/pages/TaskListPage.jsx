@@ -6,6 +6,8 @@ import Footer from '../components/Footer';
 import DashboardNavbar from '../components/AuthNavbar';
 import { Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../components/backButton';
+import { toast } from 'react-toastify';
+
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -231,7 +233,7 @@ function TaskListPage() {
                           <PencilLine size={18} />
                         </Link>
                         <button
-                          onClick={() => deleteTask(task._id)}
+                          onClick={() => handleDelete(task._id)}
                           className="text-red-600 hover:text-red-800"
                         >
                           <Trash2 size={18} />
