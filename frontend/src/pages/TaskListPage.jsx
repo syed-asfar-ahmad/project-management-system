@@ -7,7 +7,7 @@ import DashboardNavbar from '../components/AuthNavbar';
 import { Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../components/backButton';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API = process.env.REACT_APP_API_URL;
 
 function TaskListPage() {
   const [tasks, setTasks] = useState([]);
@@ -25,8 +25,8 @@ function TaskListPage() {
       try {
         const url =
           user?.role === 'Team Member'
-            ? `${API_BASE_URL}/api/tasks/my-tasks`
-            : `${API_BASE_URL}/api/tasks`;
+            ? `${API}/api/tasks/my-tasks`
+            : `${API}/api/tasks`;
 
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -43,7 +43,7 @@ function TaskListPage() {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/users/team-members`, {
+        const res = await axios.get(`${API}/api/users/team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTeamOptions(res.data);
@@ -57,7 +57,7 @@ function TaskListPage() {
   const deleteTask = async (id) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
+        await axios.delete(`${API}/api/tasks/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTasks(tasks.filter((task) => task._id !== id));

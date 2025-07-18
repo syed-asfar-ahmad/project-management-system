@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function Signup() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_BASE_URL}/api/auth/register`, form);
+      await axios.post(`${API}/api/auth/register`, form);
       toast.success("Signup successful!");
       navigate("/login");
     } catch (err) {

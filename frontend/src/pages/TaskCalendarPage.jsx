@@ -11,7 +11,7 @@ import BackButton from "../components/backButton";
 
 import "../styles/calendar.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function TaskCalendarPage() {
   const [events, setEvents] = useState([]);
@@ -22,10 +22,10 @@ function TaskCalendarPage() {
     const fetchEvents = async () => {
       try {
         const [taskRes, projectRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/tasks/calendar/tasks`, {
+          axios.get(`${API}/api/tasks/calendar/tasks`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API_BASE_URL}/api/projects`, {
+          axios.get(`${API}/api/projects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
