@@ -46,13 +46,21 @@ function TaskListPage() {
         const res = await axios.get(`${API}/users/team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setTeamOptions(res.data);
+
+        if (Array.isArray(res.data)) {
+          setTeamOptions(res.data);
+        } else {
+          console.log("API did not return array:", res.data);
+          setTeamOptions([]); 
+        }
       } catch (err) {
-        console.error('Failed to fetch users');
+        console.error("Failed to fetch users", err);
+        setTeamOptions([]); 
       }
     };
     fetchTeam();
   }, [token]);
+
 
   const handleDelete = (taskId) => {
   toast.info(
@@ -163,11 +171,13 @@ function TaskListPage() {
               className="p-2 border rounded"
             >
               <option value="">Filter by User</option>
-              {teamOptions.map((user) => (
-                <option key={user._id} value={user._id}>
-                  {user.name}
-                </option>
+              {Array.isArray(teamOptions) &&
+                teamOptions.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
+                  </option>
               ))}
+
             </select>
           )}
         </div>
