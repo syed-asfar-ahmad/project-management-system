@@ -31,7 +31,7 @@ function TaskListPage() {
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setTasks(res.data);
+        setTasks(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error('Failed to fetch tasks', err);
       }
