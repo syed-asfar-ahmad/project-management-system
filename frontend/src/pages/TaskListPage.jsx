@@ -7,7 +7,7 @@ import DashboardNavbar from '../components/AuthNavbar';
 import { Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../components/backButton';
 
-const API = process.env.REACT_APP_API_URL;
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function TaskListPage() {
   const [tasks, setTasks] = useState([]);

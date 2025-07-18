@@ -16,7 +16,7 @@ import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
 
-const API = process.env.REACT_APP_API_URL;
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function TaskDetailPage() {
   const { id } = useParams();
