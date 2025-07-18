@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${API}/auth/login`, {
         email,
         password,
       });
@@ -27,6 +29,7 @@ function Login() {
       toast.error("Invalid email or password");
     }
   };
+
 
 
   return (

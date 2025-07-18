@@ -8,6 +8,8 @@ import { Pencil, XCircle } from 'lucide-react';
 import BackButton from '../components/backButton';
 import toast from 'react-hot-toast';
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function EditTaskPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,57 +24,54 @@ function EditTaskPage() {
   });
 
   const [teamOptions, setTeamOptions] = useState([]);
-  const [assignedOption, setAssignedOption] = useState(null); // single select
+  const [assignedOption, setAssignedOption] = useState(null);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const taskRes = await axios.get(`http://localhost:5000/api/tasks/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const taskRes = await axios.get(`${API}/tasks/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
-      const task = taskRes.data;
+        const task = taskRes.data;
+        const projectId = task.project?._id || task.project;
 
-      // Fetch team members based on project
-      const projectId = task.project?._id || task.project;
-      const teamRes = await axios.get(`http://localhost:5000/api/projects/${projectId}/team-members`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+        const teamRes = await axios.get(`${API}/projects/${projectId}/team-members`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
-      const options = teamRes.data.map((user) => ({
-        value: user._id,
-        label: `${user.name} (${user.email})`,
-      }));
+        const options = teamRes.data.map((user) => ({
+          value: user._id,
+          label: `${user.name} (${user.email})`,
+        }));
 
-      setTeamOptions(options);
+        setTeamOptions(options);
 
-      const selected = options.find(
-        (opt) => (task.assignedTo[0]?._id || task.assignedTo[0]) === opt.value
-      );
+        const selected = options.find(
+          (opt) => (task.assignedTo[0]?._id || task.assignedTo[0]) === opt.value
+        );
 
-      setAssignedOption(selected || null);
+        setAssignedOption(selected || null);
 
-      setForm({
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        dueDate: task.dueDate?.slice(0, 10) || '',
-        assignedTo: task.assignedTo.map((u) => u._id || u),
-      });
-    } catch (err) {
-      toast.error('Failed to load task details.');
-    }
-  };
+        setForm({
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          dueDate: task.dueDate?.slice(0, 10) || '',
+          assignedTo: task.assignedTo.map((u) => u._id || u),
+        });
+      } catch (err) {
+        toast.error('Failed to load task details.');
+      }
+    };
 
-  fetchData();
-}, [id]);
-
-
+    fetchData();
+  }, [id]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -82,7 +81,7 @@ useEffect(() => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/tasks/${id}`,
+        `${API}/tasks/${id}`,
         {
           ...form,
           assignedTo: assignedOption ? [assignedOption.value] : [],
@@ -100,10 +99,10 @@ useEffect(() => {
     }
   };
 
-
   const handleCancel = () => {
     navigate(`/tasks/${id}`);
   };
+
 
   return (
     <>

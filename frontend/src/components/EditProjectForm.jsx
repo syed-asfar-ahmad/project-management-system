@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Select from "react-select";
 import axios from "axios";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function EditProjectForm({ project, token, onSuccess, onCancel }) {
   const [teamOptions, setTeamOptions] = useState([]);
 
@@ -16,7 +18,7 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users/team-members", {
+        const res = await axios.get(`${API}/users/team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -46,11 +48,9 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `http://localhost:5000/api/projects/${project._id}`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.put(`${API}/projects/${project._id}`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       onSuccess();
     } catch (err) {
       console.error("Failed to update project", err.response?.data);
@@ -106,7 +106,9 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
         <label className="block font-medium mb-1">Team Members</label>
         <Select
           isMulti
-          value={teamOptions.filter((opt) => form.teamMembers.includes(opt.value))}
+          value={teamOptions.filter((opt) =>
+            form.teamMembers.includes(opt.value)
+          )}
           options={teamOptions}
           onChange={handleTeamChange}
           placeholder="Select team members..."

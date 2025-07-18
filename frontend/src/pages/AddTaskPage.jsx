@@ -7,6 +7,8 @@ import BackButton from '../components/backButton';
 import { ClipboardPlus, CalendarDays, Loader2, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function AddTaskPage() {
   const { token } = useAuth();
   const [projects, setProjects] = useState([]);
@@ -26,7 +28,7 @@ function AddTaskPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/projects', {
+        const res = await axios.get(`${API}/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(res.data);
@@ -42,7 +44,7 @@ function AddTaskPage() {
     const fetchTeamMembers = async () => {
       if (form.project) {
         try {
-          const res = await axios.get(`http://localhost:5000/api/projects/${form.project}/team-members`, {
+          const res = await axios.get(`${API}/projects/${form.project}/team-members`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setProjectMembers(res.data);
@@ -63,7 +65,7 @@ function AddTaskPage() {
     setForm((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === 'project' && { assignedTo: '' }), // clear assignedTo when project changes
+      ...(name === 'project' && { assignedTo: '' }), 
     }));
   };
 
@@ -71,7 +73,7 @@ function AddTaskPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/tasks', form, {
+      await axios.post(`${API}/tasks`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Task created successfully!');

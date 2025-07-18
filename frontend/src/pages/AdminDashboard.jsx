@@ -27,6 +27,8 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function AdminDashboard() {
   const { token } = useAuth();
   const [projects, setProjects] = useState([]);
@@ -37,13 +39,13 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       const [projRes, taskRes, memberRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/projects", {
+        axios.get(`${API}/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/api/tasks", {
+        axios.get(`${API}/tasks`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/api/users/team-members", {
+        axios.get(`${API}/users/team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -57,6 +59,7 @@ useEffect(() => {
 
   fetchData();
 }, [token]);
+
 
 
   // Task Status Counts

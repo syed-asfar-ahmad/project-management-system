@@ -7,11 +7,12 @@ import Footer from "../components/Footer";
 import {
   ClipboardList,
   Briefcase,
-  Users,
   CalendarDays,
   NotebookPen,
   FileText,
 } from "lucide-react";
+
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function TeamDashboard() {
   const { token, user } = useAuth();
@@ -21,11 +22,11 @@ function TeamDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const taskRes = await axios.get("http://localhost:5000/api/tasks/my-tasks", {
+        const taskRes = await axios.get(`${API}/tasks/my-tasks`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const projectRes = await axios.get("http://localhost:5000/api/projects", {
+        const projectRes = await axios.get(`${API}/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -117,7 +118,11 @@ function TeamDashboard() {
                       <Briefcase size={16} /> {project.name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">{project.description}</p>
-
+                    {teammates.size > 0 && (
+                      <p className="text-sm text-gray-500">
+                        Teammates: {[...teammates].join(", ")}
+                      </p>
+                    )}
                   </Link>
                 );
               })}

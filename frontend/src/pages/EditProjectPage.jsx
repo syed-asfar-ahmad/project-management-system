@@ -8,6 +8,8 @@ import Footer from "../components/Footer";
 import BackButton from "../components/backButton";
 import toast from "react-hot-toast";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function EditProjectPage() {
   const { id } = useParams();
   const { token } = useAuth();
@@ -17,7 +19,7 @@ function EditProjectPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/projects/${id}`, {
+        const res = await axios.get(`${API}/projects/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProject(res.data);
@@ -29,11 +31,11 @@ function EditProjectPage() {
     fetchProject();
   }, [id, token]);
 
-
   const handleSuccess = () => {
-    toast.success("Project updated successfully!"); 
+    toast.success("Project updated successfully!");
     navigate(`/projects/${id}`);
   };
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />

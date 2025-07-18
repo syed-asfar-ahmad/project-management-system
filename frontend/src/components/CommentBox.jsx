@@ -1,5 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+
+const API = process.env.REACT_APP_API_BASE_URL;
 
 function CommentBox({ token, projectId, onCommentAdded }) {
   const [commentText, setCommentText] = useState("");
@@ -10,15 +13,17 @@ function CommentBox({ token, projectId, onCommentAdded }) {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/projects/${projectId}/comments`,
+        `${API}/projects/${projectId}/comments`,
         { text: commentText },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      toast.success("Comment posted");
       setCommentText("");
-      onCommentAdded(); // Reload comments
+      onCommentAdded(); 
     } catch (err) {
+      toast.error("Failed to post comment");
       console.error("Failed to add comment", err.response?.data);
     }
   };

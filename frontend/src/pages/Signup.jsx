@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function Signup() {
   const navigate = useNavigate();
 
@@ -20,7 +22,7 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", form);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, form);
       toast.success("Signup successful!");
       navigate("/login");
     } catch (err) {
@@ -35,45 +37,49 @@ function Signup() {
         <p className="text-center text-gray-500 mb-6">Sign up to get started with TaskPilot</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">Name</label>
             <input
               type="text"
               name="name"
-              placeholder="John Doe"
               value={form.name}
               onChange={handleChange}
               required
+              placeholder="John Doe"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
+          {/* Email */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">Email</label>
             <input
               type="email"
               name="email"
-              placeholder="you@example.com"
               value={form.email}
               onChange={handleChange}
               required
+              placeholder="you@example.com"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">Password</label>
             <input
               type="password"
               name="password"
-              placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
               required
+              placeholder="••••••••"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
+          {/* Role */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">Role</label>
             <select
@@ -88,6 +94,7 @@ function Signup() {
             </select>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
@@ -96,6 +103,7 @@ function Signup() {
           </button>
         </form>
 
+        {/* Link to Login */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
           <Link to="/login" className="text-green-600 hover:underline font-medium">

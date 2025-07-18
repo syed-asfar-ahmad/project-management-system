@@ -1,34 +1,38 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
+
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import BackButton from "../components/backButton";
-import { CalendarDays } from "lucide-react";
-import "../styles/calendar.css"; // <-- Custom styles for arrows, optional
+
+import "../styles/calendar.css";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 function TaskCalendarPage() {
   const [events, setEvents] = useState([]);
-  const token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const [taskRes, projectRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/tasks/calendar/tasks", {
+          axios.get(`${API_BASE_URL}/api/tasks/calendar/tasks`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/projects", {
+          axios.get(`${API_BASE_URL}/api/projects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
 
         const taskEvents = taskRes.data.map((task) => ({
           id: task._id,
-          title: `${task.title}`,
+          title: task.title,
           date: task.dueDate,
           backgroundColor: "#6366f1", // Indigo
           borderColor: "#6366f1",
@@ -40,7 +44,7 @@ function TaskCalendarPage() {
 
         const projectEvents = projectRes.data.map((project) => ({
           id: project._id,
-          title: `${project.name}`,
+          title: project.name,
           date: project.deadline,
           backgroundColor: "#10b981", // Emerald
           borderColor: "#10b981",
@@ -51,8 +55,8 @@ function TaskCalendarPage() {
         }));
 
         setEvents([...taskEvents, ...projectEvents]);
-      } catch (err) {
-        console.error("Failed to load calendar data:", err);
+      } catch (error) {
+        console.error("Failed to load calendar data:", error);
       }
     };
 
@@ -69,9 +73,10 @@ function TaskCalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <BackButton/>
+      <BackButton />
+
       <main className="flex-grow px-4 py-8">
         <div className="max-w-6xl mx-auto bg-white shadow-xl rounded-lg p-6">
           <div className="mb-6 flex items-center gap-2 text-indigo-700">

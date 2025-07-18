@@ -7,6 +7,8 @@ import DashboardNavbar from '../components/AuthNavbar';
 import { Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../components/backButton';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 function TaskListPage() {
   const [tasks, setTasks] = useState([]);
   const [filterStatus, setFilterStatus] = useState('');
@@ -23,8 +25,8 @@ function TaskListPage() {
       try {
         const url =
           user?.role === 'Team Member'
-            ? 'http://localhost:5000/api/tasks/my-tasks'
-            : 'http://localhost:5000/api/tasks';
+            ? `${API_BASE_URL}/api/tasks/my-tasks`
+            : `${API_BASE_URL}/api/tasks`;
 
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -41,7 +43,7 @@ function TaskListPage() {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/users/team-members', {
+        const res = await axios.get(`${API_BASE_URL}/api/users/team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTeamOptions(res.data);
@@ -55,7 +57,7 @@ function TaskListPage() {
   const deleteTask = async (id) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+        await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTasks(tasks.filter((task) => task._id !== id));
@@ -82,7 +84,7 @@ function TaskListPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <DashboardNavbar />
-      <BackButton/>
+      <BackButton />
       <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">
           {user?.role === 'Team Member' ? 'Tasks Assigned to You' : 'All Tasks'}
@@ -243,15 +245,15 @@ function TaskListPage() {
         </div>
 
         {(user?.role === "Admin" || user?.role === "Manager") && (
-            <div className="flex justify-end mt-6">
-              <Link
-                to="/add-task"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded shadow hover:bg-blue-700 transition"
-              >
-                + Add Task
-              </Link>
-            </div>
-          )}
+          <div className="flex justify-end mt-6">
+            <Link
+              to="/add-task"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded shadow hover:bg-blue-700 transition"
+            >
+              + Add Task
+            </Link>
+          </div>
+        )}
       </main>
 
       <Footer />

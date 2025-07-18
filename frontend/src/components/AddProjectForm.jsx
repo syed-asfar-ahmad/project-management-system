@@ -4,6 +4,10 @@ import { createProject } from "../services/projectService";
 import axios from "axios";
 import Select from "react-select";
 import { CalendarDays, Users, ClipboardList, FileText, ListChecks } from "lucide-react";
+import { toast } from "react-toastify";
+
+const API = process.env.REACT_APP_API_BASE_URL;
+
 
 function AddProjectForm({ onProjectCreated }) {
   const { token } = useAuth();
@@ -19,10 +23,10 @@ function AddProjectForm({ onProjectCreated }) {
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/users/team-members", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      try {const res = await axios.get(`${API}/users/team-members`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
 
         const options = res.data.map((member) => ({
           value: member._id,
@@ -52,7 +56,7 @@ function AddProjectForm({ onProjectCreated }) {
     e.preventDefault();
     try {
       await createProject(form, token);
-      alert("Project created");
+      toast.success("Project created successfully!");
 
       setForm({
         name: "",
@@ -64,10 +68,11 @@ function AddProjectForm({ onProjectCreated }) {
 
       if (onProjectCreated) onProjectCreated();
     } catch (err) {
-      alert("Failed to create project");
       console.error(err.response?.data);
+      toast.error("Failed to create project");
     }
   };
+
 
   return (
     <form

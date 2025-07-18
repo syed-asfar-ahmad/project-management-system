@@ -16,6 +16,8 @@ import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 function TaskDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ function TaskDetailPage() {
 
   const fetchTaskDetails = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/tasks/${id}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTask(res.data);
@@ -49,15 +51,14 @@ function TaskDetailPage() {
 
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/tasks/${id}/comments`,
+        `${API_BASE_URL}/api/tasks/${id}/comments`,
         { text: commentText },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      const newComment = res.data;
-      setComments([...comments, newComment]);
+      setComments([...comments, res.data]);
       setCommentText('');
       toast.success("Comment posted");
     } catch (err) {
@@ -71,7 +72,6 @@ function TaskDetailPage() {
       return;
     }
 
-    // Optional: 10 MB max file size
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.error("File too large. Max size is 10MB");
@@ -83,7 +83,7 @@ function TaskDetailPage() {
     setUploading(true);
 
     try {
-      await axios.post(`http://localhost:5000/api/tasks/${id}/upload`, formData, {
+      await axios.post(`${API_BASE_URL}/api/tasks/${id}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
@@ -114,9 +114,9 @@ function TaskDetailPage() {
           <div className="flex justify-end gap-3">
             <button
               onClick={async () => {
-                closeToast(); // Close the toast before proceeding
+                closeToast();
                 try {
-                  await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+                  await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                   });
                   toast.success("Task deleted successfully!");
@@ -147,7 +147,6 @@ function TaskDetailPage() {
       }
     );
   };
-
 
   return (
     <>
@@ -180,7 +179,7 @@ function TaskDetailPage() {
                   {task.attachments.map((file, idx) => (
                     <li key={idx}>
                       <a
-                        href={`http://localhost:5000/${file.path}`}
+                        href={`${API_BASE_URL}/${file.path}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:underline"

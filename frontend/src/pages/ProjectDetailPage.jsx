@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function ProjectDetailPage() {
   const { id } = useParams();
   const { token, user } = useAuth();
@@ -28,7 +30,7 @@ function ProjectDetailPage() {
 
   const fetchProject = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/projects/${id}`, {
+      const res = await axios.get(`${API}/projects/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProject(res.data);
@@ -39,28 +41,23 @@ function ProjectDetailPage() {
 
   const fetchTasks = useCallback(async () => {
     try {
-      if (user?.role === "Team Member") {
-        // Fetch only the team member's tasks for this project
-        const res = await axios.get(`http://localhost:5000/api/tasks/project/${id}/user`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTasks(res.data);
-      } else {
-        // Admin/Manager: fetch all project tasks
-        const res = await axios.get(`http://localhost:5000/api/tasks?projectId=${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTasks(res.data);
-      }
+      const url =
+        user?.role === "Team Member"
+          ? `${API}/tasks/project/${id}/user`
+          : `${API}/tasks?projectId=${id}`;
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTasks(res.data);
     } catch (err) {
       toast.error("Failed to fetch tasks");
     }
   }, [id, token, user]);
 
-
   const fetchComments = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/projects/${id}/comments`, {
+      const res = await axios.get(`${API}/projects/${id}/comments`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setComments(res.data);
@@ -69,50 +66,49 @@ function ProjectDetailPage() {
     }
   }, [id, token]);
 
-const handleDeleteProject = () => {
-  toast.info(
-    ({ closeToast }) => (
-      <div>
-        <p className="font-semibold text-gray-800 mb-2">
-          Are you sure you want to delete this project?
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={async () => {
-              closeToast(); // close the toast before processing
-              try {
-                await axios.delete(`http://localhost:5000/api/projects/${id}`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-                toast.success("Project deleted successfully!");
-                navigate("/projects");
-              } catch (err) {
-                toast.error("Failed to delete project");
-              }
-            }}
-            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-          >
-            Yes, Delete
-          </button>
-          <button
-            onClick={closeToast}
-            className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-400"
-          >
-            Cancel
-          </button>
+  const handleDeleteProject = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div>
+          <p className="font-semibold text-gray-800 mb-2">
+            Are you sure you want to delete this project?
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={async () => {
+                closeToast();
+                try {
+                  await axios.delete(`${API}/projects/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  toast.success("Project deleted successfully!");
+                  navigate("/projects");
+                } catch (err) {
+                  toast.error("Failed to delete project");
+                }
+              }}
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+            >
+              Yes, Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-    ),
-    {
-      position: "top-center",
-      autoClose: false,
-      closeButton: false,
-      draggable: false,
-      closeOnClick: false,
-    }
-  );
-};
-
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeButton: false,
+        draggable: false,
+        closeOnClick: false,
+      }
+    );
+  };
 
   useEffect(() => {
     fetchProject();

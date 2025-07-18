@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
+const API = process.env.REACT_APP_API_BASE_URL;
+
 function ProjectList() {
   const { token } = useAuth();
   const [projects, setProjects] = useState([]);
@@ -9,7 +11,7 @@ function ProjectList() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/projects", {
+        const res = await axios.get(`${API}/projects`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
