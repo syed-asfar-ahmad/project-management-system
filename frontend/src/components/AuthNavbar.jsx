@@ -44,14 +44,47 @@ function AuthNavbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden mt-3 px-4 space-y-2 text-sm">
-          <Link to={dashboardLink} onClick={() => setIsOpen(false)} className={navLinkStyle}>Dashboard</Link>
-          <Link to="/projects" onClick={() => setIsOpen(false)} className={navLinkStyle}>Projects</Link>
-          <Link to="/tasks" onClick={() => setIsOpen(false)} className={navLinkStyle}>Tasks</Link>
-          <Link to="/calendar" onClick={() => setIsOpen(false)} className={navLinkStyle}>Calendar</Link>
-          <button onClick={() => { handleLogout(); setIsOpen(false); }} className={navLinkStyle}>Logout</button>
+        <div className="md:hidden mt-3 mx-4 bg-white text-blue-600 rounded-lg shadow-lg py-4 px-3 space-y-3 transition-all duration-300">
+          <Link
+            to={dashboardLink}
+            onClick={() => setIsOpen(false)}
+            className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/projects"
+            onClick={() => setIsOpen(false)}
+            className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
+          >
+            Projects
+          </Link>
+          <Link
+            to="/tasks"
+            onClick={() => setIsOpen(false)}
+            className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
+          >
+            Tasks
+          </Link>
+          <Link
+            to="/calendar"
+            onClick={() => setIsOpen(false)}
+            className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
+          >
+            Calendar
+          </Link>
+          <button
+            onClick={() => {
+              handleLogout();
+              setIsOpen(false);
+            }}
+            className="block w-full text-left font-medium text-red-600 hover:bg-red-100 px-4 py-2 rounded-md"
+          >
+            Logout
+          </button>
         </div>
       )}
+
     </nav>
   );
 }

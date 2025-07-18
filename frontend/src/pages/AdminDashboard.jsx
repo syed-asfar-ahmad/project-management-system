@@ -110,11 +110,11 @@ useEffect(() => {
         {/* Charts */}
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {/* Pie Chart */}
-          <div className="bg-white p-6 rounded shadow h-[360px] flex flex-col">
+          <div className="bg-white p-4 rounded shadow md:h-[360px] h-[280px] flex flex-col overflow-hidden">
             <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
               <ClipboardList size={20} /> Task Status Overview
             </h2>
-            <div className="flex-grow">
+            <div className="flex-grow relative">
               <Pie
                 data={taskStatusData}
                 options={{
@@ -133,6 +133,7 @@ useEffect(() => {
               />
             </div>
           </div>
+
 
           {/* Task counts per team member (list) */}
           <div className="bg-white p-6 rounded shadow h-[360px] overflow-y-auto">
