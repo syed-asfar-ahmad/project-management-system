@@ -11,7 +11,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://project-management-system-1emk-3enli7y7j.vercel.app",
+  "https://project-management-system-1emk.vercel.app",
 ];
 
 app.use(cors({
