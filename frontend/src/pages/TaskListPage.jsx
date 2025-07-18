@@ -54,18 +54,49 @@ function TaskListPage() {
     fetchTeam();
   }, [token]);
 
-  const deleteTask = async (id) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      try {
-        await axios.delete(`${API}/tasks/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTasks(tasks.filter((task) => task._id !== id));
-      } catch (err) {
-        console.error('Failed to delete task');
-      }
+  const handleDelete = (taskId) => {
+  toast.info(
+    ({ closeToast }) => (
+      <div>
+        <p className="font-semibold text-gray-800 mb-2">
+          Are you sure you want to delete this task?
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={async () => {
+              closeToast();
+              try {
+                await axios.delete(`${API}/tasks/${taskId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                toast.success("Task deleted successfully!");
+                navigate("/tasks"); // Or refresh task list if you're already on same page
+              } catch (err) {
+                toast.error("Failed to delete task");
+              }
+            }}
+            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+          >
+            Yes, Delete
+          </button>
+          <button
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ),
+    {
+      position: "top-center",
+      autoClose: false,
+      closeButton: false,
+      draggable: false,
+      closeOnClick: false,
     }
-  };
+  );
+};
 
   const filteredTasks = tasks.filter((task) => {
     const matchesStatus = filterStatus ? task.status === filterStatus : true;
@@ -232,11 +263,12 @@ function TaskListPage() {
                       <PencilLine size={18} />
                     </Link>
                     <button
-                      onClick={() => deleteTask(task._id)}
+                      onClick={() => handleDelete(task._id)}
                       className="text-red-600 hover:text-red-800"
                     >
                       <Trash2 size={18} />
                     </button>
+
                   </div>
                 )}
               </div>
