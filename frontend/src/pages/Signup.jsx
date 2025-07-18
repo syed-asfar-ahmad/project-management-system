@@ -22,7 +22,7 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/api/auth/register`, form);
+      await axios.post(`${API}/auth/register`, form);
       toast.success("Signup successful!");
       navigate("/login");
     } catch (err) {

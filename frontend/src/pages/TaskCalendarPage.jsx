@@ -22,10 +22,10 @@ function TaskCalendarPage() {
     const fetchEvents = async () => {
       try {
         const [taskRes, projectRes] = await Promise.all([
-          axios.get(`${API}/api/tasks/calendar/tasks`, {
+          axios.get(`${API}/tasks/calendar/tasks`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API}/api/projects`, {
+          axios.get(`${API}/projects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

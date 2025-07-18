@@ -31,7 +31,7 @@ function TaskDetailPage() {
 
   const fetchTaskDetails = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/api/tasks/${id}`, {
+      const res = await axios.get(`${API}/tasks/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTask(res.data);
@@ -51,7 +51,7 @@ function TaskDetailPage() {
 
     try {
       const res = await axios.post(
-        `${API}/api/tasks/${id}/comments`,
+        `${API}/tasks/${id}/comments`,
         { text: commentText },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -83,7 +83,7 @@ function TaskDetailPage() {
     setUploading(true);
 
     try {
-      await axios.post(`${API}/api/tasks/${id}/upload`, formData, {
+      await axios.post(`${API}/tasks/${id}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
@@ -116,7 +116,7 @@ function TaskDetailPage() {
               onClick={async () => {
                 closeToast();
                 try {
-                  await axios.delete(`${API}/api/tasks/${id}`, {
+                  await axios.delete(`${API}/tasks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                   });
                   toast.success("Task deleted successfully!");
