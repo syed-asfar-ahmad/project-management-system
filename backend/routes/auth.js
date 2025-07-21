@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, changePassword } = require('../controllers/authController');
+const { register, login, changePassword, verifyPassword } = require('../controllers/authController');
 const { verifyToken, checkRole } = require('../middleware/auth');
 const User = require('../models/User');
+
 
 // Auth
 router.post('/register', register);
@@ -37,5 +38,9 @@ router.get('/team-members', verifyToken, async (req, res) => {
 });
 
 router.post("/change-password", changePassword);
+
+router.post("/verify-password", verifyPassword);
+
+
 
 module.exports = router;

@@ -81,7 +81,7 @@ const login = async (req, res) => {
   }
 };
 
-exports.verifyPassword = async (req, res) => {
+const verifyPassword = async (req, res) => {
   const { email, currentPassword } = req.body;
 
   const user = await User.findOne({ email });
@@ -101,4 +101,4 @@ exports.verifyPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, changePassword };
+module.exports = { register, login, changePassword, verifyPassword };
