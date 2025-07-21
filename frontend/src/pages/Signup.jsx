@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react"; // 👁️ icons for show/hide
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -15,12 +16,32 @@ function Signup() {
     role: "Team Member",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState(false);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === "password") setTouched(true);
+  };
+
+  const isValidPassword = () => {
+    const { password } = form;
+    return (
+      /[a-z]/.test(password) &&
+      /[A-Z]/.test(password) &&
+      /\d/.test(password) &&
+      /[^A-Za-z0-9]/.test(password) &&
+      password.length >= 8
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isValidPassword()) {
+      toast.error("Password does not meet security requirements.");
+      return;
+    }
+
     try {
       await axios.post(`${API}/auth/register`, form);
       toast.success("Signup successful!");
@@ -29,6 +50,14 @@ function Signup() {
       toast.error(err?.response?.data?.message || "Signup failed. Please try again.");
     }
   };
+
+  const passwordChecks = [
+    { label: "At least 8 characters", test: (p) => p.length >= 8 },
+    { label: "One lowercase letter (a-z)", test: (p) => /[a-z]/.test(p) },
+    { label: "One uppercase letter (A-Z)", test: (p) => /[A-Z]/.test(p) },
+    { label: "One number (0-9)", test: (p) => /\d/.test(p) },
+    { label: "One special character (!@#$%^&*)", test: (p) => /[^A-Za-z0-9]/.test(p) },
+  ];
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-green-50 to-white px-4">
@@ -46,7 +75,6 @@ function Signup() {
               value={form.name}
               onChange={handleChange}
               required
-              placeholder="John Doe"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
@@ -60,23 +88,38 @@ function Signup() {
               value={form.email}
               onChange={handleChange}
               required
-              placeholder="you@example.com"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
           {/* Password */}
-          <div>
+          <div className="relative">
             <label className="block mb-1 text-sm text-gray-600">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={form.password}
               onChange={handleChange}
               required
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400 pr-10"
             />
+            <span
+              className="absolute right-3 top-[37px] cursor-pointer text-gray-500 hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </span>
+
+            {/* Password rules */}
+            {touched && (
+              <ul className="mt-2 space-y-1 text-sm">
+                {passwordChecks.map((check, index) => (
+                  <li key={index} className={check.test(form.password) ? "text-green-600" : "text-red-500"}>
+                    • {check.label}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Role */}
@@ -94,7 +137,7 @@ function Signup() {
             </select>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
@@ -103,7 +146,7 @@ function Signup() {
           </button>
         </form>
 
-        {/* Link to Login */}
+        {/* Login Link */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
           <Link to="/login" className="text-green-600 hover:underline font-medium">

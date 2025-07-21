@@ -117,8 +117,7 @@ function ProjectDetailPage() {
     fetchComments();
   }, [fetchProject, fetchTasks, fetchComments]);
 
-  if (!project) return <p className="p-4"><InLineLoader message="Loading Project Details" />
-</p>;
+  if (!project) return <p className="p-4"><InLineLoader message="Loading Project Details" /></p>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

@@ -21,7 +21,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Admin', 'Manager', 'Team Member'],
     default: 'Team Member'
+  },
+
+  resetOtp: {
+    type: String,
+    default: null
+  },
+
+  otpExpires: {
+    type: Date,
+    default: null
   }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
