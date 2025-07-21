@@ -16,6 +16,7 @@ import {
   Edit3,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import InLineLoader from "../components/InLineLoader"
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -116,7 +117,8 @@ function ProjectDetailPage() {
     fetchComments();
   }, [fetchProject, fetchTasks, fetchComments]);
 
-  if (!project) return <p className="p-4">Loading project...</p>;
+  if (!project) return <p className="p-4"><InLineLoader message="Loading Project Details" />
+</p>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

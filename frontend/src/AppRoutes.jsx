@@ -18,12 +18,13 @@ import TeamDashboard from "./pages/TeamDashboard";
 import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InLineLoader from "./components/InLineLoader";
 
 function AppRoutes() {
   const { token, loading, user } = useAuth();
 
   if (loading) {
-    return <p className="text-center mt-10">Loading user info...</p>;
+    return <p className="text-center mt-10"><InLineLoader message="Loading User Information" /></p>;
   }
 
   return (

@@ -15,6 +15,7 @@ import {
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
+import InLineLoader from '../components/InLineLoader';
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -195,7 +196,7 @@ function TaskDetailPage() {
             </div>
           </div>
         ) : (
-          <p>Loading task...</p>
+          <InLineLoader message="Loading Task Details" />
         )}
 
         {/* Comments */}

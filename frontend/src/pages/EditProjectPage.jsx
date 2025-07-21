@@ -7,6 +7,7 @@ import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import BackButton from "../components/backButton";
 import toast from "react-hot-toast";
+import InLineLoader from "../components/InLineLoader";
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -50,8 +51,7 @@ function EditProjectPage() {
             onCancel={() => navigate(`/projects/${id}`)}
           />
         ) : (
-          <p>Loading...</p>
-        )}
+          <InLineLoader message="Loading Project" />        )}
       </main>
       <Footer />
     </div>
