@@ -37,10 +37,4 @@ router.get('/team-members', verifyToken, async (req, res) => {
   }
 });
 
-router.post("/change-password", changePassword);
-
-router.post("/verify-password", verifyPassword);
-
-
-
 module.exports = router;

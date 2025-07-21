@@ -19,7 +19,6 @@ import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
-import ChangePassword from "./pages/ChangePassword";
 
 
 function AppRoutes() {
@@ -104,7 +103,6 @@ function AppRoutes() {
             </RoleBasedRoute>
           }
         />
-        <Route path="/change-password" element={<ChangePassword />} />
 
 
       </Routes>
