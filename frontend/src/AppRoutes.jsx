@@ -19,6 +19,7 @@ import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
+import ProfilePage from "./pages/ProfilePage";
 
 
 function AppRoutes() {
@@ -68,6 +69,8 @@ function AppRoutes() {
         <Route path="/tasks/:id" element={<PrivateRoute><TaskDetailPage /></PrivateRoute>} />
         <Route path="/calendar" element={<PrivateRoute><TaskCalendarPage /></PrivateRoute>} />
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+
 
 
 

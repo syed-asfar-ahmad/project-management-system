@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken } = require('../middleware/auth');
+
+const { verifyToken } = require('../middleware/auth'); // ✅ Corrected
+const upload = require('../middleware/upload'); // ✅ Corrected
 const User = require('../models/User');
+const {
+  updateUserProfile,
+  getUserProfile
+} = require('../controllers/userController');
 
 // GET only team members
 router.get('/team-members', verifyToken, async (req, res) => {
@@ -12,5 +18,11 @@ router.get('/team-members', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch team members' });
   }
 });
+
+// GET profile (protected)
+router.get('/profile', verifyToken, getUserProfile);
+
+// PUT profile (with image)
+router.put('/profile', verifyToken, upload.single('profilePicture'), updateUserProfile);
 
 module.exports = router;

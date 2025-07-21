@@ -23,15 +23,13 @@ const userSchema = new mongoose.Schema({
     default: 'Team Member'
   },
 
-  resetOtp: {
-    type: String,
-    default: null
-  },
+  bio: { type: String },
 
-  otpExpires: {
-    type: Date,
-    default: null
-  }
+  dateOfBirth: { type: Date },
+
+  gender: { type: String, enum: ['Male', 'Female', 'Other'] },
+
+  profilePicture: { type: String }, 
 
 }, { timestamps: true });
 
