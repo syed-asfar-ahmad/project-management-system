@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login } = require('../controllers/authController');
+const { register, login, changePassword } = require('../controllers/authController');
 const { verifyToken, checkRole } = require('../middleware/auth');
 const User = require('../models/User');
-
-// Import OTP-related controllers
-const { sendOtp } = require('../controllers/forgotPassword');
 
 // Auth
 router.post('/register', register);
@@ -39,7 +36,6 @@ router.get('/team-members', verifyToken, async (req, res) => {
   }
 });
 
-// OTP & Password Reset
-router.post('/forgot-password', sendOtp);
+router.post("/change-password", changePassword);
 
 module.exports = router;

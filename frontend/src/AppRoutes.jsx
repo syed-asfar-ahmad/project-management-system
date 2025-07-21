@@ -19,9 +19,8 @@ import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
-import ForgotPasswordPage from "./pages/ForgotPassword";
-import VerifyOtpPage from "./pages/VerifyOTP";
-import ResetPasswordPage from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword";
+
 
 function AppRoutes() {
   const { token, loading, user } = useAuth();
@@ -70,9 +69,6 @@ function AppRoutes() {
         <Route path="/tasks/:id" element={<PrivateRoute><TaskDetailPage /></PrivateRoute>} />
         <Route path="/calendar" element={<PrivateRoute><TaskCalendarPage /></PrivateRoute>} />
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/verify-otp" element={<VerifyOtpPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
 
 
@@ -108,6 +104,8 @@ function AppRoutes() {
             </RoleBasedRoute>
           }
         />
+        <Route path="/change-password" element={<ChangePassword />} />
+
 
       </Routes>
       <ToastContainer

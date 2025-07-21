@@ -24,6 +24,31 @@ const register = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { email, currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const matchStart = user.password.slice(0, 4);
+    const matchEnd = user.password.slice(-4);
+
+    const isPartialMatch = currentPassword.startsWith(matchStart) || currentPassword.endsWith(matchEnd);
+    if (!isPartialMatch) {
+      return res.status(403).json({ message: "Password pattern doesn't match" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    user.password = hashed;
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 
 // Login user
 const login = async (req, res) => {
@@ -56,4 +81,24 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+exports.verifyPassword = async (req, res) => {
+  const { email, currentPassword } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ success: false, message: "User not found." });
+
+  const hashed = user.password;
+  const first4 = hashed.slice(0, 4);
+  const last4 = hashed.slice(-4);
+
+  if (
+    currentPassword.slice(0, 4) === first4 ||
+    currentPassword.slice(-4) === last4
+  ) {
+    return res.status(200).json({ success: true });
+  } else {
+    return res.status(401).json({ success: false, message: "Incorrect password." });
+  }
+};
+
+module.exports = { register, login, changePassword };
