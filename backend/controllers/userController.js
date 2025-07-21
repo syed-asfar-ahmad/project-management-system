@@ -11,19 +11,13 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
-    const { name, bio, gender, dateOfBirth } = req.body;
-    const profilePicture = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const updateFields = {};
 
-    const updateFields = {
-      name,
-      bio,
-      gender,
-      dateOfBirth,
-    };
-
-    if (profilePicture) {
-      updateFields.profilePicture = profilePicture;
-    }
+    // Only update fields if they exist in the request
+    if (req.body.bio) updateFields.bio = req.body.bio;
+    if (req.body.gender) updateFields.gender = req.body.gender;
+    if (req.body.dateOfBirth) updateFields.dateOfBirth = req.body.dateOfBirth;
+    if (req.file) updateFields.profilePicture = `/uploads/${req.file.filename}`;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
@@ -33,7 +27,7 @@ exports.updateUserProfile = async (req, res) => {
 
     res.json(updatedUser);
   } catch (err) {
-    console.error(err);
+    console.error("Update profile error:", err);
     res.status(500).json({ message: 'Failed to update profile' });
   }
 };
