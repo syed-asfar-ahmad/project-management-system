@@ -79,7 +79,7 @@ export default function About() {
         <h2 className="text-3xl font-bold mb-4">Ready to simplify your projects?</h2>
         <p className="text-gray-600 mb-6">Start using TaskPilot today - it’s fast, free, and designed for teams like yours.</p>
         <Link
-          to="http://localhost:3000/signup"
+          to="https://project-management-system-1emk.vercel.app/signup"
           className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
         >
           Get Started

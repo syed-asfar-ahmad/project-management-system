@@ -32,13 +32,13 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap justify-center gap-4 animate-fade-in-up delay-300">
             <a
-                href="http://localhost:3000/signup"
+                href="https://project-management-system-1emk.vercel.app/signup"
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow hover:bg-blue-700 transition"
             >
                 Get Started
             </a>
             <a
-                href="http://localhost:3000/login"
+                href="https://project-management-system-1emk.vercel.app/login"
                 className="border border-white text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition"
             >
                 Login
