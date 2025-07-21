@@ -48,9 +48,11 @@ exports.verifyOtp = async (req, res) => {
     await user.save();
 
     res.json({ message: "OTP verified successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
-  }
+    } catch (err) {
+    console.error("Error in sendOtp:", err);
+    res.status(500).json({ message: "Something went wrong." });
+    }
+
 };
 
 exports.resetPassword = async (req, res) => {
