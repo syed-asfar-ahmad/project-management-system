@@ -38,6 +38,7 @@ function AuthNavbar() {
           <li><Link to="/projects" className={navLinkStyle}>Projects</Link></li>
           <li><Link to="/tasks" className={navLinkStyle}>Tasks</Link></li>
           <li><Link to="/calendar" className={navLinkStyle}>Calendar</Link></li>
+          <li><Link to="/profile" className={navLinkStyle}>Profile</Link></li>
           <li><button onClick={handleLogout} className={navLinkStyle}>Logout</button></li>
         </ul>
       </div>
@@ -72,6 +73,13 @@ function AuthNavbar() {
             className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
           >
             Calendar
+          </Link>
+                    <Link
+            to="/calendar"
+            onClick={() => setIsOpen(false)}
+            className="block font-medium hover:bg-blue-100 px-4 py-2 rounded-md"
+          >
+            Profile
           </Link>
           <button
             onClick={() => {
