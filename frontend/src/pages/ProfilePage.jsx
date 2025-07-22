@@ -37,9 +37,9 @@ function ProfilePage() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("bio", profile.bio);
-    formData.append("gender", profile.gender);
-    formData.append("dateOfBirth", profile.dateOfBirth);
+    if (profile.bio) formData.append("bio", profile.bio);
+    if (profile.gender) formData.append("gender", profile.gender);
+    if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
     if (file) formData.append("profilePicture", file);
 
     try {
@@ -49,13 +49,18 @@ function ProfilePage() {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("Updated Profile Response:", res.data);
+
       toast.success("Profile updated successfully");
-      setProfile(res.data);
+
+      fetchProfile();
       setFile(null);
     } catch (err) {
       toast.error("Update failed");
     }
+
   };
+
 
   useEffect(() => {
     fetchProfile();
@@ -72,18 +77,16 @@ function ProfilePage() {
 
           <form onSubmit={handleUpdate} className="space-y-5">
             <div className="flex items-center gap-6">
-                <img
-                    src={
-                        file
-                        ? URL.createObjectURL(file)
-                        : profile.profilePicture
-                        ? profile.profilePicture
-                        : "/default_avatar.jpg"
-                    }
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-2 border-blue-300"
-                />
-
+              <img
+                src={
+                  profile?.profilePicture
+                    ? `${API}${profile.profilePicture}` 
+                    : "/default_avatar.jpg"
+                }
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border"
+              />
+              
               <label className="flex items-center gap-2 cursor-pointer text-blue-600 hover:underline">
                 <Image size={20} />
                 <span>Change Picture</span>
