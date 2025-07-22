@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Eye, EyeOff } from "lucide-react"; // 👁️ icons for show/hide
+import { Eye, EyeOff } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -13,7 +13,9 @@ function Signup() {
     name: "",
     email: "",
     password: "",
-    role: "Team Member",
+    gender: "",
+    position: "",
+    role: "Team Member", // hardcoded default role
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -122,19 +124,35 @@ function Signup() {
             )}
           </div>
 
-          {/* Role */}
+          {/* Gender */}
           <div>
-            <label className="block mb-1 text-sm text-gray-600">Role</label>
+            <label className="block mb-1 text-sm text-gray-600">Gender</label>
             <select
-              name="role"
-              value={form.role}
+              name="gender"
+              value={form.gender}
               onChange={handleChange}
+              required
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
             >
-              <option value="Admin">Admin</option>
-              <option value="Manager">Manager</option>
-              <option value="Team Member">Team Member</option>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
+          </div>
+
+          {/* Position */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-600">Position</label>
+            <input
+              type="text"
+              name="position"
+              value={form.position}
+              onChange={handleChange}
+              required
+              placeholder="e.g. Frontend Developer"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-green-400"
+            />
           </div>
 
           {/* Submit */}
