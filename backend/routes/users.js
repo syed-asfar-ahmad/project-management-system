@@ -4,6 +4,8 @@ const router = express.Router();
 const { verifyToken } = require('../middleware/auth'); 
 const upload = require('../middleware/upload'); 
 const User = require('../models/User');
+const { getAllUsers } = require("../controllers/userController");
+const { protect } = require("../middleware/auth");
 const {
   updateUserProfile,
   getUserProfile
@@ -25,4 +27,10 @@ router.get('/profile', verifyToken, getUserProfile);
 // PUT profile (with image)
 router.put('/profile', verifyToken, upload.single('profilePicture'), updateUserProfile);
 
+
+router.get("/", protect, getAllUsers); 
+
+
+
 module.exports = router;
+

@@ -20,6 +20,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
+import AllMembersPage from "./pages/AllMembersPage";
+
 
 
 function AppRoutes() {
@@ -70,6 +72,7 @@ function AppRoutes() {
         <Route path="/calendar" element={<PrivateRoute><TaskCalendarPage /></PrivateRoute>} />
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/members" element={<AllMembersPage />} />
 
 
 

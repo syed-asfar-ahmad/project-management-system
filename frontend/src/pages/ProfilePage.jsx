@@ -48,7 +48,6 @@ function ProfilePage() {
     if (profile.bio) formData.append("bio", profile.bio);
     if (profile.gender) formData.append("gender", profile.gender);
     if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
-    if (file) formData.append("profilePicture", file);
 
     try {
       await axios.put(`${API}/users/profile`, formData, {
@@ -60,9 +59,32 @@ function ProfilePage() {
 
       toast.success("Profile updated successfully");
       fetchProfile();
-      setFile(null);
     } catch (err) {
       toast.error("Update failed");
+    }
+  };
+
+  const handleProfilePictureChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+
+    const formData = new FormData();
+    formData.append("profilePicture", selectedFile);
+
+    try {
+      await axios.put(`${API}/users/profile`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast.success("Profile picture updated successfully");
+      fetchProfile();
+    } catch (err) {
+      toast.error("Failed to update profile picture");
     }
   };
 
@@ -99,7 +121,7 @@ function ProfilePage() {
                   <input
                     type="file"
                     hidden
-                    onChange={(e) => setFile(e.target.files[0])}
+                    onChange={handleProfilePictureChange}
                   />
                   Change
                 </label>

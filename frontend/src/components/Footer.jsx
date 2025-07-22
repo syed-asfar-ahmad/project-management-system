@@ -22,6 +22,8 @@ export default function Footer() {
             <li><Link to="/projects" className="hover:text-white transition">Projects</Link></li>
             <li><Link to="/tasks" className="hover:text-white transition">Tasks</Link></li>
             <li><Link to="/calendar" className="hover:text-white transition">Calendar</Link></li>
+            <li><Link to="/profile" className="hover:text-white transition">Profile</Link></li>
+
           </ul>
         </div>
 

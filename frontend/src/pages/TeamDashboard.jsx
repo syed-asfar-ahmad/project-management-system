@@ -32,9 +32,18 @@ function TeamDashboard() {
 
         setTasks(taskRes.data);
 
-        const assignedProjectIds = new Set(taskRes.data.map(t => t.project?._id));
-        const userProjects = projectRes.data.filter(p => assignedProjectIds.has(p._id));
+        const userProjects = projectRes.data.filter(p =>
+          p.teamMembers?.some(member => {
+            if (typeof member === "string") {
+              return member === user._id;
+            } else if (typeof member === "object") {
+              return member._id === user._id;
+            }
+            return false;
+          })
+        );
         setProjects(userProjects);
+
       } catch (err) {
         console.error("Error loading team dashboard:", err.response?.data);
       }
