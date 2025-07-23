@@ -23,11 +23,11 @@ exports.updateUserProfile = async (req, res) => {
     if (position) updateFields.position = position;
     if (name) updateFields.name = name;
 
+
     if (req.file && req.file.path) {
-      updateFields.profilePicture = req.file.path;
-      console.log("✅ Uploaded to Cloudinary:", req.file.path);
-    } else {
-      console.log("❌ No file uploaded");
+      updateFields.profilePicture = req.file.path; // optional fallback
+    } else if (req.file && req.file.filename && req.file.path === undefined && req.file.url) {
+      updateFields.profilePicture = req.file.url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
