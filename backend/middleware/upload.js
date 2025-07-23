@@ -1,7 +1,12 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads/ folder exists
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 // File type validation
 const fileFilter = (req, file, cb) => {
@@ -10,22 +15,19 @@ const fileFilter = (req, file, cb) => {
   if (allowed.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error("Unsupported file type"), false);
+    cb(new Error('Unsupported file type'), false);
   }
 };
 
-// Cloudinary storage configuration
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const isImage = ['.jpg', '.jpeg', '.png'].includes(ext);
-
-    return {
-      folder: isImage ? 'profile_pictures' : 'documents',
-      resource_type: isImage ? 'image' : 'raw',
-      public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`,
-    };
+// Local storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext).replace(/\s+/g, '-');
+    cb(null, `${Date.now()}-${name}${ext}`);
   },
 });
 

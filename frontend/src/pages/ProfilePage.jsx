@@ -23,7 +23,6 @@ function ProfilePage() {
   });
 
   const API = process.env.REACT_APP_API_BASE_URL;
-  const IMG = "https://taskpilot-o3bm.onrender.com";
   const [file, setFile] = useState(null);
   const token = localStorage.getItem("token");
 
@@ -48,10 +47,7 @@ function ProfilePage() {
     if (profile.bio) formData.append("bio", profile.bio);
     if (profile.gender) formData.append("gender", profile.gender);
     if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
-
-      if (file) {
-    formData.append("profilePicture", file);
-      }
+    if (file) formData.append("profilePicture", file);
 
     try {
       await axios.put(`${API}/users/profile`, formData, {
@@ -69,28 +65,10 @@ function ProfilePage() {
     }
   };
 
-  const handleProfilePictureChange = async (e) => {
+  const handleProfilePictureChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-
     setFile(selectedFile);
-
-    const formData = new FormData();
-    formData.append("profilePicture", selectedFile);
-
-    try {
-      await axios.put(`${API}/users/profile`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      toast.success("Profile picture updated successfully");
-      fetchProfile();
-    } catch (err) {
-      toast.error("Failed to update profile picture");
-    }
   };
 
   useEffect(() => {
@@ -113,16 +91,17 @@ function ProfilePage() {
             {/* Profile Picture */}
             <div className="flex items-center gap-6">
               <div className="relative group">
-              <img
-                src={
-                  file
-                    ? URL.createObjectURL(file)
-                    : profile.profilePicture || "/default_avatar.jpg"
-                }
-
-                alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
-              />
+                <img
+                  src={
+                    file
+                      ? URL.createObjectURL(file)
+                      : profile.profilePicture
+                      ? `${API}${profile.profilePicture}`
+                      : "/default_avatar.jpg"
+                  }
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
+                />
 
                 <label className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-3 py-1 rounded-full cursor-pointer opacity-90 hover:bg-blue-700 transition">
                   <input
