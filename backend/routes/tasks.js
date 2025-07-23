@@ -11,6 +11,7 @@ const {
   addCommentToTask,
   getTasksByDueDate,
   getMyProjectTasks,
+  uploadTaskFile,
 } = require('../controllers/taskController');
 
 const { verifyToken, checkRole } = require('../middleware/auth');
@@ -42,6 +43,9 @@ router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), deleteTask);
 
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);
+
+router.post('/:id/upload', verifyToken, upload.single('file'), uploadTaskFile);
+
 
 // Upload File to Task - Any logged-in user
 router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) => {

@@ -49,6 +49,10 @@ function ProfilePage() {
     if (profile.gender) formData.append("gender", profile.gender);
     if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
 
+      if (file) {
+    formData.append("profilePicture", file);
+      }
+
     try {
       await axios.put(`${API}/users/profile`, formData, {
         headers: {
@@ -59,6 +63,7 @@ function ProfilePage() {
 
       toast.success("Profile updated successfully");
       fetchProfile();
+      setFile(null);
     } catch (err) {
       toast.error("Update failed");
     }
@@ -108,15 +113,20 @@ function ProfilePage() {
             {/* Profile Picture */}
             <div className="flex items-center gap-6">
               <div className="relative group">
-                <img
-                  src={
-                    profile?.profilePicture
-                      ? `${IMG}${profile.profilePicture}`
-                      : "/default_avatar.jpg"
-                  }
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
-                />
+              <img
+                src={
+                  file
+                    ? URL.createObjectURL(file)
+                    : profile?.profilePicture
+                    ? profile.profilePicture.startsWith("http")
+                      ? profile.profilePicture
+                      : `${IMG}${profile.profilePicture}`
+                    : "/default_avatar.jpg"
+                }
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
+              />
+
                 <label className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-3 py-1 rounded-full cursor-pointer opacity-90 hover:bg-blue-700 transition">
                   <input
                     type="file"

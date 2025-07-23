@@ -24,7 +24,6 @@ function AllMembersPage() {
         const res = await axios.get(`${API}/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(res.data);
         setMembers(res.data);
       } catch (err) {
         console.error("Failed to fetch members", err);
@@ -50,16 +49,15 @@ function AllMembersPage() {
               className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition duration-300 border border-gray-200"
             >
               <div className="flex flex-col items-center text-center">
-                <img
-                  src={
-                    member.profilePicture
-                      ? `${IMG}${member.profilePicture}`
-                      : "/default_avatar.jpg"
-                  }
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-indigo-300 mb-4"
-                />
-
+              <img
+                src={
+                  member.profilePicture
+                    ? member.profilePicture // No need to prefix with base URL now
+                    : "/default_avatar.jpg"
+                }
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-4 border-indigo-300 mb-4"
+              />
                 <h2 className="text-2xl font-bold text-gray-800 mb-1">
                   {roleIcons[member.role]} {member.name}
                 </h2>

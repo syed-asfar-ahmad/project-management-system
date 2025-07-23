@@ -11,13 +11,23 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
+    console.log("Incoming update request body:", req.body);
+    console.log("Uploaded file to Cloudinary:", req.file); // ← ADD THIS
     const updateFields = {};
 
-    // Only update fields if they exist in the request
-    if (req.body.bio) updateFields.bio = req.body.bio;
-    if (req.body.gender) updateFields.gender = req.body.gender;
-    if (req.body.dateOfBirth) updateFields.dateOfBirth = req.body.dateOfBirth;
-    if (req.file) updateFields.profilePicture = `/uploads/${req.file.filename}`;
+    const { bio, gender, dateOfBirth, position, name } = req.body;
+
+    if (bio) updateFields.bio = bio;
+    if (gender) updateFields.gender = gender;
+    if (dateOfBirth) updateFields.dateOfBirth = dateOfBirth;
+    if (position) updateFields.position = position;
+    if (name) updateFields.name = name;
+
+    // ✅ Use Cloudinary image URL
+    if (req.file && req.file.path) {
+      console.log("Uploaded to Cloudinary:", req.file);
+      updateFields.profilePicture = req.file.path;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
@@ -31,17 +41,3 @@ exports.updateUserProfile = async (req, res) => {
     res.status(500).json({ message: 'Failed to update profile' });
   }
 };
-
-exports.getAllUsers = async (req, res) => {
-  try {
-    if (req.user.role !== "Admin") {
-      return res.status(403).json({ error: "Access denied" });
-    }
-
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-};
-

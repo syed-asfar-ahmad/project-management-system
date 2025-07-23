@@ -85,14 +85,44 @@ const getTaskById = async (req, res) => {
 // Update Task
 const updateTask = async (req, res) => {
   const { id } = req.params;
+  const {
+    title,
+    description,
+    status,
+    priority,
+    dueDate,
+    assignedTo,
+    attachments,
+  } = req.body;
 
   try {
-    const updated = await Task.findByIdAndUpdate(id, req.body, { new: true });
-    res.json({ message: 'Task updated', task: updated });
+    const task = await Task.findById(id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Update basic fields
+    task.title = title || task.title;
+    task.description = description || task.description;
+    task.status = status || task.status;
+    task.priority = priority || task.priority;
+    task.dueDate = dueDate || task.dueDate;
+    task.assignedTo = assignedTo || task.assignedTo;
+
+    // Attachments (overwrite only if present)
+    if (attachments && Array.isArray(attachments)) {
+      task.attachments = attachments; // must be array of { filename, path }
+    }
+
+    await task.save();
+
+    res.json({ message: "Task updated", task });
   } catch (err) {
-    res.status(500).json({ error: 'Error updating task' });
+    console.error("Error updating task:", err);
+    res.status(500).json({ error: "Error updating task" });
   }
 };
+
 
 // Delete Task
 const deleteTask = async (req, res) => {
@@ -178,6 +208,33 @@ const getMyProjectTasks = async (req, res) => {
   }
 };
 
+const uploadTaskFile = async (req, res) => {
+  const { id } = req.params;
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  try {
+    const task = await Task.findById(id);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    const fileData = {
+      filename: req.file.originalname,
+      path: req.file.path, // Cloudinary URL
+    };
+
+    task.attachments.push(fileData);
+    await task.save();
+
+    res.status(200).json({ message: 'File uploaded and attached', file: fileData });
+  } catch (err) {
+    console.error('Error uploading file:', err);
+    res.status(500).json({ message: 'Error uploading file' });
+  }
+};
+
+
 
 module.exports = {
   createTask,
@@ -188,5 +245,6 @@ module.exports = {
   deleteTask,
   addCommentToTask,
   getTasksByDueDate,
-  getMyProjectTasks
+  getMyProjectTasks,
+  uploadTaskFile
 };
