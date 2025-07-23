@@ -117,12 +117,9 @@ function ProfilePage() {
                 src={
                   file
                     ? URL.createObjectURL(file)
-                    : profile?.profilePicture
-                    ? profile.profilePicture.startsWith("http")
-                      ? profile.profilePicture
-                      : `${IMG}${profile.profilePicture}`
-                    : "/default_avatar.jpg"
+                    : profile.profilePicture || "/default_avatar.jpg"
                 }
+
                 alt="Profile"
                 className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
               />
