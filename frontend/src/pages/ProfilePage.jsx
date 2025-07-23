@@ -96,7 +96,7 @@ function ProfilePage() {
                     file
                       ? URL.createObjectURL(file)
                       : profile.profilePicture
-                      ? `${API}${profile.profilePicture}`
+                      ? `${API}/${profile.profilePicture}`
                       : "/default_avatar.jpg"
                   }
                   alt="Profile"
