@@ -63,7 +63,7 @@ function ProfilePage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/upload-profile-image", {
+      const res = await fetch(`${API}/upload-profile-image`, {
         method: "POST",
         body: formData,
       });
