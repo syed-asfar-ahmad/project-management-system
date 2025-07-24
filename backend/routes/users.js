@@ -8,7 +8,8 @@ const User = require('../models/User');
 const {
   updateUserProfile,
   getUserProfile,
-  getAllUsers
+  getAllUsers,
+  updateUserRole
 } = require('../controllers/userController');
 
 // GET only team members
@@ -40,6 +41,12 @@ router.get(
 );
 
 
-
+// Admin-only access to update role
+router.put('/update-role', verifyToken, (req, res, next) => {
+  if (req.user.role !== 'Admin') {
+    return res.status(403).json({ message: 'Access denied: Admins only' });
+  }
+  next();
+}, updateUserRole);
 
 module.exports = router;

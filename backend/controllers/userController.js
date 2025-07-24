@@ -48,3 +48,28 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+
+exports.updateUserRole = async (req, res) => {
+  const { userId, newRole } = req.body;
+
+  // Only allow 'Team Member' or 'Manager'
+  const allowedRoles = ['Team Member', 'Manager'];
+  if (!allowedRoles.includes(newRole)) {
+    return res.status(400).json({ message: 'Invalid role' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.role = newRole;
+    await user.save();
+
+    res.status(200).json({ message: `Role updated to ${newRole}` });
+  } catch (err) {
+    console.error("Role update error:", err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+

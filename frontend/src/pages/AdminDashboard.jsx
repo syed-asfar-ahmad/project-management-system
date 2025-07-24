@@ -99,6 +99,28 @@ useEffect(() => {
     }).length;
   };
 
+  const handleRoleChange = async (userId, newRole) => {
+  try {
+    await axios.put(`${API}/users/update-role/${userId}`, 
+      { role: newRole },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    toast.success("User role updated");
+
+    // Refetch members after update (optional)
+    setMembers((prev) =>
+      prev.map((m) =>
+        m._id === userId ? { ...m, role: newRole } : m
+      )
+    );
+  } catch (err) {
+    console.error("Role update failed", err);
+    toast.error("Failed to update role");
+  }
+};
+
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -152,20 +174,43 @@ useEffect(() => {
               <ul className="space-y-2 text-sm text-gray-700">
                 {members.map((member) => {
                   const count = getTaskCount(member._id);
+
                   return (
                     <li
                       key={member._id}
                       className="flex justify-between items-center border-b pb-1"
                     >
-                      <span className="font-medium">{member.name}</span>
-                      <Link to={`/tasks?userId=${member._id}`} className="text-blue-600 hover:underline">
-                        {count} task{count !== 1 ? "s" : ""}
-                      </Link>
+                      <div>
+                        <span className="font-medium">{member.name}</span>
+                        <div className="text-xs text-gray-500">Role: {member.role}</div>
+                      </div>
 
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to={`/tasks?userId=${member._id}`}
+                          className="text-blue-600 hover:underline text-sm"
+                        >
+                          {count} task{count !== 1 ? "s" : ""}
+                        </Link>
+
+                        {/* Only show role change dropdown if current user is Admin */}
+                        {token && JSON.parse(atob(token.split('.')[1])).role === "Admin" && (
+                          <select
+                            value={member.role}
+                            onChange={(e) => handleRoleChange(member._id, e.target.value)}
+                            className="text-sm border rounded px-2 py-1"
+                          >
+                            <option value="Team Member">Team Member</option>
+                            <option value="Manager">Manager</option>
+                          </select>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
+
               </ul>
+              
             </div>
 
         </div>
