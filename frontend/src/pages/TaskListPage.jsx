@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
 import DashboardNavbar from '../components/AuthNavbar';
@@ -15,9 +15,13 @@ function TaskListPage() {
   const [tasks, setTasks] = useState([]);
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
-  const [filterUser, setFilterUser] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [teamOptions, setTeamOptions] = useState([]);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialUserId = queryParams.get('userId') || '';
+
+  const [filterUser, setFilterUser] = useState(initialUserId);
 
   const { token, user } = useAuth();
   const navigate = useNavigate();
