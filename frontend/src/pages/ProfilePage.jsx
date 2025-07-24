@@ -58,6 +58,7 @@ function ProfilePage() {
     if (profile.bio) formData.append("bio", profile.bio);
     if (profile.gender) formData.append("gender", profile.gender);
     if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
+    if (profile.position) formData.append("position", profile.position);
     if (file) formData.append("profilePicture", file);
 
     try {
@@ -174,6 +175,22 @@ function ProfilePage() {
                   </select>
                 </div>
               </div>
+              {/* Position */}
+              <div>
+                <label className="font-semibold text-gray-700 mb-1 block">Position</label>
+                <div className="flex items-center border border-gray-300 rounded-lg px-3 bg-white">
+                  <Briefcase className="mr-2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    name="position"
+                    value={profile.position || ""}
+                    onChange={handleChange}
+                    placeholder="e.g. Frontend Developer"
+                    className="w-full py-2 outline-none text-gray-700"
+                  />
+                </div>
+              </div>
+
 
               {/* Date of Birth */}
               <div>
