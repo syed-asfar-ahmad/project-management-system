@@ -12,7 +12,7 @@ exports.getUserProfile = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   try {
     const updateFields = {};
-    const { bio, gender, dateOfBirth, position, name } = req.body;
+    const { bio, gender, dateOfBirth, position, name, profilePicture } = req.body;
 
     if (bio) updateFields.bio = bio;
     if (gender) updateFields.gender = gender;
@@ -20,22 +20,24 @@ exports.updateUserProfile = async (req, res) => {
     if (position) updateFields.position = position;
     if (name) updateFields.name = name;
 
-    if (req.file && req.file.path) {
-      updateFields.profilePicture = `/uploads/${req.file.filename}`;
+    // Accept Vercel Blob image URL
+    if (profilePicture) {
+      updateFields.profilePicture = profilePicture;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       updateFields,
       { new: true }
-    ).select("-password");
+    ).select('-password');
 
     res.json(updatedUser);
   } catch (err) {
-    console.error("Update profile error:", err); 
+    console.error("Update profile error:", err);
     res.status(500).json({ message: "Failed to update profile" });
   }
 };
+
 
 
 exports.getAllUsers = async (req, res) => {

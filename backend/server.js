@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const path = require('path');
+const blobUploadRoute = require('./routes/blobUploadRoute');
+
 
 const fs = require('fs');
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -43,6 +45,8 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/upload-profile-image', blobUploadRoute);
+
 
 app.get('/', (req, res) => {
   res.send('API is working...');

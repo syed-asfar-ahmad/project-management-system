@@ -53,29 +53,60 @@ function ProfilePage() {
   };
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  const token = localStorage.getItem("token");
+
+  let profilePictureUrl = profile.profilePicture;
+
+  if (file) {
     const formData = new FormData();
-    if (profile.bio) formData.append("bio", profile.bio);
-    if (profile.gender) formData.append("gender", profile.gender);
-    if (profile.dateOfBirth) formData.append("dateOfBirth", profile.dateOfBirth);
-    if (profile.position) formData.append("position", profile.position);
-    if (file) formData.append("profilePicture", file);
+    formData.append("file", file);
 
     try {
-      await axios.put(`${API}/users/profile`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch("/api/upload-profile-image", {
+        method: "POST",
+        body: formData,
       });
 
-      toast.success("Profile updated successfully");
-      fetchProfile();
-      setFile(null);
+      const data = await res.json();
+
+      if (data?.url) {
+        profilePictureUrl = data.url;
+      } else {
+        toast.error("Image upload failed");
+        return;
+      }
     } catch (err) {
-      toast.error("Update failed");
+      toast.error("Image upload error");
+      return;
     }
-  };
+  }
+
+  try {
+    await axios.put(
+      `${API}/users/profile`,
+      {
+        bio: profile.bio,
+        gender: profile.gender,
+        dateOfBirth: profile.dateOfBirth,
+        position: profile.position,
+        profilePicture: profilePictureUrl,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success("Profile updated successfully");
+    fetchProfile(); // refresh updated info
+    setFile(null);  // clear selected file
+  } catch (err) {
+    toast.error("Update failed");
+  }
+};
+
 
   const handleProfilePictureChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -110,9 +141,9 @@ function ProfilePage() {
                     src={
                       file
                         ? URL.createObjectURL(file)
-                        : profile.profilePicture
-                        ? `${IMG}/${profile.profilePicture}`
-                        : "/default_avatar.jpg"
+                        : profile.profilePicture?.startsWith("http")
+                        ? profile.profilePicture
+                        : `${IMG}/${profile.profilePicture}`
                     }
                     alt="Profile"
                     className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
@@ -234,10 +265,11 @@ function ProfilePage() {
               src={
                 file
                   ? URL.createObjectURL(file)
-                  : profile.profilePicture
-                  ? `${IMG}/${profile.profilePicture}`
-                  : "/default_avatar.jpg"
+                  : profile.profilePicture?.startsWith("http")
+                  ? profile.profilePicture
+                  : `${IMG}/${profile.profilePicture}`
               }
+
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover border-4 border-indigo-300 mb-4 mx-auto"
             />
