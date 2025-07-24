@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Project = require('../models/Project'); 
+const Task = require('../models/Task'); 
 
 exports.getUserProfile = async (req, res) => {
   try {
@@ -52,7 +54,6 @@ exports.getAllUsers = async (req, res) => {
 exports.updateUserRole = async (req, res) => {
   const { userId, newRole } = req.body;
 
-  // Only allow 'Team Member' or 'Manager'
   const allowedRoles = ['Team Member', 'Manager'];
   if (!allowedRoles.includes(newRole)) {
     return res.status(400).json({ message: 'Invalid role' });
@@ -65,11 +66,23 @@ exports.updateUserRole = async (req, res) => {
     user.role = newRole;
     await user.save();
 
+    // Remove from projects and tasks if promoted to Manager
+    if (newRole === 'Manager') {
+      await Project.updateMany(
+        { assignedTo: userId },
+        { $pull: { assignedTo: userId } }
+      );
+
+      await Task.updateMany(
+        { assignedTo: userId },
+        { $pull: { assignedTo: userId } }
+      );
+    }
+
     res.status(200).json({ message: `Role updated to ${newRole}` });
   } catch (err) {
     console.error("Role update error:", err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 

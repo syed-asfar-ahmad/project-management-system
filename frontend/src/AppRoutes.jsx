@@ -21,6 +21,8 @@ import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
+import TeamMemberRoute from "./components/TeamMembersRoute";
+
 
 
 
@@ -74,9 +76,6 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members" element={<AllMembersPage />} />
 
-
-
-
         {/* Role-based Routes */}
         <Route path="/add-task" element={
           <RoleBasedRoute allowedRoles={["Admin", "Manager"]}>
@@ -109,20 +108,27 @@ function AppRoutes() {
             </RoleBasedRoute>
           }
         />
+        <Route
+        path="/team-dashboard"
+        element={
+          <TeamMemberRoute>
+            <TeamDashboard />
+          </TeamMemberRoute>
+        }
+      />
 
 
       </Routes>
       <ToastContainer
-  position="top-center"
-  autoClose={3000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  closeOnClick
-  pauseOnHover
-  draggable
-  theme="light"
-/>
-
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+      />
 
     </Router>
   );
