@@ -136,40 +136,27 @@ useEffect(() => {
 
 
           {/* Task counts per team member (list) */}
-<div className="bg-white p-6 rounded shadow h-[360px] overflow-y-auto">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-      <Users size={20} /> Team Members & Their Tasks
-    </h2>
-    <Link
-      to="/members"
-      className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition duration-200"
-    >
-      View All
-    </Link>
-  </div>
-
-  <ul className="space-y-2 text-sm text-gray-700">
-    {members.map((member) => {
-      const count = getTaskCount(member._id);
-      return (
-        <li
-          key={member._id}
-          className="flex justify-between items-center border-b pb-1"
-        >
-          <span className="font-medium">{member.name}</span>
-          <Link
-            to={`/tasks?assignedTo=${member._id}`}
-            className="text-blue-600 hover:underline"
-          >
-            {count} task{count !== 1 ? "s" : ""}
-          </Link>
-        </li>
-      );
-    })}
-  </ul>
-</div>
-
+          <div className="bg-white p-6 rounded shadow h-[360px] overflow-y-auto">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+              <Users size={20} /> Team Members & Their Tasks
+            </h2>
+            <ul className="space-y-2 text-sm text-gray-700">
+              {members.map((member) => {
+                const count = getTaskCount(member._id);
+                return (
+                  <li
+                    key={member._id}
+                    className="flex justify-between items-center border-b pb-1"
+                  >
+                    <span className="font-medium">{member.name}</span>
+                    <span className="text-gray-500">
+                      {count} task{count !== 1 ? "s" : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
 
         {/* Projects Section */}

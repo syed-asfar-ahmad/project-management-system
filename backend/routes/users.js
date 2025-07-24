@@ -28,7 +28,7 @@ router.get('/profile', verifyToken, getUserProfile);
 router.put('/profile', verifyToken, upload.single('profilePicture'), updateUserProfile);
 
 router.get('/', verifyToken, (req, res, next) => {
-  if (req.user.role !== 'Admin', 'Manager') {
+  if (req.user.role !== 'Admin') {
     return res.status(403).json({ message: 'Access denied: Admins and Managers only' });
   }
   next();
