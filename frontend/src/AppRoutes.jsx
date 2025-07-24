@@ -21,7 +21,6 @@ import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
-import TeamMemberRoute from "./components/TeamMembersRoute";
 
 
 
@@ -108,16 +107,6 @@ function AppRoutes() {
             </RoleBasedRoute>
           }
         />
-        <Route
-        path="/team-dashboard"
-        element={
-          <TeamMemberRoute>
-            <TeamDashboard />
-          </TeamMemberRoute>
-        }
-      />
-
-
       </Routes>
       <ToastContainer
         position="top-center"
