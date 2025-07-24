@@ -42,7 +42,7 @@ router.get(
 
 
 // Admin-only access to update role
-router.put('/update-role', verifyToken, (req, res, next) => {
+router.put('/update-role/:id', verifyToken, (req, res, next) => {
   if (req.user.role !== 'Admin') {
     return res.status(403).json({ message: 'Access denied: Admins only' });
   }

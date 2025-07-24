@@ -52,7 +52,8 @@ exports.getAllUsers = async (req, res) => {
 
 
 exports.updateUserRole = async (req, res) => {
-  const { userId, newRole } = req.body;
+  const { id } = req.params;
+  const { newRole } = req.body;
 
   const allowedRoles = ['Team Member', 'Manager'];
   if (!allowedRoles.includes(newRole)) {
@@ -68,15 +69,8 @@ exports.updateUserRole = async (req, res) => {
 
     // Remove from projects and tasks if promoted to Manager
     if (newRole === 'Manager') {
-      await Project.updateMany(
-        { assignedTo: userId },
-        { $pull: { assignedTo: userId } }
-      );
-
-      await Task.updateMany(
-        { assignedTo: userId },
-        { $pull: { assignedTo: userId } }
-      );
+      await Project.updateMany({ assignedTo: id }, { $pull: { assignedTo: id } });
+      await Task.updateMany({ assignedTo: id }, { $pull: { assignedTo: id } });
     }
 
     res.status(200).json({ message: `Role updated to ${newRole}` });
