@@ -3,10 +3,9 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import AuthNavbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
-import { ShieldCheck, UserCircle, Briefcase, BadgeInfo } from "lucide-react";
+import { ShieldCheck, UserCircle, Briefcase } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL;
-const IMG = "https://taskpilot-o3bm.onrender.com";
 
 const roleIcons = {
   Admin: <ShieldCheck className="inline-block w-5 h-5 text-red-500 mr-1" />,
