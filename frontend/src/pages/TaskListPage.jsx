@@ -19,7 +19,7 @@ function TaskListPage() {
   const [teamOptions, setTeamOptions] = useState([]);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialUserId = queryParams.get('userId') || '';
+  const initialUserId = queryParams.get('assignedTo') || '';
 
   const [filterUser, setFilterUser] = useState(initialUserId);
 

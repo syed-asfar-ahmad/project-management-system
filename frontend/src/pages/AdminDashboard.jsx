@@ -5,6 +5,8 @@ import axios from "axios";
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import { toast } from 'react-hot-toast'; 
+import UserProfileWidget from "../components/UserProfileWidget";
+
 import {
   BarChart,
   FilePlus,
