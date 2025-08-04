@@ -15,12 +15,12 @@ function CreateProject() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-100">
+          <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-100">
       <AuthNavbar />
       <BackButton />
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-center mb-6 text-blue-700">
+        <div className="flex items-center justify-center mb-6 text-green-700">
           <FolderPlus className="w-8 h-8 mr-2" />
           <h2 className="text-3xl font-semibold">Create New Project</h2>
         </div>

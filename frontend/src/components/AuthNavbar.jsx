@@ -1,81 +1,241 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, User, LogOut, Bell } from "lucide-react";
+import { notificationService } from "../services/notificationService";
 
 function AuthNavbar() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await notificationService.getUnreadCount();
+        setUnreadCount(response.unreadCount);
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Refresh unread count every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  const dashboardLink =
-    user?.role === "Team Member" ? "/team-dashboard" : "/dashboard";
+  const dashboardLink = user?.role === "Team Member" ? "/team-dashboard" : "/dashboard";
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinkStyle = (path) =>
-    `transition-all duration-200 px-3 py-1 rounded-md ${
-      isActive(path)
-        ? "bg-white text-blue-600 font-semibold"
-        : "hover:bg-white hover:text-blue-600"
-    }`;
+  const navLinkStyle = (path) => {
+    const active = isActive(path);
+    return `
+      relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 group
+      ${active 
+        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+        : 'text-white/90 hover:text-white hover:bg-white/10'
+      }
+    `;
+  };
 
-  const mobileLinkStyle = (path) =>
-    `block font-medium px-4 py-2 rounded-md ${
-      isActive(path)
-        ? "bg-blue-100 text-blue-700"
-        : "hover:bg-blue-100 text-blue-600"
-    }`;
+  const mobileLinkStyle = (path) => {
+    const active = isActive(path);
+    return `
+      block px-4 py-3 rounded-lg font-medium transition-all duration-200
+      ${active 
+        ? 'text-green-600 bg-green-50 border-l-4 border-green-600' 
+        : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+      }
+    `;
+  };
 
   return (
-    <nav className="bg-blue-600 text-white px-6 py-3 shadow-md">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <h1 className="text-xl font-bold">TaskPilot</h1>
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'bg-green-600/95 backdrop-blur-md shadow-lg border-b border-green-500/20' 
+        : 'bg-green-600 shadow-md'
+    }`}>
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to={dashboardLink} className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 transform group-hover:scale-105">
+              <span className="text-white font-bold text-xl">T</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">TaskPilot</h1>
+              <p className="text-xs text-white/70 -mt-1 capitalize">{user?.role}</p>
+            </div>
+          </Link>
 
-        {/* Mobile menu toggle */}
-        <button
-          className="md:hidden focus:outline-none"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-2">
+            <Link to={dashboardLink} className={navLinkStyle(dashboardLink)}>
+              <span className="relative">
+                Dashboard
+                {isActive(dashboardLink) && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/projects" className={navLinkStyle("/projects")}>
+              <span className="relative">
+                Projects
+                {isActive("/projects") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/tasks" className={navLinkStyle("/tasks")}>
+              <span className="relative">
+                Tasks
+                {isActive("/tasks") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/calendar" className={navLinkStyle("/calendar")}>
+              <span className="relative">
+                Calendar
+                {isActive("/calendar") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/profile" className={navLinkStyle("/profile")}>
+              <span className="relative">
+                Profile
+                {isActive("/profile") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+          </div>
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex space-x-4 text-sm items-center">
-          <li><Link to={dashboardLink} className={navLinkStyle(dashboardLink)}>Dashboard</Link></li>
-          <li><Link to="/projects" className={navLinkStyle("/projects")}>Projects</Link></li>
-          <li><Link to="/tasks" className={navLinkStyle("/tasks")}>Tasks</Link></li>
-          <li><Link to="/calendar" className={navLinkStyle("/calendar")}>Calendar</Link></li>
-          <li><Link to="/profile" className={navLinkStyle("/profile")}>Profile</Link></li>
-          <li><button onClick={handleLogout} className="hover:bg-white hover:text-blue-600 px-3 py-1 rounded-md">Logout</button></li>
-        </ul>
-      </div>
+          {/* User Profile & Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Notifications */}
+            <Link to="/notifications" className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 relative group">
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full animate-pulse text-xs text-white flex items-center justify-center font-medium">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Link>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden mt-3 mx-4 bg-white text-blue-600 rounded-lg shadow-lg py-4 px-3 space-y-3 transition-all duration-300">
-          <Link to={dashboardLink} onClick={() => setIsOpen(false)} className={mobileLinkStyle(dashboardLink)}>Dashboard</Link>
-          <Link to="/projects" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/projects")}>Projects</Link>
-          <Link to="/tasks" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/tasks")}>Tasks</Link>
-          <Link to="/calendar" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/calendar")}>Calendar</Link>
-          <Link to="/profile" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/profile")}>Profile</Link>
-          <button
-            onClick={() => {
-              handleLogout();
-              setIsOpen(false);
-            }}
-            className="block w-full text-left font-medium text-red-600 hover:bg-red-100 px-4 py-2 rounded-md"
-          >
-            Logout
-          </button>
+            {/* User Profile */}
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <User size={16} className="text-white" />
+              </div>
+              <div className="text-sm">
+                <p className="text-white font-medium">{user?.name}</p>
+                <p className="text-white/70 text-xs">{user?.email}</p>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className="p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
+            >
+              {isOpen ? (
+                <X className="w-6 h-6 transform rotate-180 transition-transform duration-200" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          isOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 space-y-2">
+            {/* User Info */}
+            <div className="flex items-center space-x-3 px-4 py-3 border-b border-gray-200">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                <User size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-800">{user?.name}</p>
+                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <Link to={dashboardLink} onClick={() => setIsOpen(false)} className={mobileLinkStyle(dashboardLink)}>
+              Dashboard
+            </Link>
+            <Link to="/projects" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/projects")}>
+              Projects
+            </Link>
+            <Link to="/tasks" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/tasks")}>
+              Tasks
+            </Link>
+            <Link to="/calendar" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/calendar")}>
+              Calendar
+            </Link>
+            <Link to="/profile" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/profile")}>
+              Profile
+            </Link>
+            
+                         {/* Mobile Actions */}
+             <div className="pt-4 border-t border-gray-100 space-y-2">
+               <Link to="/notifications" onClick={() => setIsOpen(false)} className="flex items-center space-x-2 w-full px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
+                 <Bell size={16} />
+                 <span>Notifications</span>
+               </Link>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="flex items-center space-x-2 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
   );
 }

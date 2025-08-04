@@ -8,7 +8,7 @@ function BackButton() {
     <div className="mt-4 ml-6">
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg shadow-sm transition"
+        className="inline-flex items-center gap-2 bg-white text-green-600 hover:bg-green-50 border border-green-200 px-4 py-2 rounded-lg shadow-sm transition"
       >
         <ArrowLeft size={18} />
         <span className="font-medium">Go Back</span>

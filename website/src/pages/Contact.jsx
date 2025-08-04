@@ -42,7 +42,7 @@ export default function Contact() {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
@@ -55,7 +55,7 @@ export default function Contact() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email address"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
@@ -68,13 +68,13 @@ export default function Contact() {
               value={formData.message}
               onChange={handleChange}
               placeholder="Write your message here..."
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-green-400"
             />
           </div>
 
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
           >
             Send Message
           </button>

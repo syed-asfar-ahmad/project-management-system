@@ -79,7 +79,7 @@ function AddProjectForm({ onProjectCreated }) {
       onSubmit={handleSubmit}
       className="space-y-6 bg-white border border-gray-200 rounded-xl shadow-lg px-10 py-8"
     >
-      <div className="flex items-center mb-6 text-blue-700">
+              <div className="flex items-center mb-6 text-green-700">
         <ClipboardList className="w-6 h-6 mr-2" />
         <h2 className="text-2xl font-bold">Project Details</h2>
       </div>
@@ -95,7 +95,7 @@ function AddProjectForm({ onProjectCreated }) {
           placeholder="Enter project name"
           value={form.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
           required
         />
       </div>
@@ -110,7 +110,7 @@ function AddProjectForm({ onProjectCreated }) {
           placeholder="Brief project description"
           value={form.description}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
           rows={4}
           required
         />
@@ -122,7 +122,7 @@ function AddProjectForm({ onProjectCreated }) {
           name="status"
           value={form.status}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
         >
           <option value="Pending">Pending</option>
           <option value="In Progress">In Progress</option>
@@ -140,7 +140,7 @@ function AddProjectForm({ onProjectCreated }) {
           name="deadline"
           value={form.deadline}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
           required
         />
       </div>
@@ -162,7 +162,7 @@ function AddProjectForm({ onProjectCreated }) {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition"
+        className="w-full bg-green-600 text-white font-medium py-2 rounded-lg hover:bg-green-700 transition"
       >
         Create Project
       </button>

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { createNotificationsForUsers } = require('./notificationController');
 
 // Register new user
 const register = async (req, res) => {
@@ -17,6 +18,23 @@ const register = async (req, res) => {
 
     const user = new User({ name, email, password: hashedPassword, role, position, gender });
     await user.save();
+
+    // Notify all admins about new user registration
+    const admins = await User.find({ role: { $in: ['Admin', 'Manager'] } });
+    if (admins.length > 0) {
+      const adminIds = admins.map(admin => admin._id);
+      
+      const notificationTitle = 'New User Registered';
+      const notificationMessage = `A new user "${name}" (${email}) has registered as a ${role}`;
+      
+      await createNotificationsForUsers(
+        adminIds,
+        user._id, // Use the new user's ID as sender
+        'member_added',
+        notificationTitle,
+        notificationMessage
+      );
+    }
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {

@@ -117,7 +117,7 @@ function ProjectDetailPage() {
     fetchComments();
   }, [fetchProject, fetchTasks, fetchComments]);
 
-  if (!project) return <p className="p-4"><InLineLoader message="Loading Project Details" /></p>;
+  if (!project) return <div className="p-4"><InLineLoader message="Loading Project Details" /></div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -135,7 +135,7 @@ function ProjectDetailPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="flex items-center gap-3">
-              <ClipboardList className="text-blue-500" />
+                              <ClipboardList className="text-green-500" />
               <div>
                 <p className="text-sm text-gray-600">Status</p>
                 <p className="font-semibold text-gray-800">{project.status}</p>
@@ -188,7 +188,7 @@ function ProjectDetailPage() {
                     <div className="flex gap-2">
                       <Link
                         to={`/tasks/${task._id}/edit`}
-                        className="text-blue-600 hover:underline flex items-center gap-1"
+                        className="text-green-600 hover:underline flex items-center gap-1"
                       >
                         <Pencil size={16} /> Edit
                       </Link>

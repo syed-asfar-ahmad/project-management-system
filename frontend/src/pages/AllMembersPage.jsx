@@ -10,7 +10,7 @@ const API = process.env.REACT_APP_API_BASE_URL;
 const roleIcons = {
   Admin: <ShieldCheck className="inline-block w-5 h-5 text-red-500 mr-1" />,
   Manager: <Briefcase className="inline-block w-5 h-5 text-amber-500 mr-1" />,
-  "Team Member": <UserCircle className="inline-block w-5 h-5 text-blue-500 mr-1" />,
+      "Team Member": <UserCircle className="inline-block w-5 h-5 text-green-500 mr-1" />,
 };
 
 function AllMembersPage() {
@@ -35,7 +35,7 @@ function AllMembersPage() {
   }, [token, user]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+          <div className="min-h-screen bg-gradient-to-b from-white to-green-50">
       <AuthNavbar />
 
       <main className="max-w-7xl mx-auto px-6 py-12">

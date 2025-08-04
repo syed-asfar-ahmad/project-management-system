@@ -161,7 +161,7 @@ function TaskDetailPage() {
 
         {task ? (
           <div className="bg-white p-6 rounded-xl shadow-md mb-6 space-y-4">
-            <h3 className="text-2xl font-semibold text-indigo-700">{task.title}</h3>
+                            <h3 className="text-2xl font-semibold text-green-700">{task.title}</h3>
             <p className="text-gray-700">{task.description}</p>
 
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
@@ -176,7 +176,7 @@ function TaskDetailPage() {
                 <Paperclip size={18} /> <span>Attachments</span>
               </div>
               {task.attachments?.length > 0 ? (
-                <ul className="list-disc ml-5 space-y-1 text-blue-600">
+                <ul className="list-disc ml-5 space-y-1 text-green-600">
                   {task.attachments.map((file, idx) => (
                     <li key={idx}>
                       <a
@@ -232,7 +232,7 @@ function TaskDetailPage() {
             />
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-1"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-1"
             >
               <Send size={16} /> Post
             </button>
@@ -254,7 +254,7 @@ function TaskDetailPage() {
           {file && <p className="text-sm text-gray-700 mb-2">Selected: {file.name}</p>}
           <button
             onClick={handleFileUpload}
-            className={`bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded flex items-center gap-2 ${uploading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded flex items-center gap-2 ${uploading ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={uploading}
           >
             <UploadCloud size={18} />

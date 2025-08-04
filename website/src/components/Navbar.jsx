@@ -1,60 +1,196 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  const linkClass = (path) =>
-    `${location.pathname === path ? 'text-blue-600 font-semibold' : 'text-gray-700'} hover:text-blue-600 transition`;
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const linkClass = (path) => {
+    const isActive = location.pathname === path;
+    return `
+      relative px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group
+      ${isActive 
+        ? 'text-green-600 bg-green-50 shadow-sm' 
+        : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+      }
+    `;
+  };
+
+  const buttonClass = (isPrimary = false) => {
+    const baseClass = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    return isPrimary 
+      ? `${baseClass} bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:from-green-700 hover:to-green-800 focus:ring-green-500`
+      : `${baseClass} text-green-600 border-2 border-green-600 hover:bg-green-600 hover:text-white focus:ring-green-500`;
+  };
 
   return (
-    <header className="bg-white shadow sticky top-0 z-50">
-      <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="text-2xl font-bold text-blue-600 tracking-tight">
-          <Link to="/">TaskPilot</Link>
-        </div>
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100' 
+        : 'bg-white shadow-sm'
+    }`}>
+      <nav className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 transform group-hover:scale-105">
+              <span className="text-white font-bold text-xl">T</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                TaskPilot
+              </h1>
+              <p className="text-xs text-gray-500 -mt-1">Project Management</p>
+            </div>
+          </Link>
 
-        <div className="hidden md:flex space-x-6 font-medium">
-          <Link to="/" className={linkClass('/')}>Home</Link>
-          <Link to="/features" className={linkClass('/features')}>Features</Link>
-          <Link to="/about" className={linkClass('/about')}>About</Link>
-          <Link to="/contact" className={linkClass('/contact')}>Contact</Link>
-        </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            <Link to="/" className={linkClass('/')}>
+              <span className="relative">
+                Home
+                {location.pathname === '/' && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-green-600 rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/features" className={linkClass('/features')}>
+              <span className="relative">
+                Features
+                {location.pathname === '/features' && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-green-600 rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/about" className={linkClass('/about')}>
+              <span className="relative">
+                About
+                {location.pathname === '/about' && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-green-600 rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/contact" className={linkClass('/contact')}>
+              <span className="relative">
+                Contact
+                {location.pathname === '/contact' && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-green-600 rounded-full"></span>
+                )}
+              </span>
+            </Link>
+          </div>
 
-        <div className="hidden md:flex space-x-3">
-          <a href="https://project-management-system-1emk.vercel.app/login" className="px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
-            Login
-          </a>
-          <a href="https://project-management-system-1emk.vercel.app/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
-            Sign Up
-          </a>
-        </div>
-
-        <div className="md:hidden">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-gray-700 focus:outline-none">
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </nav>
-
-      {mobileOpen && (
-        <div className="md:hidden px-6 pb-4">
-          <div className="flex flex-col space-y-3 font-medium">
-            <Link to="/" onClick={() => setMobileOpen(false)} className={linkClass('/')}>Home</Link>
-            <Link to="/features" onClick={() => setMobileOpen(false)} className={linkClass('/features')}>Features</Link>
-            <Link to="/about" onClick={() => setMobileOpen(false)} className={linkClass('/about')}>About</Link>
-            <Link to="/contact" onClick={() => setMobileOpen(false)} className={linkClass('/contact')}>Contact</Link>
-            <a href="https://project-management-system-1emk.vercel.app/login" className="mt-3 px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded hover:bg-blue-50 transition">
+          {/* Desktop Buttons */}
+          <div className="hidden md:flex items-center space-x-3">
+            <a 
+              href="https://project-management-system-1emk.vercel.app/login" 
+              className={buttonClass(false)}
+            >
               Login
             </a>
-            <a href="https://project-management-system-1emk.vercel.app/signup" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
+            <a 
+              href="https://project-management-system-1emk.vercel.app/signup" 
+              className={buttonClass(true)}
+            >
               Sign Up
             </a>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button 
+              onClick={() => setMobileOpen(!mobileOpen)} 
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+            >
+              {mobileOpen ? (
+                <X className="w-6 h-6 transform rotate-180 transition-transform duration-200" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          mobileOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 space-y-2">
+            <Link 
+              to="/" 
+              onClick={() => setMobileOpen(false)} 
+              className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                location.pathname === '/' 
+                  ? 'text-green-600 bg-green-50 border-l-4 border-green-600' 
+                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+              }`}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/features" 
+              onClick={() => setMobileOpen(false)} 
+              className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                location.pathname === '/features' 
+                  ? 'text-green-600 bg-green-50 border-l-4 border-green-600' 
+                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+              }`}
+            >
+              Features
+            </Link>
+            <Link 
+              to="/about" 
+              onClick={() => setMobileOpen(false)} 
+              className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                location.pathname === '/about' 
+                  ? 'text-green-600 bg-green-50 border-l-4 border-green-600' 
+                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+              }`}
+            >
+              About
+            </Link>
+            <Link 
+              to="/contact" 
+              onClick={() => setMobileOpen(false)} 
+              className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                location.pathname === '/contact' 
+                  ? 'text-green-600 bg-green-50 border-l-4 border-green-600' 
+                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+              }`}
+            >
+              Contact
+            </Link>
+            
+            <div className="pt-4 border-t border-gray-100 space-y-2">
+              <a 
+                href="https://project-management-system-1emk.vercel.app/login" 
+                className="block px-4 py-3 text-green-600 font-semibold border-2 border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all duration-200 text-center"
+              >
+                Login
+              </a>
+              <a 
+                href="https://project-management-system-1emk.vercel.app/signup" 
+                className="block px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 text-center shadow-lg"
+              >
+                Sign Up
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
     </header>
   );
 }

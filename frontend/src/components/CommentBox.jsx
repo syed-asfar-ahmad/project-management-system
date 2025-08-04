@@ -38,7 +38,7 @@ function CommentBox({ token, projectId, onCommentAdded }) {
       />
       <button
         type="submit"
-        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
       >
         Post Comment
       </button>

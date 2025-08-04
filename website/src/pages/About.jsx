@@ -5,7 +5,7 @@ export default function About() {
   return (
     <div className="bg-white text-gray-800">
       {/* Hero */}
-      <section className="text-center py-20 px-6 bg-gradient-to-b from-blue-50 to-white">
+      <section className="text-center py-20 px-6 bg-gradient-to-b from-green-50 to-white">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">We Built TaskPilot for Teams That Care</h1>
         <p className="text-lg text-gray-600 max-w-xl mx-auto">
           From freelancers to enterprises, our mission is to help people do more with less chaos.
@@ -19,7 +19,7 @@ export default function About() {
             </h2>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
-            Project management tools were either <span className="font-semibold text-blue-600">too complex</span> or <span className="font-semibold text-blue-600">too limited</span>.
+            Project management tools were either <span className="font-semibold text-green-600">too complex</span> or <span className="font-semibold text-green-600">too limited</span>.
             We wanted something that was easy, powerful, and actually enjoyable to use.
             </p>
 
@@ -29,8 +29,8 @@ export default function About() {
             </p>
 
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8 mt-10">
-            <p className="text-xl italic text-blue-700 font-medium">
-                “Beautiful. Simple. Focused.”
+            <p className="text-xl italic text-green-700 font-medium">
+                "Beautiful. Simple. Focused."
             </p>
             <p className="text-sm text-gray-500 mt-2">- The TaskPilot Philosophy</p>
             </div>
@@ -49,7 +49,7 @@ export default function About() {
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {/* Value 1 */}
           <div className="bg-white shadow rounded-2xl p-6 text-center hover:shadow-md transition">
-            <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto mb-4 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
               <Lightbulb className="w-5 h-5" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Clarity</h3>
@@ -75,12 +75,12 @@ export default function About() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 text-center bg-gradient-to-b from-white to-blue-50">
+      <section className="py-20 text-center bg-gradient-to-b from-white to-green-50">
         <h2 className="text-3xl font-bold mb-4">Ready to simplify your projects?</h2>
         <p className="text-gray-600 mb-6">Start using TaskPilot today - it’s fast, free, and designed for teams like yours.</p>
         <Link
           to="https://project-management-system-1emk.vercel.app/signup"
-          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+          className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition"
         >
           Get Started
         </Link>

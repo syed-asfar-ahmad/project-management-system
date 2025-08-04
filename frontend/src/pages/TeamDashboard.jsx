@@ -10,6 +10,10 @@ import {
   CalendarDays,
   NotebookPen,
   FileText,
+  CheckSquare,
+  Calendar,
+  ArrowRight,
+  Users,
 } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL;
@@ -18,9 +22,15 @@ function TeamDashboard() {
   const { token, user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentTasksPage, setCurrentTasksPage] = useState(1);
+  const [currentProjectsPage, setCurrentProjectsPage] = useState(1);
+  const [tasksPerPage] = useState(4);
+  const [projectsPerPage] = useState(4);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const taskRes = await axios.get(`${API}/tasks/my-tasks`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -46,98 +56,364 @@ function TeamDashboard() {
 
       } catch (err) {
         console.error("Error loading team dashboard:", err.response?.data);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [token]);
+  }, [token, user._id]);
+
+  // Pagination logic for tasks
+  const indexOfLastTask = currentTasksPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
+  const totalTasksPages = Math.ceil(tasks.length / tasksPerPage);
+
+  // Pagination logic for projects
+  const indexOfLastProject = currentProjectsPage * projectsPerPage;
+  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+  const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
+  const totalProjectsPages = Math.ceil(projects.length / projectsPerPage);
+
+  const handleTasksPageChange = (pageNumber) => {
+    setCurrentTasksPage(pageNumber);
+  };
+
+  const handleProjectsPageChange = (pageNumber) => {
+    setCurrentProjectsPage(pageNumber);
+  };
+
+  const getTaskStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'to do':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getProjectStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'planning':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'on hold':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <AuthNavbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-indigo-700">
-          <NotebookPen /> Team Member Dashboard
-        </h1>
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+        {/* Header Section */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
+            <NotebookPen size={32} className="text-green-600" />
+            <h1 className="text-3xl font-bold text-gray-800">Team Member Dashboard</h1>
+          </div>
+          <p className="mt-4 text-gray-600 text-lg">Track your assigned tasks and projects</p>
+        </div>
 
-        {/* Tasks Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <ClipboardList size={20} /> Your Assigned Tasks
-          </h2>
-          {tasks.length === 0 ? (
-            <p className="text-gray-500">No tasks assigned to you yet.</p>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {tasks.map(task => (
-                <Link
-                  to={`/tasks/${task._id}`}
-                  key={task._id}
-                  className="bg-white p-4 rounded shadow hover:shadow-md transition border"
-                >
-                  <h3 className="font-bold text-indigo-700 flex items-center gap-2">
-                    <FileText size={16} /> {task.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <Briefcase size={14} /> {task.project?.name || "Unknown Project"}
-                  </p>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <ClipboardList size={14} /> {task.status}
-                  </p>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <CalendarDays size={14} />{" "}
-                    {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No Due Date"}
-                  </p>
-                </Link>
-              ))}
+        {loading ? (
+          /* Loading State */
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              {/* Spinning Circle */}
+              <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+              {/* Dashboard Icon Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <NotebookPen size={24} className="text-green-600" />
+              </div>
             </div>
-          )}
-        </section>
-
-        {/* Projects Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Briefcase size={20} /> Your Projects & Team
-          </h2>
-          {projects.length === 0 ? (
-            <p className="text-gray-500">You are not assigned to any projects yet.</p>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {projects.map(project => {
-                const teammates = new Set();
-
-                tasks.forEach(task => {
-                  if (task.project?._id === project._id) {
-                    task.assignedTo?.forEach(member => {
-                      if (typeof member === "object" && member._id !== user._id) {
-                        teammates.add(member.name);
-                      }
-                    });
-                  }
-                });
-
-                return (
-                  <Link
-                    to={`/projects/${project._id}`}
-                    key={project._id}
-                    className="bg-white p-5 rounded shadow hover:shadow-md transition border block"
-                  >
-                    <h3 className="text-lg font-bold text-indigo-700 flex items-center gap-2">
-                      <Briefcase size={16} /> {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2">{project.description}</p>
-                    {teammates.size > 0 && (
-                      <p className="text-sm text-gray-500">
-                        Teammates: {[...teammates].join(", ")}
-                      </p>
-                    )}
-                  </Link>
-                );
-              })}
+            <div className="mt-6 text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Dashboard</h3>
+              <p className="text-gray-600">Fetching your project data...</p>
             </div>
-          )}
-        </section>
+            {/* Loading Dots */}
+            <div className="flex space-x-2 mt-4">
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Tasks Section */}
+            <section className="mb-10">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-2 rounded-full shadow-lg border border-green-100">
+                    <CheckSquare size={24} className="text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800">Your Assigned Tasks</h2>
+                </div>
+              </div>
+              
+              {tasks.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
+                  <CheckSquare size={64} className="text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No Tasks Assigned</h3>
+                  <p className="text-gray-600 mb-4">You don't have any tasks assigned to you yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {currentTasks.map(task => (
+                      <div
+                        key={task._id}
+                        className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex-1">
+                              <Link
+                                to={`/tasks/${task._id}`}
+                                className="group-hover:text-green-800 transition-colors"
+                              >
+                                <h3 className="text-xl font-bold text-green-700 group-hover:text-green-800 transition-colors cursor-pointer flex items-center gap-2">
+                                  <FileText size={16} />
+                                  {task.title}
+                                </h3>
+                              </Link>
+                              <p className="text-gray-600 text-sm mt-1 line-clamp-2">{task.description}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTaskStatusColor(task.status)} ml-4`}>
+                              {task.status}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Calendar size={16} className="text-green-500" />
+                                <span className="font-medium">Due:</span>
+                                <span>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No Due Date"}</span>
+                              </div>
+                            </div>
+                            
+                            <Link
+                              to={`/tasks/${task._id}`}
+                              className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg"
+                            >
+                              <span>View Details</span>
+                              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tasks Pagination */}
+                  {tasks.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6 mt-6">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                          Showing {indexOfFirstTask + 1} to {Math.min(indexOfLastTask, tasks.length)} of {tasks.length} tasks
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTasksPageChange(currentTasksPage - 1)}
+                            disabled={currentTasksPage === 1}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentTasksPage === 1
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            Previous
+                          </button>
+                          
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: totalTasksPages }, (_, index) => index + 1).map((pageNumber) => (
+                              <button
+                                key={pageNumber}
+                                onClick={() => handleTasksPageChange(pageNumber)}
+                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  currentTasksPage === pageNumber
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                {pageNumber}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => handleTasksPageChange(currentTasksPage + 1)}
+                            disabled={currentTasksPage === totalTasksPages}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentTasksPage === totalTasksPages
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+
+            {/* Projects Section */}
+            <section className="mb-10">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-2 rounded-full shadow-lg border border-green-100">
+                    <Briefcase size={24} className="text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800">Your Projects & Team</h2>
+                </div>
+              </div>
+              
+              {projects.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
+                  <Briefcase size={64} className="text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Assigned</h3>
+                  <p className="text-gray-600 mb-4">You are not assigned to any projects yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {currentProjects.map(project => {
+                      const teammates = new Set();
+
+                      tasks.forEach(task => {
+                        if (task.project?._id === project._id) {
+                          task.assignedTo?.forEach(member => {
+                            if (typeof member === "object" && member._id !== user._id) {
+                              teammates.add(member.name);
+                            }
+                          });
+                        }
+                      });
+
+                      return (
+                        <div
+                          key={project._id}
+                          className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                        >
+                          <div className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex-1">
+                                <Link
+                                  to={`/projects/${project._id}`}
+                                  className="group-hover:text-green-800 transition-colors"
+                                >
+                                  <h3 className="text-xl font-bold text-green-700 group-hover:text-green-800 transition-colors cursor-pointer flex items-center gap-2">
+                                    <Briefcase size={16} />
+                                    {project.name}
+                                  </h3>
+                                </Link>
+                                <p className="text-gray-600 text-sm mt-1 line-clamp-2">{project.description}</p>
+                              </div>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getProjectStatusColor(project.status)} ml-4`}>
+                                {project.status}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Calendar size={16} className="text-green-500" />
+                                  <span className="font-medium">Deadline:</span>
+                                  <span>{project.deadline?.slice(0, 10) || "N/A"}</span>
+                                </div>
+                                {teammates.size > 0 && (
+                                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <Users size={16} className="text-green-500" />
+                                    <span className="font-medium">Teammates:</span>
+                                    <span>{[...teammates].join(", ")}</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <Link
+                                to={`/projects/${project._id}`}
+                                className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg"
+                              >
+                                <span>View Details</span>
+                                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Projects Pagination */}
+                  {projects.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6 mt-6">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                          Showing {indexOfFirstProject + 1} to {Math.min(indexOfLastProject, projects.length)} of {projects.length} projects
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleProjectsPageChange(currentProjectsPage - 1)}
+                            disabled={currentProjectsPage === 1}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentProjectsPage === 1
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            Previous
+                          </button>
+                          
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: totalProjectsPages }, (_, index) => index + 1).map((pageNumber) => (
+                              <button
+                                key={pageNumber}
+                                onClick={() => handleProjectsPageChange(pageNumber)}
+                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  currentProjectsPage === pageNumber
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                {pageNumber}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => handleProjectsPageChange(currentProjectsPage + 1)}
+                            disabled={currentProjectsPage === totalProjectsPages}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentProjectsPage === totalProjectsPages
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </>
+        )}
       </main>
 
       <Footer />

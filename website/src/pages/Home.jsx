@@ -33,13 +33,13 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4 animate-fade-in-up delay-300">
             <a
                 href="https://project-management-system-1emk.vercel.app/signup"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow hover:bg-blue-700 transition"
+                className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow hover:bg-green-700 transition"
             >
                 Get Started
             </a>
             <a
                 href="https://project-management-system-1emk.vercel.app/login"
-                className="border border-white text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition"
+                className="border border-white text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-600 transition"
             >
                 Login
             </a>
@@ -48,7 +48,7 @@ export default function Home() {
     </section>
 
       {/* Features Section */}
-    <section className="py-12 px-6 bg-gradient-to-b from-white to-blue-50">
+    <section className="py-12 px-6 bg-gradient-to-b from-white to-green-50">
     <div className="max-w-6xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in-up">
         Key Features
@@ -60,7 +60,7 @@ export default function Home() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {/* Feature Card 1 */}
         <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 animate-fade-in-up delay-300 text-center">
-            <div className="w-14 h-14 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full mx-auto mb-4">
+            <div className="w-14 h-14 bg-green-100 text-green-600 flex items-center justify-center rounded-full mx-auto mb-4">
             <ClipboardList className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Task Management</h3>

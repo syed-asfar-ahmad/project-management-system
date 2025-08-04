@@ -18,7 +18,7 @@ import BackButton from "../components/backButton";
 const roleIcons = {
   Admin: <ShieldCheck className="inline-block w-5 h-5 text-red-500 mr-1" />,
   Manager: <Briefcase className="inline-block w-5 h-5 text-amber-500 mr-1" />,
-  "Team Member": <UserCircle className="inline-block w-5 h-5 text-blue-500 mr-1" />,
+      "Team Member": <UserCircle className="inline-block w-5 h-5 text-green-500 mr-1" />,
 };
 
 function ProfilePage() {
@@ -44,6 +44,7 @@ function ProfilePage() {
       });
       setProfile(res.data);
     } catch (err) {
+      console.error("Profile fetch error:", err);
       toast.error("Failed to load profile");
     }
   };
@@ -53,65 +54,89 @@ function ProfilePage() {
   };
 
   const handleUpdate = async (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem("token");
+    e.preventDefault();
+    const token = localStorage.getItem("token");
 
-  let profilePictureUrl = profile.profilePicture;
+    let profilePictureUrl = profile.profilePicture;
 
-  if (file) {
-    const formData = new FormData();
-    formData.append("file", file);
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    try {
-      const res = await fetch(`${API}/upload-profile-image`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const res = await fetch(`${API}/upload-profile-image`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
 
-      const data = await res.json();
+        if (!res.ok) {
+          throw new Error(`Upload failed: ${res.status}`);
+        }
 
-      if (data?.url) {
-        profilePictureUrl = data.url;
-      } else {
-        toast.error("Image upload failed");
+        const data = await res.json();
+
+        if (data?.url) {
+          profilePictureUrl = data.url;
+        } else {
+          toast.error("Image upload failed - no URL returned");
+          return;
+        }
+      } catch (err) {
+        console.error("Image upload error:", err);
+        toast.error("Image upload failed. Please try again.");
         return;
       }
-    } catch (err) {
-      toast.error("Image upload error");
-      return;
     }
-  }
 
-  try {
-    await axios.put(
-      `${API}/users/profile`,
-      {
-        bio: profile.bio,
-        gender: profile.gender,
-        dateOfBirth: profile.dateOfBirth,
-        position: profile.position,
-        profilePicture: profilePictureUrl,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    try {
+      await axios.put(
+        `${API}/users/profile`,
+        {
+          bio: profile.bio,
+          gender: profile.gender,
+          dateOfBirth: profile.dateOfBirth,
+          position: profile.position,
+          profilePicture: profilePictureUrl,
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    toast.success("Profile updated successfully");
-    fetchProfile(); // refresh updated info
-    setFile(null);  // clear selected file
-  } catch (err) {
-    toast.error("Update failed");
-  }
-};
+      toast.success("Profile updated successfully");
+      fetchProfile(); // refresh updated info
+      setFile(null);  // clear selected file
+    } catch (err) {
+      console.error("Profile update error:", err);
+      toast.error("Profile update failed");
+    }
+  };
 
 
   const handleProfilePictureChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.error("Please select a valid image file (JPEG, JPG, or PNG)");
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+    
     setFile(selectedFile);
+    toast.success("Image selected successfully");
   };
 
   useEffect(() => {
@@ -128,7 +153,7 @@ function ProfilePage() {
           
           {/* RIGHT: Profile Form */}
             <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100 w-full md:flex-[2]">
-            <h2 className="text-3xl font-bold mb-8 flex items-center gap-3 text-blue-700">
+            <h2 className="text-3xl font-bold mb-8 flex items-center gap-3 text-green-700">
               <User className="w-7 h-7" />
               My Profile
             </h2>
@@ -137,19 +162,17 @@ function ProfilePage() {
               {/* Profile Picture */}
               <div className="flex items-center gap-6">
                 <div className="relative group">
-                  <img
-                    src={
-                      file
-                        ? URL.createObjectURL(file)
-                        : profile.profilePicture?.startsWith("http")
-                        ? profile.profilePicture
-                        : `${IMG}/${profile.profilePicture}`
-                    }
-                    alt="Profile"
-                    className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
-                  />
+                                     <img
+                     src={
+                       file
+                         ? URL.createObjectURL(file)
+                         : profile.profilePicture || "/default_avatar.jpg"
+                     }
+                     alt="Profile"
+                     className="w-32 h-32 rounded-full object-cover border border-gray-300 shadow group-hover:opacity-80 transition"
+                   />
 
-                  <label className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-3 py-1 rounded-full cursor-pointer opacity-90 hover:bg-blue-700 transition">
+                  <label className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-green-600 text-white text-sm px-3 py-1 rounded-full cursor-pointer opacity-90 hover:bg-green-700 transition">
                     <input
                       type="file"
                       hidden
@@ -252,7 +275,7 @@ function ProfilePage() {
 
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium"
               >
                 Update Profile
               </button>
@@ -261,18 +284,15 @@ function ProfilePage() {
 
           {/* LEFT: Profile Card */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 text-center w-full md:w-96">
-            <img
-              src={
-                file
-                  ? URL.createObjectURL(file)
-                  : profile.profilePicture?.startsWith("http")
-                  ? profile.profilePicture
-                  : `${IMG}/${profile.profilePicture}`
-              }
-
-              alt="Profile"
-              className="w-32 h-32 rounded-full object-cover border-4 border-indigo-300 mb-4 mx-auto"
-            />
+                         <img
+               src={
+                 file
+                   ? URL.createObjectURL(file)
+                   : profile.profilePicture || "/default_avatar.jpg"
+               }
+               alt="Profile"
+               className="w-32 h-32 rounded-full object-cover border-4 border-green-300 mb-4 mx-auto"
+             />
             <h2 className="text-2xl font-bold text-gray-800 mb-1">
               {roleIcons[profile.role] || null} {profile.name}
             </h2>
