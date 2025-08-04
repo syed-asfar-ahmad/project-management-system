@@ -52,11 +52,23 @@ const getAllProjects = async (req, res) => {
 const updateProject = async (req, res) => {
   const { id } = req.params;
 
+  console.log('=== PROJECT UPDATE STARTED ===');
+  console.log('Project ID:', id);
+  console.log('Request body:', req.body);
+  console.log('User ID:', req.user.id);
+
   try {
     const project = await Project.findById(id);
     if (!project) {
+      console.log('Project not found');
       return res.status(404).json({ message: 'Project not found' });
     }
+
+    console.log('Original project:', {
+      name: project.name,
+      status: project.status,
+      teamMembers: project.teamMembers
+    });
 
     // Store original values for comparison
     const originalName = project.name;
@@ -68,12 +80,20 @@ const updateProject = async (req, res) => {
     // Create notifications for project updates
     const projectName = updated.name;
 
+    console.log('Checking for notification triggers...');
+    console.log('Name changed?', req.body.name && req.body.name !== originalName);
+    console.log('Status changed?', req.body.status && req.body.status !== originalStatus);
+    console.log('Team members changed?', req.body.teamMembers && req.body.teamMembers.length !== originalTeamMembers.length);
+    console.log('Other updates?', req.body.description || req.body.deadline);
+
     // Notification for name change
     if (req.body.name && req.body.name !== originalName) {
+      console.log('Creating notification for name change');
       const notificationTitle = 'Project Name Updated';
       const notificationMessage = `Project "${originalName}" has been renamed to "${projectName}"`;
       
       if (updated.teamMembers && updated.teamMembers.length > 0) {
+        console.log('Team members found, creating notifications for:', updated.teamMembers);
         await createNotificationsForUsers(
           updated.teamMembers,
           req.user.id,
@@ -82,15 +102,19 @@ const updateProject = async (req, res) => {
           notificationMessage,
           updated._id
         );
+      } else {
+        console.log('No team members found for notifications');
       }
     }
 
     // Notification for status change
     if (req.body.status && req.body.status !== originalStatus) {
+      console.log('Creating notification for status change');
       const notificationTitle = 'Project Status Updated';
       const notificationMessage = `Project "${projectName}" status changed to ${req.body.status}`;
       
       if (updated.teamMembers && updated.teamMembers.length > 0) {
+        console.log('Team members found, creating status change notifications for:', updated.teamMembers);
         await createNotificationsForUsers(
           updated.teamMembers,
           req.user.id,
@@ -99,6 +123,8 @@ const updateProject = async (req, res) => {
           notificationMessage,
           updated._id
         );
+      } else {
+        console.log('No team members found for status change notifications');
       }
     }
 
@@ -136,6 +162,7 @@ const updateProject = async (req, res) => {
       }
     }
 
+    console.log('=== PROJECT UPDATE COMPLETED ===');
     res.json({ message: 'Project updated', project: updated });
   } catch (err) {
     console.error('Error updating project:', err);
