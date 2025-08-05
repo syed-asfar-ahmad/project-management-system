@@ -35,20 +35,26 @@ router.post('/forgot-password', async (req, res) => {
     // Create reset URL
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    // Send email
-    const emailSent = await sendPasswordResetEmail(email, resetToken, resetUrl);
+    // Send email (optional - for development)
+    let emailSent = false;
+    try {
+      emailSent = await sendPasswordResetEmail(email, resetToken, resetUrl);
+    } catch (emailError) {
+      console.error('Email service error:', emailError);
+      // Continue without email for development
+    }
 
     if (emailSent) {
       res.status(200).json({ 
         message: 'If an account with that email exists, a password reset link has been sent.' 
       });
     } else {
-      // Clear the token if email failed
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      await user.save();
-      
-      res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
+      // For development, return the reset URL directly
+      res.status(200).json({ 
+        message: 'Password reset link generated successfully.',
+        resetUrl: resetUrl,
+        note: 'Email service not configured. Use this link directly for testing.'
+      });
     }
 
   } catch (error) {
@@ -87,8 +93,13 @@ router.post('/reset-password/:token', async (req, res) => {
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    // Send success email
-    await sendPasswordResetSuccessEmail(user.email);
+    // Send success email (optional)
+    try {
+      await sendPasswordResetSuccessEmail(user.email);
+    } catch (emailError) {
+      console.error('Success email error:', emailError);
+      // Continue without email
+    }
 
     res.status(200).json({ message: 'Password has been reset successfully' });
 

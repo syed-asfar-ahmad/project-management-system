@@ -26,6 +26,14 @@ function ForgetPassword() {
       });
 
       toast.success(response.data.message);
+      
+      // If reset URL is provided directly (for development/testing)
+      if (response.data.resetUrl) {
+        console.log('Reset URL:', response.data.resetUrl);
+        // You can show this URL to user or auto-redirect
+        toast.success('Reset link generated! Check console for URL.');
+      }
+      
       setEmailSent(true);
     } catch (error) {
       if (error.response?.data?.error) {
