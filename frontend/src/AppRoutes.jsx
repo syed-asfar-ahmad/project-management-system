@@ -23,6 +23,8 @@ import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 
@@ -68,6 +70,8 @@ function AppRoutes() {
           }
         />
         <Route path="/signup" element={token ? <Navigate to="/dashboard" /> : <Signup />} />
+        <Route path="/forget-password" element={token ? <Navigate to="/dashboard" /> : <ForgetPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />

@@ -107,6 +107,16 @@ function AuthNavbar() {
                 )}
               </span>
             </Link>
+            {user?.role === "Admin" && (
+              <Link to="/members" className={navLinkStyle("/members")}>
+                <span className="relative">
+                  Team Members
+                  {isActive("/members") && (
+                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                  )}
+                </span>
+              </Link>
+            )}
             <Link to="/profile" className={navLinkStyle("/profile")}>
               <span className="relative">
                 Profile
@@ -204,6 +214,11 @@ function AuthNavbar() {
             <Link to="/calendar" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/calendar")}>
               Calendar
             </Link>
+            {user?.role === "Admin" && (
+              <Link to="/members" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/members")}>
+                Team Members
+              </Link>
+            )}
             <Link to="/profile" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/profile")}>
               Profile
             </Link>

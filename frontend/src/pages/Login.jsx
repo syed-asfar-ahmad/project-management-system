@@ -109,10 +109,20 @@ function Login() {
                     <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
                   )}
                 </button>
-              </div>
-            </div>
+                          </div>
+          </div>
 
-            {/* Submit Button */}
+          {/* Forgot Password Link */}
+          <div className="text-right">
+            <Link
+              to="/forget-password"
+              className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
+            >
+              Forgot your password?
+            </Link>
+          </div>
+
+          {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}

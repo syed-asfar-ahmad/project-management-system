@@ -167,7 +167,7 @@ function AdminDashboard() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
             <BarChart size={32} className="text-green-600" />
-            <h1 className="text-3xl font-bold text-gray-800">Admin & Manager Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
           </div>
           <p className="mt-4 text-gray-600 text-lg">Monitor and manage your project ecosystem</p>
         </div>
@@ -196,6 +196,45 @@ function AdminDashboard() {
           </div>
         ) : (
           <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Projects</p>
+                    <p className="text-3xl font-bold text-gray-800">{projects.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Briefcase size={24} className="text-green-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                    <p className="text-3xl font-bold text-gray-800">{tasks.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <ClipboardList size={24} className="text-blue-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Members</p>
+                    <p className="text-3xl font-bold text-gray-800">{members.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Users size={24} className="text-purple-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Charts */}
             <div className="grid md:grid-cols-2 gap-6 mb-10">
               {/* Pie Chart */}

@@ -182,14 +182,32 @@ function ManagerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-white">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
         <AuthNavbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading Manager Dashboard...</p>
+        <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+          {/* Loading State */}
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              {/* Spinning Circle */}
+              <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+              {/* Dashboard Icon Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <BarChart size={24} className="text-green-600" />
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Manager Dashboard</h3>
+              <p className="text-gray-600">Fetching your project and task data...</p>
+            </div>
+            {/* Loading Dots */}
+            <div className="flex space-x-2 mt-4">
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
           </div>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }

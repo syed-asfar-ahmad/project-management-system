@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { Twitter, Linkedin, Instagram, Facebook, Mail, Phone, MapPin, ArrowRight, CheckCircle, Users, Calendar, BarChart3 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Footer() {
+  const { user } = useAuth();
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300 relative overflow-hidden">
       {/* Background Pattern */}
@@ -59,7 +61,10 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3">
                 <li>
-                  <Link to="/dashboard" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">
+                  <Link 
+                    to={user?.role === "Team Member" ? "/team-dashboard" : user?.role === "Manager" ? "/manager-dashboard" : "/dashboard"} 
+                    className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group"
+                  >
                     <ArrowRight size={14} className="mr-2 group-hover:translate-x-1 transition-transform duration-200" />
                     Dashboard
                   </Link>
@@ -82,6 +87,14 @@ export default function Footer() {
                     Calendar
                   </Link>
                 </li>
+                {user?.role === "Admin" && (
+                  <li>
+                    <Link to="/members" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">
+                      <ArrowRight size={14} className="mr-2 group-hover:translate-x-1 transition-transform duration-200" />
+                      Team Members
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link to="/profile" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">
                     <ArrowRight size={14} className="mr-2 group-hover:translate-x-1 transition-transform duration-200" />
