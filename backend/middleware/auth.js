@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
+const Project = require("../models/Project");
 
 
 // Middleware to verify JWT token
@@ -35,5 +36,73 @@ const checkRole = (...allowedRoles) => {
   };
 };
 
+// Middleware to check if manager is assigned to project
+const checkManagerProjectAccess = async (req, res, next) => {
+  try {
+    const projectId = req.params.id || req.body.project;
+    
+    if (!projectId) {
+      return res.status(400).json({ message: 'Project ID is required' });
+    }
 
-module.exports = { verifyToken, checkRole };
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Check if the user is a manager and is assigned to this project (as team member or project manager)
+    const isAssignedToProject = project.teamMembers.some(memberId => 
+      memberId.toString() === req.user.id
+    );
+    
+    const isProjectManager = project.projectManager && 
+      project.projectManager.toString() === req.user.id;
+
+    if (req.user.role === 'Manager' && !isAssignedToProject && !isProjectManager) {
+      return res.status(403).json({ message: 'You do not have access to this project' });
+    }
+
+    req.project = project;
+    next();
+  } catch (error) {
+    console.error('Error checking manager project access:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Middleware to check if manager has access to task (via project)
+const checkManagerTaskAccess = async (req, res, next) => {
+  try {
+    const Task = require("../models/Task");
+    const taskId = req.params.id;
+    
+    if (!taskId) {
+      return res.status(400).json({ message: 'Task ID is required' });
+    }
+
+    const task = await Task.findById(taskId).populate('project');
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Check if the user is a manager and is assigned to the project this task belongs to (as team member or project manager)
+    const isAssignedToProject = task.project.teamMembers.some(memberId => 
+      memberId.toString() === req.user.id
+    );
+    
+    const isProjectManager = task.project.projectManager && 
+      task.project.projectManager.toString() === req.user.id;
+
+    if (req.user.role === 'Manager' && !isAssignedToProject && !isProjectManager) {
+      return res.status(403).json({ message: 'You do not have access to this task' });
+    }
+
+    req.task = task;
+    next();
+  } catch (error) {
+    console.error('Error checking manager task access:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { verifyToken, checkRole, checkManagerProjectAccess, checkManagerTaskAccess };

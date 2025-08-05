@@ -259,38 +259,38 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {/* Projects Section */}
-            <section className="mb-10">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white p-2 rounded-full shadow-lg border border-green-100">
-                    <Briefcase size={24} className="text-green-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-800">All Projects</h2>
-                </div>
-                <Link
-                  to="/projects/create"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
-                >
-                  <FilePlus size={20} />
-                  Add Project
-                </Link>
+                    {/* Projects Section */}
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-full shadow-lg border border-green-100">
+                <Briefcase size={24} className="text-green-600" />
               </div>
+              <h2 className="text-2xl font-bold text-gray-800">All Projects</h2>
+            </div>
+            <Link
+              to="/projects/create"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+            >
+              <FilePlus size={20} />
+              Add Project
+            </Link>
+          </div>
               
-              {projects.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
-                  <Briefcase size={64} className="text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Found</h3>
-                  <p className="text-gray-600 mb-4">Get started by creating your first project</p>
-                  <Link
-                    to="/projects/create"
-                    className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                  >
-                    <FilePlus size={18} />
-                    Create Project
-                  </Link>
-                </div>
-              ) : (
+                        {projects.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
+              <Briefcase size={64} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Found</h3>
+              <p className="text-gray-600 mb-4">Get started by creating your first project</p>
+              <Link
+                to="/projects/create"
+                className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                <FilePlus size={18} />
+                Create Project
+              </Link>
+            </div>
+          ) : (
                 <>
                   <div className="grid gap-4 md:grid-cols-2">
                     {currentProjects.map((project) => (

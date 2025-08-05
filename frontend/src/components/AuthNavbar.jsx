@@ -1,8 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
-import { Menu, X, User, LogOut, Bell } from "lucide-react";
-import { notificationService } from "../services/notificationService";
+import { Menu, X, User, LogOut } from "lucide-react";
 
 function AuthNavbar() {
   const { logout, user } = useAuth();
@@ -10,7 +9,6 @@ function AuthNavbar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // Handle scroll effect
   useEffect(() => {
@@ -23,30 +21,14 @@ function AuthNavbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch unread notification count
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await notificationService.getUnreadCount();
-        setUnreadCount(response.unreadCount);
-      } catch (error) {
-        console.error('Error fetching unread count:', error);
-      }
-    };
 
-    fetchUnreadCount();
-    
-    // Refresh unread count every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  const dashboardLink = user?.role === "Team Member" ? "/team-dashboard" : "/dashboard";
+  const dashboardLink = user?.role === "Team Member" ? "/team-dashboard" : user?.role === "Manager" ? "/manager-dashboard" : "/dashboard";
 
   const isActive = (path) => location.pathname === path;
 
@@ -137,20 +119,20 @@ function AuthNavbar() {
 
           {/* User Profile & Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Notifications */}
-            <Link to="/notifications" className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 relative group">
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full animate-pulse text-xs text-white flex items-center justify-center font-medium">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </Link>
-
             {/* User Profile */}
             <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <User size={16} className="text-white" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                {user?.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                    <User size={16} className="text-white" />
+                  </div>
+                )}
               </div>
               <div className="text-sm">
                 <p className="text-white font-medium">{user?.name}</p>
@@ -190,8 +172,18 @@ function AuthNavbar() {
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 space-y-2">
             {/* User Info */}
             <div className="flex items-center space-x-3 px-4 py-3 border-b border-gray-200">
-              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                <User size={20} className="text-white" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+                {user?.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-green-500 flex items-center justify-center">
+                    <User size={20} className="text-white" />
+                  </div>
+                )}
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.name}</p>
@@ -216,12 +208,8 @@ function AuthNavbar() {
               Profile
             </Link>
             
-                         {/* Mobile Actions */}
-             <div className="pt-4 border-t border-gray-100 space-y-2">
-               <Link to="/notifications" onClick={() => setIsOpen(false)} className="flex items-center space-x-2 w-full px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
-                 <Bell size={16} />
-                 <span>Notifications</span>
-               </Link>
+                                     {/* Mobile Actions */}
+            <div className="pt-4 border-t border-gray-100 space-y-2">
               <button
                 onClick={() => {
                   handleLogout();

@@ -8,6 +8,7 @@ import { CalendarDays } from "lucide-react";
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import BackButton from "../components/backButton";
+import { useAuth } from "../context/AuthContext";
 
 import "../styles/calendar.css";
 
@@ -17,57 +18,83 @@ function TaskCalendarPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const { token, user } = useAuth();
 
     useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
+        // Determine which endpoints to use based on user role
+        let taskUrl, projectUrl;
+        
+        if (user?.role === 'Team Member') {
+          taskUrl = `${API}/tasks/my-tasks`;
+          projectUrl = `${API}/projects`;
+        } else if (user?.role === 'Manager') {
+          taskUrl = `${API}/tasks/manager-tasks`;
+          projectUrl = `${API}/projects`;
+        } else {
+          taskUrl = `${API}/tasks/calendar/tasks`;
+          projectUrl = `${API}/projects`;
+        }
+
         const [taskRes, projectRes] = await Promise.all([
-          axios.get(`${API}/tasks/calendar/tasks`, {
+          axios.get(taskUrl, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API}/projects`, {
+          axios.get(projectUrl, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
 
-                 const taskEvents = taskRes.data.map((task) => ({
-           id: task._id,
-           title: task.title,
-           start: task.dueDate,
-           allDay: true,
-           backgroundColor: "#16a34a", // Green
-           borderColor: "#16a34a",
-           type: "task",
-           extendedProps: {
-             fullTitle: `Task: ${task.title}`,
-           },
-         }));
+        // Filter projects for Team Members and Managers
+        let filteredProjects = projectRes.data;
+        if (user?.role === 'Team Member' || user?.role === 'Manager') {
+          filteredProjects = projectRes.data.filter(project => 
+            project.teamMembers?.some(member => 
+              typeof member === "string" ? member === user._id : member._id === user._id
+            )
+          );
+        }
 
-                  const projectEvents = projectRes.data.map((project) => ({
-             id: project._id,
-             title: project.name,
-             start: project.deadline,
-             allDay: true,
-             backgroundColor: "#7c3aed", // Purple
-             borderColor: "#7c3aed",
-             type: "project",
-             extendedProps: {
-               fullTitle: `Project: ${project.name}`,
-             },
-           }));
+        const taskEvents = taskRes.data.map((task) => ({
+          id: task._id,
+          title: task.title,
+          start: task.dueDate,
+          allDay: true,
+          backgroundColor: "#16a34a", // Green
+          borderColor: "#16a34a",
+          type: "task",
+          extendedProps: {
+            fullTitle: `Task: ${task.title}`,
+          },
+        }));
 
-                 setEvents([...taskEvents, ...projectEvents]);
-       } catch (error) {
-         console.error("Failed to load calendar data:", error);
-       } finally {
-         setLoading(false);
-       }
-     };
+        const projectEvents = filteredProjects.map((project) => ({
+          id: project._id,
+          title: project.name,
+          start: project.deadline,
+          allDay: true,
+          backgroundColor: "#7c3aed", // Purple
+          borderColor: "#7c3aed",
+          type: "project",
+          extendedProps: {
+            fullTitle: `Project: ${project.name}`,
+          },
+        }));
 
-     fetchEvents();
-   }, [token]);
+        setEvents([...taskEvents, ...projectEvents]);
+      } catch (error) {
+        console.error("Failed to load calendar data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token && user) {
+      fetchEvents();
+    }
+   }, [token, user]);
 
   const handleEventClick = (info) => {
     const { id, extendedProps } = info.event;
@@ -89,7 +116,11 @@ function TaskCalendarPage() {
           <div className="mb-8 text-center">
             <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
               <CalendarDays size={32} className="text-green-600" />
-              <h1 className="text-3xl font-bold text-gray-800">Task & Project Calendar</h1>
+              <h1 className="text-3xl font-bold text-gray-800">
+                {user?.role === "Team Member" ? "My Tasks & Projects Calendar" : 
+                 user?.role === "Manager" ? "Assigned Tasks & Projects Calendar" : 
+                 "Task & Project Calendar"}
+              </h1>
             </div>
             <p className="mt-4 text-gray-600 text-lg">Stay organized with your project timeline</p>
           </div>

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
 import Projects from "./pages/Projects";
 import AddTaskPage from "./pages/AddTaskPage";
 import TaskListPage from "./pages/TaskListPage";
@@ -60,6 +61,8 @@ function AppRoutes() {
             token ? (
               user?.role === "Team Member"
                 ? <Navigate to="/team-dashboard" />
+                : user?.role === "Manager"
+                ? <Navigate to="/manager-dashboard" />
                 : <Navigate to="/dashboard" />
             ) : <Login />
           }
@@ -68,6 +71,7 @@ function AppRoutes() {
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+        <Route path="/manager-dashboard" element={<PrivateRoute><ManagerDashboard /></PrivateRoute>} />
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/tasks" element={<PrivateRoute><TaskListPage /></PrivateRoute>} />
         <Route path="/tasks/:id" element={<PrivateRoute><TaskDetailPage /></PrivateRoute>} />
@@ -98,8 +102,20 @@ function AppRoutes() {
         }
         />
         {/* Catch-all route */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-        <Route path="/projects/create" element={<CreateProject />} />
+        <Route path="*" element={
+          token ? (
+            user?.role === "Team Member"
+              ? <Navigate to="/team-dashboard" />
+              : user?.role === "Manager"
+              ? <Navigate to="/manager-dashboard" />
+              : <Navigate to="/dashboard" />
+          ) : <Navigate to="/login" />
+        } />
+        <Route path="/projects/create" element={
+          <RoleBasedRoute allowedRoles={["Admin"]}>
+            <CreateProject />
+          </RoleBasedRoute>
+        } />
 
         <Route
           path="/team-dashboard"

@@ -33,10 +33,14 @@ function TaskListPage() {
     const fetchTasks = async () => {
       setLoading(true);
       try {
-        const url =
-          user?.role === 'Team Member'
-            ? `${API}/tasks/my-tasks`
-            : `${API}/tasks`;
+        let url;
+        if (user?.role === 'Team Member') {
+          url = `${API}/tasks/my-tasks`;
+        } else if (user?.role === 'Manager') {
+          url = `${API}/tasks/manager-tasks`;
+        } else {
+          url = `${API}/tasks`;
+        }
 
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -231,9 +235,11 @@ function TaskListPage() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
             <CheckSquare size={32} className="text-green-600" />
-            <h1 className="text-3xl font-bold text-gray-800">
-              {user?.role === 'Team Member' ? 'My Tasks' : 'All Tasks'}
-            </h1>
+                         <h1 className="text-3xl font-bold text-gray-800">
+               {user?.role === 'Team Member' ? 'My Tasks' : 
+                user?.role === 'Manager' ? 'Assigned Project Tasks' : 
+                'All Tasks'}
+             </h1>
           </div>
           <p className="mt-4 text-gray-600 text-lg">Manage and track your project tasks</p>
         </div>

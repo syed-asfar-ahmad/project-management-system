@@ -18,14 +18,24 @@ function Projects() {
   const loadProjects = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getAllProjects(token, user?.role === "Team Member");
-      setProjects(res.data);
+      const res = await getAllProjects(token);
+      // Filter projects for Team Members and Managers to only show assigned ones
+      if (user?.role === "Team Member" || user?.role === "Manager") {
+        const assignedProjects = res.data.filter(project => 
+          project.teamMembers?.some(member => 
+            typeof member === "string" ? member === user._id : member._id === user._id
+          )
+        );
+        setProjects(assignedProjects);
+      } else {
+        setProjects(res.data);
+      }
     } catch (err) {
       toast.error("Failed to load projects");
     } finally {
       setLoading(false);
     }
-  }, [token, user?.role]);
+  }, [token, user?.role, user?._id]);
 
   useEffect(() => {
     if (token && user) {
@@ -81,7 +91,7 @@ function Projects() {
           <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
             <Briefcase size={32} className="text-green-600" />
             <h1 className="text-3xl font-bold text-gray-800">
-              {user?.role === "Team Member" ? "My Projects" : "All Projects"}
+              {user?.role === "Team Member" ? "My Projects" : user?.role === "Manager" ? "Assigned Projects" : "All Projects"}
             </h1>
           </div>
           <p className="mt-4 text-gray-600 text-lg">Manage and track your project portfolio</p>
@@ -111,33 +121,37 @@ function Projects() {
           </div>
         ) : (
           <>
-            {/* Create Project Button - Moved to top */}
-            {(user?.role === "Admin" || user?.role === "Manager") && (
-              <div className="flex justify-end mb-6">
-                <Link
-                  to="/projects/create"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
-                >
-                  <Briefcase size={20} />
-                  Create New Project
-                </Link>
-              </div>
-            )}
+                         {/* Create Project Button - Moved to top */}
+             {user?.role === "Admin" && (
+               <div className="flex justify-end mb-6">
+                 <Link
+                   to="/projects/create"
+                   className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                 >
+                   <Briefcase size={20} />
+                   Create New Project
+                 </Link>
+               </div>
+             )}
 
             {projects.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
                 <Briefcase size={64} className="text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Found</h3>
-                <p className="text-gray-600 mb-4">Get started by creating your first project</p>
-                {(user?.role === "Admin" || user?.role === "Manager") && (
-                  <Link
-                    to="/projects/create"
-                    className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                  >
-                    <Briefcase size={18} />
-                    Create Project
-                  </Link>
-                )}
+                                 <p className="text-gray-600 mb-4">
+                   {user?.role === "Admin" ? "Get started by creating your first project" : 
+                    user?.role === "Manager" ? "No projects have been assigned to you yet" : 
+                    "No projects found"}
+                 </p>
+                 {user?.role === "Admin" && (
+                   <Link
+                     to="/projects/create"
+                     className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                   >
+                     <Briefcase size={18} />
+                     Create Project
+                   </Link>
+                 )}
               </div>
             ) : (
               <>

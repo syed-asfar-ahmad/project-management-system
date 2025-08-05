@@ -14,17 +14,44 @@ const {
   uploadTaskFile,
 } = require('../controllers/taskController');
 
-const { verifyToken, checkRole } = require('../middleware/auth');
+const { verifyToken, checkRole, checkManagerTaskAccess } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Create Task - Admin or Manager
 router.post('/', verifyToken, checkRole('Admin', 'Manager'), createTask);
 
-// Get All Tasks - Admin or Manager
-router.get('/', verifyToken, checkRole('Admin', 'Manager'), getAllTasks);
+// Get All Tasks - Admin only
+router.get('/', verifyToken, checkRole('Admin'), getAllTasks);
 
 // Get My Tasks - Team Member
 router.get('/my-tasks', verifyToken, checkRole('Team Member'), getMyTasks);
+
+// Get Manager's Project Tasks (all tasks from projects they are assigned to)
+router.get('/manager-tasks', verifyToken, checkRole('Manager'), async (req, res) => {
+  try {
+    const Task = require('../models/Task');
+    const Project = require('../models/Project');
+    
+    // First get all projects the manager is assigned to (as team member or project manager)
+    const assignedProjects = await Project.find({
+      $or: [
+        { teamMembers: req.user.id },
+        { projectManager: req.user.id }
+      ]
+    });
+    const projectIds = assignedProjects.map(project => project._id);
+    
+    // Then get all tasks from those projects
+    const tasks = await Task.find({ project: { $in: projectIds } })
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+    
+    res.json(tasks);
+  } catch (err) {
+    console.error('Failed to fetch manager tasks:', err);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
+  }
+});
 
 // Get project-specific tasks assigned to the team member
 router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), getMyProjectTasks);
@@ -35,11 +62,11 @@ router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
 // Get Task by ID - Any logged-in user
 router.get('/:id', verifyToken, getTaskById);
 
-// Update Task - Admin or Manager
-router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), updateTask);
+// Update Task - Admin or Manager (if assigned to project)
+router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, updateTask);
 
-// Delete Task - Admin or Manager
-router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), deleteTask);
+// Delete Task - Admin or Manager (if assigned to project)
+router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
 
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);

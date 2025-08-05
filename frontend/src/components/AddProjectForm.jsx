@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { createProject } from "../services/projectService";
 import axios from "axios";
 import Select from "react-select";
-import { CalendarDays, Users, ClipboardList, FileText, ListChecks } from "lucide-react";
+import { CalendarDays, Users, ClipboardList, FileText, ListChecks, UserCheck } from "lucide-react";
 import { toast } from "react-toastify";
 
 const API = process.env.REACT_APP_API_BASE_URL;
@@ -13,33 +13,46 @@ function AddProjectForm({ onProjectCreated }) {
   const { token } = useAuth();
 
   const [teamOptions, setTeamOptions] = useState([]);
+  const [managerOptions, setManagerOptions] = useState([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
     status: "Pending",
     deadline: "",
+    projectManager: "",
     teamMembers: [],
   });
 
   useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {const res = await axios.get(`${API}/users/team-members`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const fetchData = async () => {
+      try {
+        const [teamRes, managerRes] = await Promise.all([
+          axios.get(`${API}/users/team-members`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API}/users/managers`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        ]);
 
-
-        const options = res.data.map((member) => ({
+        const teamOptions = teamRes.data.map((member) => ({
           value: member._id,
           label: `${member.name} (${member.email})`,
         }));
 
-        setTeamOptions(options);
+        const managerOptions = managerRes.data.map((manager) => ({
+          value: manager._id,
+          label: `${manager.name} (${manager.email})`,
+        }));
+
+        setTeamOptions(teamOptions);
+        setManagerOptions(managerOptions);
       } catch (err) {
-        console.error("Error fetching team members:", err);
+        console.error("Error fetching data:", err.response?.data || err);
       }
     };
 
-    fetchTeamMembers();
+    fetchData();
   }, [token]);
 
   const handleChange = (e) => {
@@ -50,6 +63,10 @@ function AddProjectForm({ onProjectCreated }) {
   const handleTeamChange = (selectedOptions) => {
     const selectedIds = selectedOptions.map((opt) => opt.value);
     setForm((prev) => ({ ...prev, teamMembers: selectedIds }));
+  };
+
+  const handleManagerChange = (selectedOption) => {
+    setForm((prev) => ({ ...prev, projectManager: selectedOption ? selectedOption.value : "" }));
   };
 
   const handleSubmit = async (e) => {
@@ -63,6 +80,7 @@ function AddProjectForm({ onProjectCreated }) {
         description: "",
         status: "Pending",
         deadline: "",
+        projectManager: "",
         teamMembers: [],
       });
 
@@ -142,6 +160,21 @@ function AddProjectForm({ onProjectCreated }) {
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
           required
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <UserCheck className="w-4 h-4 mr-1" />
+          Project Manager
+        </label>
+        <Select
+          options={managerOptions}
+          onChange={handleManagerChange}
+          placeholder="Select project manager..."
+          className="react-select-container"
+          classNamePrefix="react-select"
+          isClearable
         />
       </div>
 

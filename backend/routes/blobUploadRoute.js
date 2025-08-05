@@ -20,15 +20,20 @@ router.post("/", verifyToken, upload.single("file"), async (req, res) => {
 
     console.log("File received:", file.originalname, "Size:", file.size);
 
-    const blob = await put(file.originalname, file.buffer, {
-      access: "public", // or 'private' if you want it to be secure
+    // Generate unique filename
+    const timestamp = Date.now();
+    const filename = `profile-${req.user.id}-${timestamp}-${file.originalname}`;
+
+    const blob = await put(filename, file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN
     });
 
     console.log("Blob uploaded successfully:", blob.url);
     res.json({ url: blob.url }); // return the hosted image URL
   } catch (err) {
     console.error("Blob upload error:", err);
-    res.status(500).json({ error: "Upload failed" });
+    res.status(500).json({ error: "Upload failed: " + err.message });
   }
 });
 

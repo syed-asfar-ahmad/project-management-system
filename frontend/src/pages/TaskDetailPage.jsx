@@ -11,11 +11,17 @@ import {
   Send,
   Pencil,
   Trash2,
+  CheckSquare,
+  Clock,
+  AlertCircle,
+  Calendar,
+  User,
+  ArrowRight,
+  Download,
 } from 'lucide-react';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
-import InLineLoader from '../components/InLineLoader';
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -27,8 +33,8 @@ function TaskDetailPage() {
   const [commentText, setCommentText] = useState('');
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const token = localStorage.getItem('token');
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const { token, user } = useAuth();
 
   const fetchTaskDetails = useCallback(async () => {
     try {
@@ -39,6 +45,8 @@ function TaskDetailPage() {
       setComments(res.data.comments || []);
     } catch (err) {
       toast.error("Failed to load task details");
+    } finally {
+      setLoading(false);
     }
   }, [id, token]);
 
@@ -149,134 +157,334 @@ function TaskDetailPage() {
     );
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+        return 'bg-green-100 text-green-800';
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'To Do':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High':
+        return 'bg-red-100 text-red-800';
+      case 'Medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTaskStatusIcon = (status) => {
+    switch (status) {
+      case 'Completed':
+        return <CheckSquare className="w-5 h-5 text-green-500" />;
+      case 'In Progress':
+        return <Clock className="w-5 h-5 text-blue-500" />;
+      case 'To Do':
+        return <AlertCircle className="w-5 h-5 text-gray-500" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
+        <Navbar />
+        <BackButton />
+        <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+          {/* Loading State */}
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              {/* Spinning Circle */}
+              <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+              {/* Task Icon Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <CheckSquare size={24} className="text-green-600" />
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Task Details</h3>
+              <p className="text-gray-600">Fetching task information...</p>
+            </div>
+            {/* Loading Dots */}
+            <div className="flex space-x-2 mt-4">
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!task) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
+        <Navbar />
+        <BackButton />
+        <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
+            <CheckSquare size={64} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Task Not Found</h3>
+            <p className="text-gray-600 mb-4">The task you're looking for doesn't exist or you don't have access to it.</p>
+            <button 
+              onClick={() => navigate("/tasks")} 
+              className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              <ArrowRight size={18} />
+              Back to Tasks
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
       <BackButton />
-      <div className="p-6 max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 text-3xl font-bold text-gray-800 mb-6">
-          <FileText size={28} />
-          <h2>Task Details</h2>
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <CheckSquare size={24} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">{task.title}</h1>
+                  <p className="text-gray-600">Task Details</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)}`}>
+                  {task.status}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)}`}>
+                  {task.priority}
+                </span>
+              </div>
+            </div>
+            <p className="text-gray-700 text-lg leading-relaxed">{task.description}</p>
+          </div>
         </div>
 
-        {task ? (
-          <div className="bg-white p-6 rounded-xl shadow-md mb-6 space-y-4">
-                            <h3 className="text-2xl font-semibold text-green-700">{task.title}</h3>
-            <p className="text-gray-700">{task.description}</p>
-
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <p>Status: <span className="font-medium">{task.status}</span></p>
-              <p>Priority: <span className="font-medium">{task.priority}</span></p>
-              <p>Due Date: <span className="font-medium">{task.dueDate?.slice(0, 10)}</span></p>
-              <p>Assigned To: <span className="font-medium">{task.assignedTo?.[0]?.name || 'N/A'}</span></p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Task Information */}
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FileText className="text-green-500" />
+                Task Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  {getTaskStatusIcon(task.status)}
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <p className="font-semibold text-gray-800">{task.status}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <AlertCircle className="text-yellow-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Priority</p>
+                    <p className="font-semibold text-gray-800">{task.priority}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Calendar className="text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Due Date</p>
+                    <p className="font-semibold text-gray-800">
+                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <User className="text-purple-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Assigned To</p>
+                    <p className="font-semibold text-gray-800">
+                      {task.assignedTo?.[0]?.name || 'Unassigned'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-2 font-semibold text-lg">
-                <Paperclip size={18} /> <span>Attachments</span>
-              </div>
+            {/* Attachments */}
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Paperclip className="text-indigo-500" />
+                Attachments ({task.attachments?.length || 0})
+              </h2>
               {task.attachments?.length > 0 ? (
-                <ul className="list-disc ml-5 space-y-1 text-green-600">
+                <div className="space-y-3">
                   {task.attachments.map((file, idx) => (
-                    <li key={idx}>
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <Paperclip className="text-indigo-500" />
+                        <span className="font-medium text-gray-800">{file.filename}</span>
+                      </div>
                       <a
                         href={`${API}/${file.path}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:underline"
+                        className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
                       >
-                        {file.filename}
+                        <Download size={16} />
                       </a>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p className="text-gray-500">No attachments</p>
+                <div className="text-center py-8">
+                  <Paperclip size={48} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No attachments uploaded yet.</p>
+                </div>
               )}
             </div>
-          </div>
-        ) : (
-          <InLineLoader message="Loading Task Details" />
-        )}
 
-        {/* Comments */}
-        <div className="bg-white p-6 rounded-xl shadow-md mb-6">
-          <div className="flex items-center gap-2 mb-4 text-xl font-bold text-gray-800">
-            <MessageCircle size={22} />
-            <h3>Comments</h3>
-          </div>
-
-          {comments.length === 0 ? (
-            <p className="text-gray-500">No comments yet.</p>
-          ) : (
-            <div className="space-y-3 mb-4">
-              {comments.map((c, index) => (
-                <div key={index} className="bg-gray-100 p-3 rounded-lg">
-                  <p className="text-sm text-gray-800">{c.text}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Posted by <strong>{c.author?.name || 'Unknown'}</strong> on{' '}
-                    {new Date(c.createdAt).toLocaleString()}
-                  </p>
+            {/* Comments */}
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <MessageCircle className="text-indigo-500" />
+                Comments ({comments.length})
+              </h2>
+              {comments.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageCircle size={48} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-4 mb-6">
+                  {comments.map((c, index) => (
+                    <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-medium">
+                            {c.author?.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{c.author?.name || 'Unknown'}</p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 ml-10">{c.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Comment Form */}
+              <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="Write a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Send size={16} /> Post
+                </button>
+              </form>
             </div>
-          )}
 
-          <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="Write a comment..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              className="flex-grow p-2 border border-gray-300 rounded-md"
-            />
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-1"
-            >
-              <Send size={16} /> Post
-            </button>
-          </form>
-        </div>
-
-        {/* File Upload */}
-        <div className="bg-white p-6 rounded-xl shadow-md mb-6">
-          <div className="flex items-center gap-2 text-xl font-bold text-gray-800 mb-4">
-            <UploadCloud size={22} />
-            <h3>Upload Attachment</h3>
+            {/* File Upload */}
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <UploadCloud className="text-blue-500" />
+                Upload Attachment
+              </h2>
+              <div className="space-y-4">
+                <input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                />
+                {file && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-700">Selected: {file.name}</p>
+                  </div>
+                )}
+                <button
+                  onClick={handleFileUpload}
+                  className={`bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors ${
+                    uploading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                  disabled={uploading}
+                >
+                  <UploadCloud size={18} />
+                  {uploading ? 'Uploading...' : 'Upload File'}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="mb-3"
-          />
-          {file && <p className="text-sm text-gray-700 mb-2">Selected: {file.name}</p>}
-          <button
-            onClick={handleFileUpload}
-                            className={`bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded flex items-center gap-2 ${uploading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            disabled={uploading}
-          >
-            <UploadCloud size={18} />
-            {uploading ? 'Uploading...' : 'Upload'}
-          </button>
-        </div>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Task Actions */}
+            {(user?.role === "Admin" || user?.role === "Manager") && (
+              <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Task Actions</h2>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleEdit}
+                    className="flex items-center gap-3 w-full p-3 bg-yellow-50 text-yellow-800 rounded-lg hover:bg-yellow-100 transition-colors"
+                  >
+                    <Pencil size={18} />
+                    <span className="font-medium">Edit Task</span>
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-3 w-full p-3 bg-red-50 text-red-800 rounded-lg hover:bg-red-100 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                    <span className="font-medium">Delete Task</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* Action Buttons */}
-        {task && (user?.role === "Admin" || user?.role === "Manager") && (
-          <div className="flex justify-end gap-3 mt-4">
-            <button onClick={handleEdit} className="flex items-center gap-2 px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600">
-              <Pencil size={18} /> Edit Task
-            </button>
-            <button onClick={handleDelete} className="flex items-center gap-2 px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">
-              <Trash2 size={18} /> Delete Task
-            </button>
+            {/* Project Info */}
+            {task.project && (
+              <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Project</h2>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="font-medium text-gray-800">{task.project.name}</p>
+                  <p className="text-sm text-gray-600 mt-1">{task.project.description}</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
+        </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }
 
