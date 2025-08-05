@@ -88,12 +88,12 @@ const sendPasswordResetSuccessEmail = async (email) => {
               Your password has been successfully reset. You can now log in to your TaskPilot account with your new password.
             </p>
             
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.FRONTEND_URL}/login" 
-                 style="background-color: #16a34a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">
-                Login to TaskPilot
-              </a>
-            </div>
+                          <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" 
+                   style="background-color: #16a34a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">
+                  Login to TaskPilot
+                </a>
+              </div>
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 14px; margin: 0;">
