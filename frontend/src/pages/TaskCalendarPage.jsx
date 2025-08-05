@@ -185,7 +185,6 @@ function TaskCalendarPage() {
                     dayMaxEvents={3}
                     moreLinkClick="popover"
                     eventDisplay="block"
-                    allDaySlot={false}
                     lazyFetching={true}
                     rerenderDelay={10}
                     eventMinHeight={20}
