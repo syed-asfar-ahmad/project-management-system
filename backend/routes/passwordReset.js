@@ -36,26 +36,33 @@ router.post('/forgot-password', async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-    // Send email (optional - for development)
-    let emailSent = false;
-    try {
-      emailSent = await sendPasswordResetEmail(email, resetToken, resetUrl);
-    } catch (emailError) {
-      console.error('Email service error:', emailError);
-      // Continue without email for development
+    // Check if email service is configured
+    const emailServiceType = process.env.EMAIL_SERVICE_TYPE || 'sendgrid';
+    
+    if (emailServiceType === 'none' || !process.env.SENDGRID_API_KEY) {
+      // No email service configured - return token for manual sharing
+      return res.status(200).json({ 
+        message: 'Password reset link generated successfully.',
+        resetUrl: resetUrl,
+        note: 'Email service not configured. Share this link with the user manually.',
+        token: resetToken // For development/testing only
+      });
     }
+
+    // Send email
+    const emailSent = await sendPasswordResetEmail(email, resetToken, resetUrl);
 
     if (emailSent) {
       res.status(200).json({ 
         message: 'If an account with that email exists, a password reset link has been sent.' 
       });
     } else {
-      // For development, return the reset URL directly
-      res.status(200).json({ 
-        message: 'Password reset link generated successfully.',
-        resetUrl: resetUrl,
-        note: 'Email service not configured. Use this link directly for testing.'
-      });
+      // Clear the token if email failed
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      
+      res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
     }
 
   } catch (error) {
@@ -94,12 +101,10 @@ router.post('/reset-password/:token', async (req, res) => {
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    // Send success email (optional)
-    try {
+    // Send success email (only if email service is configured)
+    const emailServiceType = process.env.EMAIL_SERVICE_TYPE || 'sendgrid';
+    if (emailServiceType !== 'none' && process.env.SENDGRID_API_KEY) {
       await sendPasswordResetSuccessEmail(user.email);
-    } catch (emailError) {
-      console.error('Success email error:', emailError);
-      // Continue without email
     }
 
     res.status(200).json({ message: 'Password has been reset successfully' });
