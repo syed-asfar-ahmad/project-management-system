@@ -47,10 +47,14 @@ function ProjectDetailPage() {
 
   const fetchTasks = useCallback(async () => {
     try {
-      const url =
-        user?.role === "Team Member"
-          ? `${API}/tasks/project/${id}/user`
-          : `${API}/tasks?projectId=${id}`;
+      let url;
+      if (user?.role === "Team Member") {
+        url = `${API}/tasks/project/${id}/user`;
+      } else if (user?.role === "Manager") {
+        url = `${API}/tasks/manager-project/${id}`;
+      } else {
+        url = `${API}/tasks?projectId=${id}`;
+      }
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },

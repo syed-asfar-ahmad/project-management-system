@@ -53,6 +53,37 @@ router.get('/manager-tasks', verifyToken, checkRole('Manager'), async (req, res)
   }
 });
 
+// Get Manager's Project-Specific Tasks
+router.get('/manager-project/:projectId', verifyToken, checkRole('Manager'), async (req, res) => {
+  try {
+    const Task = require('../models/Task');
+    const Project = require('../models/Project');
+    
+    // Check if manager is assigned to this project (as team member or project manager)
+    const project = await Project.findById(req.params.projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    const isAssigned = project.teamMembers?.includes(req.user.id) || 
+                      project.projectManager?.toString() === req.user.id;
+    
+    if (!isAssigned) {
+      return res.status(403).json({ error: 'Access denied. You are not assigned to this project.' });
+    }
+    
+    // Get all tasks from this project
+    const tasks = await Task.find({ project: req.params.projectId })
+      .populate('assignedTo', 'name email')
+      .populate('project', 'name');
+    
+    res.json(tasks);
+  } catch (err) {
+    console.error('Failed to fetch manager project tasks:', err);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
+  }
+});
+
 // Get project-specific tasks assigned to the team member
 router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), getMyProjectTasks);
 

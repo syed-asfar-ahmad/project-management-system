@@ -20,11 +20,22 @@ function Projects() {
     try {
       const res = await getAllProjects(token);
       // Filter projects for Team Members and Managers to only show assigned ones
-      if (user?.role === "Team Member" || user?.role === "Manager") {
+      if (user?.role === "Team Member") {
         const assignedProjects = res.data.filter(project => 
           project.teamMembers?.some(member => 
             typeof member === "string" ? member === user._id : member._id === user._id
           )
+        );
+        setProjects(assignedProjects);
+      } else if (user?.role === "Manager") {
+        const assignedProjects = res.data.filter(project => 
+          project.teamMembers?.some(member => 
+            typeof member === "string" ? member === user._id : member._id === user._id
+          ) || 
+          (project.projectManager && 
+           (typeof project.projectManager === "string" ? 
+            project.projectManager === user._id : 
+            project.projectManager._id === user._id))
         );
         setProjects(assignedProjects);
       } else {

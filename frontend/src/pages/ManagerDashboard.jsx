@@ -72,9 +72,24 @@ function ManagerDashboard() {
             project.projectManager._id === user._id))
         );
         
+        // Get unique team members from assigned projects only
+        const assignedMemberIds = new Set();
+        assignedProjects.forEach(project => {
+          if (project.teamMembers) {
+            project.teamMembers.forEach(member => {
+              const memberId = typeof member === "string" ? member : member._id;
+              assignedMemberIds.add(memberId);
+            });
+          }
+        });
+        
+        const assignedMembers = memberRes.data.filter(member => 
+          assignedMemberIds.has(member._id)
+        );
+        
         setProjects(assignedProjects);
         setTasks(taskRes.data);
-        setMembers(memberRes.data);
+        setMembers(assignedMembers);
       } catch (err) {
         toast.error("Failed to fetch dashboard data");
       } finally {
@@ -134,7 +149,19 @@ function ManagerDashboard() {
   };
 
   const getTaskCount = (memberId) => {
-    return tasks.filter(task => task.assignedTo === memberId).length;
+    // Get all tasks from projects assigned to this manager
+    return tasks.filter(task => {
+      // Check if task is assigned to this member
+      const isAssignedToMember = task.assignedTo && 
+        (Array.isArray(task.assignedTo) ? 
+          task.assignedTo.some(assignee => 
+            typeof assignee === "string" ? assignee === memberId : assignee._id === memberId
+          ) : 
+          (typeof task.assignedTo === "string" ? task.assignedTo === memberId : task.assignedTo._id === memberId)
+        );
+      
+      return isAssignedToMember;
+    }).length;
   };
 
   // Chart data
@@ -179,7 +206,7 @@ function ManagerDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
             <div className="flex items-center justify-between">
               <div>
@@ -200,18 +227,6 @@ function ManagerDashboard() {
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <ClipboardList size={24} className="text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Team Members</p>
-                <p className="text-3xl font-bold text-gray-800">{members.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users size={24} className="text-purple-600" />
               </div>
             </div>
           </div>
@@ -262,14 +277,8 @@ function ManagerDashboard() {
           <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100 h-[360px] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                <Users size={20} className="text-green-600" /> Team Members & Their Tasks
+                <Users size={20} className="text-green-600" /> Assigned Team Members & Their Tasks
               </h2>
-              <Link
-                to="/members"
-                className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition duration-200"
-              >
-                View All
-              </Link>
             </div>
 
             <ul className="space-y-3 text-sm text-gray-700">
@@ -471,13 +480,6 @@ function ManagerDashboard() {
                             <span className="font-medium">Due:</span>
                             <span>{task.dueDate?.slice(0, 10) || "N/A"}</span>
                           </div>
-                          {task.assignedTo && (
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Users size={16} className="text-green-500" />
-                              <span className="font-medium">Assigned:</span>
-                              <span>{task.assignedTo?.name || "Unassigned"}</span>
-                            </div>
-                          )}
                         </div>
                         
                         <Link

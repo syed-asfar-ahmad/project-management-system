@@ -49,11 +49,21 @@ function TaskCalendarPage() {
 
         // Filter projects for Team Members and Managers
         let filteredProjects = projectRes.data;
-        if (user?.role === 'Team Member' || user?.role === 'Manager') {
+        if (user?.role === 'Team Member') {
           filteredProjects = projectRes.data.filter(project => 
             project.teamMembers?.some(member => 
               typeof member === "string" ? member === user._id : member._id === user._id
             )
+          );
+        } else if (user?.role === 'Manager') {
+          filteredProjects = projectRes.data.filter(project => 
+            project.teamMembers?.some(member => 
+              typeof member === "string" ? member === user._id : member._id === user._id
+            ) || 
+            (project.projectManager && 
+             (typeof project.projectManager === "string" ? 
+              project.projectManager === user._id : 
+              project.projectManager._id === user._id))
           );
         }
 
