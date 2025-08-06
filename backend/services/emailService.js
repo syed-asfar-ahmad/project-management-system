@@ -87,7 +87,7 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             padding: 50px 30px;
             text-align: center;
             color: white;
@@ -148,7 +148,7 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
         
         .reset-button {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             text-decoration: none;
             padding: 18px 40px;
@@ -156,7 +156,7 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
             font-weight: 600;
             font-size: 16px;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -178,15 +178,27 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
         
         .reset-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 35px rgba(22, 163, 74, 0.4);
         }
         
         .link-section {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 25px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #bbf7d0;
+            border-radius: 16px;
+            padding: 30px;
             margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #16a34a, #15803d);
         }
         
         .link-text {
@@ -199,12 +211,12 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
         
         .reset-link {
             font-size: 13px;
-            color: #667eea;
+            color: #16a34a;
             word-break: break-all;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e6f3ff 100%);
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             padding: 15px;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #16a34a;
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-weight: 500;
         }
@@ -398,12 +410,26 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
             display: inline-block;
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             border-radius: 50%;
             line-height: 80px;
             font-size: 40px;
             color: white;
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+            box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3);
+            position: relative;
+        }
+        
+        .success-icon span::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #16a34a, #15803d, #16a34a);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
         }
         
         .title {
@@ -429,7 +455,7 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         
         .login-button {
             display: inline-block;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             text-decoration: none;
             padding: 18px 40px;
@@ -437,7 +463,7 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
             font-weight: 600;
             font-size: 16px;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+            box-shadow: 0 8px 25px rgba(22, 163, 74, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -459,7 +485,7 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         
         .login-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(72, 187, 120, 0.4);
+            box-shadow: 0 12px 35px rgba(22, 163, 74, 0.4);
         }
         
         .footer {
@@ -491,7 +517,7 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         
         .success-badge {
             display: inline-block;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -508,17 +534,30 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         }
         
         .feature-item {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 20px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 25px;
+            border-radius: 16px;
             text-align: center;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #bbf7d0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #16a34a, #15803d);
         }
         
         .feature-icon {
             font-size: 24px;
             margin-bottom: 10px;
-            color: #48bb78;
+            color: #16a34a;
         }
         
         .feature-text {
