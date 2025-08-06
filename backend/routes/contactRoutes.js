@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
-const auth = require('../middleware/auth');
+const { verifyToken } = require('../middleware/auth');
 
 // Submit contact form (public)
 router.post('/', async (req, res) => {
@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all contact messages (admin only)
-router.get('/admin', auth, async (req, res) => {
+router.get('/admin', verifyToken, async (req, res) => {
   try {
     if (req.user.role !== 'Admin') {
       return res.status(403).json({ error: 'Access denied. Admin only.' });
@@ -32,7 +32,7 @@ router.get('/admin', auth, async (req, res) => {
 });
 
 // Get single contact message (admin only)
-router.get('/admin/:id', auth, async (req, res) => {
+router.get('/admin/:id', verifyToken, async (req, res) => {
   try {
     if (req.user.role !== 'Admin') {
       return res.status(403).json({ error: 'Access denied. Admin only.' });
@@ -51,7 +51,7 @@ router.get('/admin/:id', auth, async (req, res) => {
 });
 
 // Update contact status (admin only)
-router.patch('/admin/:id/status', auth, async (req, res) => {
+router.patch('/admin/:id/status', verifyToken, async (req, res) => {
   try {
     if (req.user.role !== 'Admin') {
       return res.status(403).json({ error: 'Access denied. Admin only.' });
@@ -76,7 +76,7 @@ router.patch('/admin/:id/status', auth, async (req, res) => {
 });
 
 // Delete contact message (admin only)
-router.delete('/admin/:id', auth, async (req, res) => {
+router.delete('/admin/:id', verifyToken, async (req, res) => {
   try {
     if (req.user.role !== 'Admin') {
       return res.status(403).json({ error: 'Access denied. Admin only.' });
