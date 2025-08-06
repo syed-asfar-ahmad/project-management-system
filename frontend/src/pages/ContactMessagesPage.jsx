@@ -15,7 +15,7 @@ export default function ContactMessagesPage() {
   const fetchContacts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/contact/admin`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api'}/contact/admin`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(response.data);
@@ -29,7 +29,7 @@ export default function ContactMessagesPage() {
   const updateStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/contact/admin/${id}/status`, 
+      await axios.patch(`${process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api'}/contact/admin/${id}/status`, 
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -44,7 +44,7 @@ export default function ContactMessagesPage() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/contact/admin/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api'}/contact/admin/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchContacts(); // Refresh the list
