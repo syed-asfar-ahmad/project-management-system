@@ -461,7 +461,7 @@ const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
     }
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@taskpilot.com',
+      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
       to: email,
       subject: '🔐 Reset Your Password - TaskPilot',
       html: getPasswordResetEmailTemplate(resetUrl)
@@ -488,7 +488,7 @@ const sendPasswordResetSuccessEmail = async (email) => {
     const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`;
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@taskpilot.com',
+      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
       to: email,
       subject: '✅ Password Reset Successful - TaskPilot',
       html: getPasswordResetSuccessEmailTemplate(loginUrl)
@@ -503,7 +503,110 @@ const sendPasswordResetSuccessEmail = async (email) => {
   }
 };
 
+// Test email function
+const sendTestEmail = async (email) => {
+  try {
+    // Check if transporter is configured
+    if (!transporter) {
+      console.error('Email transporter not configured');
+      return false;
+    }
+
+    const mailOptions = {
+      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
+      to: email,
+      subject: '🧪 Test Email - TaskPilot',
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Test Email - TaskPilot</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background-color: #f8f9fa;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #ffffff;
+                    border-radius: 12px;
+                    padding: 40px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .success-icon {
+                    font-size: 48px;
+                    margin-bottom: 10px;
+                }
+                h1 {
+                    color: #1f2937;
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                p {
+                    color: #6b7280;
+                    text-align: center;
+                    margin-bottom: 15px;
+                }
+                .highlight {
+                    background-color: #f0fdf4;
+                    border-left: 4px solid #16a34a;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="success-icon">🧪</div>
+                    <h2>Test Email Successful!</h2>
+                </div>
+                
+                <h1>SendGrid is Working! 🎉</h1>
+                <p>This is a test email from your TaskPilot application.</p>
+                <p>If you receive this email, your SendGrid configuration is working correctly!</p>
+                
+                <div class="highlight">
+                    <strong>✅ Email Service:</strong> SendGrid<br>
+                    <strong>✅ SMTP Configuration:</strong> Working<br>
+                    <strong>✅ API Key:</strong> Valid<br>
+                    <strong>✅ Sender Email:</strong> Verified
+                </div>
+                
+                <p>You can now send emails from your TaskPilot application!</p>
+            </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Test email sent:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    return false;
+  }
+};
+
 module.exports = {
   sendPasswordResetEmail,
-  sendPasswordResetSuccessEmail
+  sendPasswordResetSuccessEmail,
+  sendTestEmail
 }; 
