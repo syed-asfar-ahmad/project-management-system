@@ -363,7 +363,7 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         }
         
         .header {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             padding: 50px 30px;
             text-align: center;
             color: white;

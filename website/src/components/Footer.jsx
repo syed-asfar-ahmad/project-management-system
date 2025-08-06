@@ -177,20 +177,9 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800">
           <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex justify-center items-center">
               <div className="text-gray-400 text-sm">
                 © {new Date().getFullYear()} TaskPilot. All rights reserved.
-              </div>
-              <div className="flex space-x-6 text-sm">
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors duration-200">
-                  Privacy Policy
-                </a>
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors duration-200">
-                  Terms of Service
-                </a>
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors duration-200">
-                  Cookie Policy
-                </a>
               </div>
             </div>
           </div>
