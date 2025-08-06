@@ -25,6 +25,7 @@ import AllMembersPage from "./pages/AllMembersPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ContactMessagesPage from "./pages/ContactMessagesPage";
 
 
 
@@ -84,6 +85,11 @@ function AppRoutes() {
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members" element={<AllMembersPage />} />
+        <Route path="/contact-messages" element={
+          <RoleBasedRoute allowedRoles={["Admin"]}>
+            <ContactMessagesPage />
+          </RoleBasedRoute>
+        } />
 
         {/* Role-based Routes */}
         <Route path="/add-task" element={

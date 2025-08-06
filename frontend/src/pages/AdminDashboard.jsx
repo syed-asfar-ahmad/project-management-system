@@ -18,6 +18,7 @@ import {
   Calendar,
   ArrowRight,
   CheckSquare,
+  Mail,
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
 import {
@@ -197,7 +198,7 @@ function AdminDashboard() {
         ) : (
           <>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
               <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
                 <div className="flex items-center justify-between">
                   <div>
@@ -232,6 +233,25 @@ function AdminDashboard() {
                     <Users size={24} className="text-purple-600" />
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Contact Messages</p>
+                    <p className="text-3xl font-bold text-gray-800">-</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Mail size={24} className="text-orange-600" />
+                  </div>
+                </div>
+                <Link
+                  to="/contact-messages"
+                  className="mt-4 inline-flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg w-full justify-center"
+                >
+                  <Mail size={16} />
+                  View Messages
+                </Link>
               </div>
             </div>
 

@@ -109,8 +109,8 @@ export default function Footer() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Phone</p>
-                    <a href="tel:+12345678901" className="text-white hover:text-green-400 transition-colors duration-200">
-                      +1 (234) 567-8901
+                    <a href="tel:+923001234567" className="text-white hover:text-green-400 transition-colors duration-200">
+                      +92 (300) 123-4567
                     </a>
                   </div>
                 </li>
@@ -120,7 +120,7 @@ export default function Footer() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Location</p>
-                    <p className="text-white">San Francisco, CA</p>
+                    <p className="text-white">Lahore, Pakistan</p>
                   </div>
                 </li>
               </ul>
