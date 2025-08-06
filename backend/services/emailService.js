@@ -73,147 +73,201 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+            color: #2d3748;
+            background-color: #f7fafc;
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         }
         
         .header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            padding: 40px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 30px;
             text-align: center;
             color: white;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
         }
         
         .logo {
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 36px;
+            font-weight: 700;
             margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
         
         .tagline {
             font-size: 16px;
-            opacity: 0.9;
+            opacity: 0.95;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
         }
         
         .content {
-            padding: 40px 30px;
+            padding: 50px 40px;
         }
         
         .title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
             margin-bottom: 20px;
             text-align: center;
         }
         
         .description {
             font-size: 16px;
-            color: #6b7280;
-            margin-bottom: 30px;
+            color: #4a5568;
+            margin-bottom: 40px;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.7;
         }
         
         .button-container {
             text-align: center;
-            margin: 30px 0;
+            margin: 40px 0;
         }
         
         .reset-button {
             display: inline-block;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            padding: 16px 32px;
-            border-radius: 8px;
+            padding: 18px 40px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 16px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .reset-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .reset-button:hover::before {
+            left: 100%;
         }
         
         .reset-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
         }
         
         .link-section {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 30px 0;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 40px 0;
         }
         
         .link-text {
             font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 10px;
+            color: #4a5568;
+            margin-bottom: 15px;
             text-align: center;
+            font-weight: 500;
         }
         
         .reset-link {
-            font-size: 14px;
-            color: #16a34a;
+            font-size: 13px;
+            color: #667eea;
             word-break: break-all;
-            background-color: #f0fdf4;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #16a34a;
-            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6f3ff 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-weight: 500;
         }
         
         .footer {
-            background-color: #f9fafb;
-            padding: 30px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 40px;
             text-align: center;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
         }
         
         .footer-text {
             font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 10px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
         
         .security-note {
             font-size: 12px;
-            color: #9ca3af;
+            color: #718096;
             font-style: italic;
+            margin-top: 15px;
         }
         
         .divider {
-            height: 1px;
-            background-color: #e5e7eb;
-            margin: 20px 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 30px 0;
+        }
+        
+        .security-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 10px 0;
         }
         
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
-                border-radius: 8px;
+                border-radius: 12px;
             }
             
             .header, .content, .footer {
-                padding: 20px;
+                padding: 30px 20px;
             }
             
             .logo {
-                font-size: 28px;
+                font-size: 32px;
             }
             
             .title {
-                font-size: 20px;
+                font-size: 24px;
+            }
+            
+            .reset-button {
+                padding: 16px 32px;
+                font-size: 15px;
             }
         }
     </style>
@@ -221,7 +275,7 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🚀 TaskPilot</div>
+            <div class="logo">TaskPilot</div>
             <div class="tagline">Project Management System</div>
         </div>
         
@@ -234,7 +288,7 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
             
             <div class="button-container">
                 <a href="${resetUrl}" class="reset-button">
-                    🔐 Reset Password
+                    Reset Password
                 </a>
             </div>
             
@@ -248,8 +302,9 @@ const getPasswordResetEmailTemplate = (resetUrl) => `
             <div class="divider"></div>
             
             <div class="footer">
+                <div class="security-badge">Secure Link</div>
                 <p class="footer-text">
-                    <strong>⚠️ Important:</strong> This link will expire in 1 hour for security reasons.
+                    <strong>Important:</strong> This link will expire in 1 hour for security reasons.
                 </p>
                 <p class="footer-text">
                     If you didn't request this password reset, please ignore this email.
@@ -282,130 +337,221 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+            color: #2d3748;
+            background-color: #f7fafc;
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         }
         
         .header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            padding: 40px 30px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            padding: 50px 30px;
             text-align: center;
             color: white;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
         }
         
         .logo {
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 36px;
+            font-weight: 700;
             margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
         
         .tagline {
             font-size: 16px;
-            opacity: 0.9;
+            opacity: 0.95;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
         }
         
         .content {
-            padding: 40px 30px;
+            padding: 50px 40px;
         }
         
         .success-icon {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .success-icon span {
-            font-size: 48px;
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 50%;
+            line-height: 80px;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
         }
         
         .title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
             margin-bottom: 20px;
             text-align: center;
         }
         
         .description {
             font-size: 16px;
-            color: #6b7280;
-            margin-bottom: 30px;
+            color: #4a5568;
+            margin-bottom: 40px;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.7;
         }
         
         .button-container {
             text-align: center;
-            margin: 30px 0;
+            margin: 40px 0;
         }
         
         .login-button {
             display: inline-block;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             color: white;
             text-decoration: none;
-            padding: 16px 32px;
-            border-radius: 8px;
+            padding: 18px 40px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 16px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .login-button:hover::before {
+            left: 100%;
         }
         
         .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(72, 187, 120, 0.4);
         }
         
         .footer {
-            background-color: #f9fafb;
-            padding: 30px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 40px;
             text-align: center;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
         }
         
         .footer-text {
             font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 10px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
         
         .security-note {
             font-size: 12px;
-            color: #9ca3af;
+            color: #718096;
             font-style: italic;
+            margin-top: 15px;
         }
         
         .divider {
-            height: 1px;
-            background-color: #e5e7eb;
-            margin: 20px 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 30px 0;
+        }
+        
+        .success-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-item {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #48bb78;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
         }
         
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
-                border-radius: 8px;
+                border-radius: 12px;
             }
             
             .header, .content, .footer {
-                padding: 20px;
+                padding: 30px 20px;
             }
             
             .logo {
-                font-size: 28px;
+                font-size: 32px;
             }
             
             .title {
-                font-size: 20px;
+                font-size: 24px;
+            }
+            
+            .login-button {
+                padding: 16px 32px;
+                font-size: 15px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -413,13 +559,13 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🚀 TaskPilot</div>
+            <div class="logo">TaskPilot</div>
             <div class="tagline">Project Management System</div>
         </div>
         
         <div class="content">
             <div class="success-icon">
-                <span>✅</span>
+                <span>✓</span>
             </div>
             
             <h1 class="title">Password Reset Successful!</h1>
@@ -428,17 +574,33 @@ const getPasswordResetSuccessEmailTemplate = (loginUrl) => `
                 with your new password and continue managing your projects.
             </p>
             
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🔐</div>
+                    <div class="feature-text">Secure Login</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">Project Analytics</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">👥</div>
+                    <div class="feature-text">Team Collaboration</div>
+                </div>
+            </div>
+            
             <div class="button-container">
                 <a href="${loginUrl}" class="login-button">
-                    🚀 Login to TaskPilot
+                    Login to TaskPilot
                 </a>
             </div>
             
             <div class="divider"></div>
             
             <div class="footer">
+                <div class="success-badge">Account Secured</div>
                 <p class="footer-text">
-                    <strong>🔒 Security Notice:</strong> If you didn't reset your password, 
+                    <strong>Security Notice:</strong> If you didn't reset your password, 
                     please contact our support team immediately.
                 </p>
                 <p class="security-note">
@@ -461,9 +623,9 @@ const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
     }
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
+      from: process.env.FROM_EMAIL || 'noreply@taskpilot.com',
       to: email,
-      subject: '🔐 Reset Your Password - TaskPilot',
+      subject: 'Reset Your Password - TaskPilot',
       html: getPasswordResetEmailTemplate(resetUrl)
     };
 
@@ -488,9 +650,9 @@ const sendPasswordResetSuccessEmail = async (email) => {
     const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`;
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
+      from: process.env.FROM_EMAIL || 'noreply@taskpilot.com',
       to: email,
-      subject: '✅ Password Reset Successful - TaskPilot',
+      subject: 'Password Reset Successful - TaskPilot',
       html: getPasswordResetSuccessEmailTemplate(loginUrl)
     };
 
@@ -503,110 +665,7 @@ const sendPasswordResetSuccessEmail = async (email) => {
   }
 };
 
-// Test email function
-const sendTestEmail = async (email) => {
-  try {
-    // Check if transporter is configured
-    if (!transporter) {
-      console.error('Email transporter not configured');
-      return false;
-    }
-
-    const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@sendgrid.net',
-      to: email,
-      subject: '🧪 Test Email - TaskPilot',
-      html: `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Test Email - TaskPilot</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    background-color: #f8f9fa;
-                    margin: 0;
-                    padding: 20px;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    background-color: #ffffff;
-                    border-radius: 12px;
-                    padding: 40px;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                }
-                .header {
-                    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
-                    margin-bottom: 30px;
-                }
-                .success-icon {
-                    font-size: 48px;
-                    margin-bottom: 10px;
-                }
-                h1 {
-                    color: #1f2937;
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                p {
-                    color: #6b7280;
-                    text-align: center;
-                    margin-bottom: 15px;
-                }
-                .highlight {
-                    background-color: #f0fdf4;
-                    border-left: 4px solid #16a34a;
-                    padding: 15px;
-                    margin: 20px 0;
-                    border-radius: 4px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <div class="success-icon">🧪</div>
-                    <h2>Test Email Successful!</h2>
-                </div>
-                
-                <h1>SendGrid is Working! 🎉</h1>
-                <p>This is a test email from your TaskPilot application.</p>
-                <p>If you receive this email, your SendGrid configuration is working correctly!</p>
-                
-                <div class="highlight">
-                    <strong>✅ Email Service:</strong> SendGrid<br>
-                    <strong>✅ SMTP Configuration:</strong> Working<br>
-                    <strong>✅ API Key:</strong> Valid<br>
-                    <strong>✅ Sender Email:</strong> Verified
-                </div>
-                
-                <p>You can now send emails from your TaskPilot application!</p>
-            </div>
-        </body>
-        </html>
-      `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Test email sent:', info.messageId);
-    return true;
-  } catch (error) {
-    console.error('Error sending test email:', error);
-    return false;
-  }
-};
-
 module.exports = {
   sendPasswordResetEmail,
-  sendPasswordResetSuccessEmail,
-  sendTestEmail
+  sendPasswordResetSuccessEmail
 }; 

@@ -32,8 +32,20 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = resetTokenExpiry;
     await user.save();
 
-    // Create reset URL
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Create reset URL with production fallback
+    let frontendUrl = process.env.FRONTEND_URL;
+    
+    // If no FRONTEND_URL set, try to detect production URL
+    if (!frontendUrl) {
+      const isProduction = process.env.NODE_ENV === 'production';
+      if (isProduction) {
+        // Production fallback - replace with your actual frontend URL
+        frontendUrl = 'https://your-frontend-domain.com';
+      } else {
+        frontendUrl = 'http://localhost:3000';
+      }
+    }
+    
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     // Check if email service is configured
