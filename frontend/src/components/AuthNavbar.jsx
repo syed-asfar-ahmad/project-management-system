@@ -177,7 +177,7 @@ function AuthNavbar() {
 
         {/* Mobile Menu */}
         <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+          isOpen ? 'max-h-screen opacity-100 mt-4' : 'max-h-0 opacity-0'
         }`}>
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 space-y-2">
             {/* User Info */}
@@ -230,9 +230,9 @@ function AuthNavbar() {
                   handleLogout();
                   setIsOpen(false);
                 }}
-                className="flex items-center space-x-2 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium"
               >
-                <LogOut size={16} />
+                <LogOut size={18} />
                 <span>Logout</span>
               </button>
             </div>

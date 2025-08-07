@@ -369,7 +369,7 @@ function ManagerDashboard() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar size={16} className="text-green-500" />
-                            <span className="font-medium">Deadline:</span>
+                            <span className="font-medium">Due:</span>
                             <span>{project.deadline?.slice(0, 10) || "N/A"}</span>
                           </div>
                         </div>
