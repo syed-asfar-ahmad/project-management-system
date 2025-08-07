@@ -18,6 +18,10 @@ import {
   User,
   ArrowRight,
   Download,
+  Eye,
+  File,
+  Image,
+  FileText as FileTextIcon,
 } from 'lucide-react';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
@@ -196,6 +200,111 @@ function TaskDetailPage() {
     }
   };
 
+  const getFileIcon = (filename) => {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'bmp':
+      case 'svg':
+        return <Image className="w-5 h-5 text-blue-500" />;
+      case 'pdf':
+        return <FileTextIcon className="w-5 h-5 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <FileTextIcon className="w-5 h-5 text-blue-600" />;
+      case 'xls':
+      case 'xlsx':
+        return <FileTextIcon className="w-5 h-5 text-green-600" />;
+      case 'txt':
+        return <FileTextIcon className="w-5 h-5 text-gray-600" />;
+      default:
+        return <File className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  const isPreviewable = (filename) => {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    const previewableExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'pdf', 'txt'];
+    return previewableExtensions.includes(extension);
+  };
+
+  const handleDownload = async (attachmentId) => {
+    try {
+      const response = await axios.get(`${API}/tasks/${id}/attachments/${attachmentId}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', task.attachments.find(a => a._id === attachmentId)?.filename || 'file');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("File downloaded successfully!");
+    } catch (err) {
+      toast.error("Failed to download file");
+    }
+  };
+
+  const handlePreview = (attachment) => {
+    if (attachment.path.startsWith('http')) {
+      window.open(attachment.path, '_blank');
+    } else {
+      window.open(`${API}/${attachment.path}`, '_blank');
+    }
+  };
+
+  const handleDeleteAttachment = (attachmentId) => {
+    toast.info(
+      ({ closeToast }) => (
+        <div>
+          <p className="font-semibold text-gray-800 mb-2">
+            Are you sure you want to delete this attachment?
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={async () => {
+                closeToast();
+                try {
+                  await axios.delete(`${API}/tasks/${id}/attachments/${attachmentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  toast.success("Attachment deleted successfully!");
+                  fetchTaskDetails();
+                } catch (err) {
+                  toast.error("Failed to delete attachment");
+                }
+              }}
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+            >
+              Yes, Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeButton: false,
+        draggable: false,
+        closeOnClick: false,
+      }
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
@@ -338,19 +447,48 @@ function TaskDetailPage() {
               {task.attachments?.length > 0 ? (
                 <div className="space-y-3">
                   {task.attachments.map((file, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
-                        <Paperclip className="text-indigo-500" />
-                        <span className="font-medium text-gray-800">{file.filename}</span>
+                    <div key={file._id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {getFileIcon(file.filename)}
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium text-gray-800 block truncate">{file.filename}</span>
+                          <span className="text-xs text-gray-500">
+                            {file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : 'Unknown date'}
+                          </span>
+                        </div>
                       </div>
-                      <a
-                        href={`${API}/${file.path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
-                      >
-                        <Download size={16} />
-                      </a>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Preview Button */}
+                        {isPreviewable(file.filename) && (
+                          <button
+                            onClick={() => handlePreview(file)}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Preview file"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        )}
+                        
+                        {/* Download Button */}
+                        <button
+                          onClick={() => handleDownload(file._id)}
+                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
+                          title="Download file"
+                        >
+                          <Download size={16} />
+                        </button>
+                        
+                        {/* Delete Button - Admin Only */}
+                        {user?.role === 'Admin' && (
+                          <button
+                            onClick={() => handleDeleteAttachment(file._id)}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Delete attachment"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

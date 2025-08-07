@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path'); // Added for file path handling
 
 const {
   createTask,
@@ -125,6 +126,59 @@ router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) 
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+// Download Task Attachment - Any logged-in user
+router.get('/:taskId/attachments/:attachmentId/download', verifyToken, async (req, res) => {
+  const Task = require('../models/Task');
+  const { taskId, attachmentId } = req.params;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    const attachment = task.attachments.id(attachmentId);
+    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    // If using Cloudinary, redirect to the file URL
+    if (attachment.path.startsWith('http')) {
+      return res.redirect(attachment.path);
+    }
+
+    // If using local storage, serve the file
+    const filePath = path.join(__dirname, '..', attachment.path);
+    res.sendFile(filePath);
+  } catch (err) {
+    console.error('Download error:', err);
+    res.status(500).json({ error: 'Download failed' });
+  }
+});
+
+// Delete Task Attachment - Admin only
+router.delete('/:taskId/attachments/:attachmentId', verifyToken, checkRole('Admin'), async (req, res) => {
+  const Task = require('../models/Task');
+  const { taskId, attachmentId } = req.params;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    const attachment = task.attachments.id(attachmentId);
+    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    // Remove the attachment from the array
+    task.attachments.pull(attachmentId);
+    await task.save();
+
+    res.json({ message: 'Attachment deleted successfully' });
+  } catch (err) {
+    console.error('Delete attachment error:', err);
+    res.status(500).json({ error: 'Delete failed' });
   }
 });
 
