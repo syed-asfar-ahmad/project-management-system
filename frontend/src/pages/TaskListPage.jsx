@@ -446,57 +446,7 @@ function TaskListPage() {
                </div>
              </div>
 
-             {/* Pagination Controls */}
-             {filteredTasks.length > 0 && (
-               <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6 mt-6">
-                 <div className="flex items-center justify-between">
-                   <div className="text-sm text-gray-600">
-                     Showing {indexOfFirstTask + 1} to {Math.min(indexOfLastTask, filteredTasks.length)} of {filteredTasks.length} tasks
-                   </div>
-                   <div className="flex items-center gap-2">
-                     <button
-                       onClick={handlePrevPage}
-                       disabled={currentPage === 1}
-                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                         currentPage === 1
-                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                           : 'bg-green-100 text-green-700 hover:bg-green-200'
-                       }`}
-                     >
-                       Previous
-                     </button>
-                     
-                     <div className="flex items-center gap-1">
-                       {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-                         <button
-                           key={pageNumber}
-                           onClick={() => handlePageChange(pageNumber)}
-                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                             currentPage === pageNumber
-                               ? 'bg-green-600 text-white'
-                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                           }`}
-                         >
-                           {pageNumber}
-                         </button>
-                       ))}
-                     </div>
-                     
-                     <button
-                       onClick={handleNextPage}
-                       disabled={currentPage === totalPages}
-                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                         currentPage === totalPages
-                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                           : 'bg-green-100 text-green-700 hover:bg-green-200'
-                       }`}
-                     >
-                       Next
-                     </button>
-                   </div>
-                 </div>
-               </div>
-             )}
+
 
                           {/* Card layout for small screens */}
              <div className="block md:hidden flex flex-col gap-4">

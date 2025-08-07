@@ -261,24 +261,24 @@ function TaskDetailPage() {
         {/* Header Section */}
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                   <CheckSquare size={24} className="text-white" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">{task.title}</h1>
-                  <p className="text-gray-600">Task Details</p>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words leading-tight">{task.title}</h1>
+                  <p className="text-gray-600 mt-1">Task Details</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)}`}>
-                  {task.status}
-                </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </span>
-              </div>
+                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)} w-fit`}>
+                   {task.status}
+                 </span>
+                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)} w-fit`}>
+                   {task.priority}
+                 </span>
+               </div>
             </div>
             <p className="text-gray-700 text-lg leading-relaxed">{task.description}</p>
           </div>

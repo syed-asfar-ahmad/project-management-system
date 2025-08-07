@@ -102,11 +102,11 @@ function AddProjectForm({ onProjectCreated }) {
         <h2 className="text-2xl font-bold">Project Details</h2>
       </div>
 
-      <div>
-        <label className="block mb-1 font-medium text-gray-700 flex items-center">
-          <FileText className="w-4 h-4 mr-1" />
-          Project Name
-        </label>
+             <div>
+         <label className="block mb-1 font-medium text-gray-700 flex items-center">
+           <FileText className="w-4 h-4 mr-1" />
+           Project Name <span className="text-red-500 ml-1">*</span>
+         </label>
         <input
           type="text"
           name="name"
@@ -118,11 +118,11 @@ function AddProjectForm({ onProjectCreated }) {
         />
       </div>
 
-      <div>
-        <label className="block mb-1 font-medium text-gray-700 flex items-center">
-          <ListChecks className="w-4 h-4 mr-1" />
-          Description
-        </label>
+             <div>
+         <label className="block mb-1 font-medium text-gray-700 flex items-center">
+           <ListChecks className="w-4 h-4 mr-1" />
+           Description <span className="text-red-500 ml-1">*</span>
+         </label>
         <textarea
           name="description"
           placeholder="Brief project description"
@@ -134,13 +134,14 @@ function AddProjectForm({ onProjectCreated }) {
         />
       </div>
 
-      <div>
-        <label className="block mb-1 font-medium text-gray-700">Status</label>
+             <div>
+         <label className="block mb-1 font-medium text-gray-700">Status <span className="text-red-500 ml-1">*</span></label>
         <select
           name="status"
           value={form.status}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
+          required
         >
           <option value="Pending">Pending</option>
           <option value="In Progress">In Progress</option>
@@ -148,11 +149,11 @@ function AddProjectForm({ onProjectCreated }) {
         </select>
       </div>
 
-      <div>
-        <label className="block mb-1 font-medium text-gray-700 flex items-center">
-          <CalendarDays className="w-4 h-4 mr-1" />
-          Deadline
-        </label>
+             <div>
+         <label className="block mb-1 font-medium text-gray-700 flex items-center">
+           <CalendarDays className="w-4 h-4 mr-1" />
+           Deadline <span className="text-red-500 ml-1">*</span>
+         </label>
         <input
           type="date"
           name="deadline"

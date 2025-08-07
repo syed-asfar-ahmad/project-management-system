@@ -107,11 +107,11 @@ function AddTaskPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Title */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">
-                  <FileText size={16} className="inline mr-1" />
-                  Task Title
-                </label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1">
+                   <FileText size={16} className="inline mr-1" />
+                   Task Title <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <input
                   type="text"
                   name="title"
@@ -123,20 +123,21 @@ function AddTaskPage() {
               </div>
 
               {/* Description */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Description</label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1">Description <span className="text-red-500 ml-1">*</span></label>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
                   rows="3"
+                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 ></textarea>
               </div>
 
               {/* Project */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Project</label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1">Project <span className="text-red-500 ml-1">*</span></label>
                 <select
                   name="project"
                   value={form.project}
@@ -160,7 +161,6 @@ function AddTaskPage() {
                   name="assignedTo"
                   value={form.assignedTo}
                   onChange={handleChange}
-                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="">Select a Team Member</option>
@@ -173,12 +173,13 @@ function AddTaskPage() {
               </div>
 
               {/* Status */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Status</label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1">Status <span className="text-red-500 ml-1">*</span></label>
                 <select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
+                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="To Do">To Do</option>
@@ -188,12 +189,13 @@ function AddTaskPage() {
               </div>
 
               {/* Priority */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Priority</label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1">Priority <span className="text-red-500 ml-1">*</span></label>
                 <select
                   name="priority"
                   value={form.priority}
                   onChange={handleChange}
+                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="Low">Low</option>
@@ -203,16 +205,17 @@ function AddTaskPage() {
               </div>
 
               {/* Due Date */}
-              <div>
-                <label className="block text-gray-700 font-medium mb-1 flex items-center gap-1">
-                  <CalendarDays size={16} />
-                  Due Date
-                </label>
+                             <div>
+                 <label className="block text-gray-700 font-medium mb-1 flex items-center gap-1">
+                   <CalendarDays size={16} />
+                   Due Date <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <input
                   type="date"
                   name="dueDate"
                   value={form.dueDate}
                   onChange={handleChange}
+                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>

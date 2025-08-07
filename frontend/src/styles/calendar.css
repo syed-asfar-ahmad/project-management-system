@@ -170,17 +170,46 @@
 @media (max-width: 768px) {
   .fc .fc-toolbar {
     padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.5rem;
   }
   
   .fc .fc-toolbar-title {
-    font-size: 1.25rem !important;
+    font-size: 1.1rem !important;
+    text-align: center !important;
+    flex: 1 !important;
+    margin: 0 0.5rem !important;
   }
   
   .fc .fc-button {
-    padding: 6px 12px !important;
+    padding: 8px 12px !important;
     font-size: 0.8rem !important;
+    min-width: 40px !important;
+  }
+  
+  /* Ensure navigation buttons stay on left and right */
+  .fc .fc-prev-button,
+  .fc .fc-next-button {
+    width: 40px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Improve calendar grid for mobile */
+  .fc .fc-daygrid-day {
+    min-height: 60px !important;
+  }
+  
+  .fc .fc-daygrid-day-number {
+    font-size: 0.875rem !important;
+    padding: 2px !important;
+  }
+  
+  .fc .fc-event {
+    font-size: 0.7rem !important;
+    padding: 1px 4px !important;
   }
 }
 

@@ -291,7 +291,7 @@ function AdminDashboard() {
               <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100 h-[360px] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                    <Users size={20} className="text-green-600" /> Team Members & Their Tasks
+                    <Users size={20} className="text-green-600" /> Team Members
                   </h2>
                   <Link
                     to="/members"

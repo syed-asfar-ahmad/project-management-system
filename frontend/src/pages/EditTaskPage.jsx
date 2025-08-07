@@ -171,10 +171,10 @@ function EditTaskPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Task Title *
-                </label>
+                             <div>
+                 <label className="block text-sm font-semibold text-gray-700 mb-2">
+                   Task Title <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <input
                   type="text"
                   name="title"
@@ -186,30 +186,32 @@ function EditTaskPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Due Date
-                </label>
+                             <div>
+                 <label className="block text-sm font-semibold text-gray-700 mb-2">
+                   Due Date <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <input
                   type="date"
                   name="dueDate"
                   value={form.dueDate}
                   onChange={handleChange}
+                  required
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
                 />
               </div>
             </div>
 
             {/* Description */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Description
-              </label>
+                         <div>
+               <label className="block text-sm font-semibold text-gray-700 mb-2">
+                 Description <span className="text-red-500 ml-1">*</span>
+               </label>
               <textarea
                 name="description"
                 value={form.description}
                 onChange={handleChange}
                 rows="4"
+                required
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none"
                 placeholder="Enter task description"
               ></textarea>
@@ -217,14 +219,15 @@ function EditTaskPage() {
 
             {/* Status, Priority, and Assignment */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Status
-                </label>
+                             <div>
+                 <label className="block text-sm font-semibold text-gray-700 mb-2">
+                   Status <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
+                  required
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white"
                 >
                   <option value="To Do">To Do</option>
@@ -233,14 +236,15 @@ function EditTaskPage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Priority
-                </label>
+                             <div>
+                 <label className="block text-sm font-semibold text-gray-700 mb-2">
+                   Priority <span className="text-red-500 ml-1">*</span>
+                 </label>
                 <select
                   name="priority"
                   value={form.priority}
                   onChange={handleChange}
+                  required
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white"
                 >
                   <option value="Low">Low</option>
