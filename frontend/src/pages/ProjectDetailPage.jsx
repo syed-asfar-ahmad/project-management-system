@@ -222,21 +222,23 @@ function ProjectDetailPage() {
         {/* Header Section */}
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Briefcase size={24} className="text-white" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">{project.name}</h1>
-                  <p className="text-gray-600">Project Details</p>
-                </div>
-              </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(project.status)}`}>
-                {project.status}
-              </span>
-            </div>
-            <p className="text-gray-700 text-lg leading-relaxed">{project.description}</p>
+                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+               <div className="flex items-start gap-3">
+                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                   <Briefcase size={24} className="text-white" />
+                 </div>
+                                  <div className="flex-1 min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words leading-tight">{project.name}</h1>
+                    <p className="text-gray-600 mt-1 flex items-center gap-2">
+                      Project Details
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                        {project.status}
+                      </span>
+                    </p>
+                  </div>
+               </div>
+             </div>
+            <p className="text-gray-700 text-base sm:text-lg leading-relaxed">{project.description}</p>
           </div>
         </div>
 
@@ -290,20 +292,24 @@ function ProjectDetailPage() {
                        className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group"
                        onClick={() => navigate(`/tasks/${task._id}`)}
                      >
-                       <div className="flex items-center justify-between">
-                         <div className="flex-1">
-                           <div className="flex items-center gap-2 mb-2">
-                             {getTaskStatusIcon(task.status)}
-                             <h3 className="font-medium text-gray-800 group-hover:text-green-600 transition-colors">{task.title}</h3>
+                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-start gap-2 mb-2">
+                             <div className="flex-shrink-0 mt-0.5">
+                               {getTaskStatusIcon(task.status)}
+                             </div>
+                             <h3 className="font-medium text-gray-800 group-hover:text-green-600 transition-colors break-words leading-tight">{task.title}</h3>
                            </div>
-                           <div className="flex items-center gap-4 text-sm text-gray-600">
-                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                               {task.status}
-                             </span>
-                             <span>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}</span>
-                           </div>
+                                                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                              <span className="text-gray-600 flex items-center gap-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                                  {task.status}
+                                </span>
+                                Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}
+                              </span>
+                            </div>
                          </div>
-                         <div className="flex items-center gap-2">
+                         <div className="flex items-center gap-2 flex-shrink-0">
                            <ArrowRight size={16} className="text-gray-400 group-hover:text-green-600 transition-colors" />
                            {(user?.role === "Admin" || (user?.role === "Manager" && project.teamMembers?.some(member => 
                              typeof member === "string" ? member === user._id : member._id === user._id
