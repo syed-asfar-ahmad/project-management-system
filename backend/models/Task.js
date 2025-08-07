@@ -58,6 +58,10 @@ const taskSchema = new mongoose.Schema({
 
   attachments: [
     {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: mongoose.Types.ObjectId
+      },
       filename: String,
       path: String,
       uploadedAt: {

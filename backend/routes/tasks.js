@@ -92,31 +92,45 @@ router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), ge
 router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
 
 // Download Task Attachment - Any logged-in user
-router.get('/:taskId/attachments/:attachmentId/download', verifyToken, async (req, res) => {
+router.get('/:id/attachments/:attachmentId/download', verifyToken, async (req, res) => {
   const Task = require('../models/Task');
-  const { taskId, attachmentId } = req.params;
+  const { id, attachmentId } = req.params;
+
+  console.log('Download request:', { id, attachmentId, user: req.user.id });
 
   try {
-    const task = await Task.findById(taskId);
-    if (!task) return res.status(404).json({ error: 'Task not found' });
+    const task = await Task.findById(id);
+    if (!task) {
+      console.log('Task not found:', id);
+      return res.status(404).json({ error: 'Task not found' });
+    }
 
     const attachment = task.attachments.id(attachmentId);
-    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+    if (!attachment) {
+      console.log('Attachment not found:', attachmentId, 'in task:', id);
+      return res.status(404).json({ error: 'Attachment not found' });
+    }
+
+    console.log('Attachment found:', attachment);
 
     // If using Cloudinary or external URL, redirect to the file URL
     if (attachment.path.startsWith('http')) {
+      console.log('Redirecting to external URL:', attachment.path);
       return res.redirect(attachment.path);
     }
 
     // If using local storage, serve the file
     const filePath = path.join(__dirname, '..', attachment.path);
+    console.log('Local file path:', filePath);
     
     // Check if file exists
     const fs = require('fs');
     if (!fs.existsSync(filePath)) {
+      console.log('File not found on server:', filePath);
       return res.status(404).json({ error: 'File not found on server' });
     }
 
+    console.log('Serving file:', filePath);
     // Set headers for file download
     res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
@@ -128,12 +142,12 @@ router.get('/:taskId/attachments/:attachmentId/download', verifyToken, async (re
 });
 
 // Preview Task Attachment - Any logged-in user (without download headers)
-router.get('/:taskId/attachments/:attachmentId/preview', verifyToken, async (req, res) => {
+router.get('/:id/attachments/:attachmentId/preview', verifyToken, async (req, res) => {
   const Task = require('../models/Task');
-  const { taskId, attachmentId } = req.params;
+  const { id, attachmentId } = req.params;
 
   try {
-    const task = await Task.findById(taskId);
+    const task = await Task.findById(id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     const attachment = task.attachments.id(attachmentId);
@@ -174,12 +188,12 @@ router.get('/:taskId/attachments/:attachmentId/preview', verifyToken, async (req
 });
 
 // Delete Task Attachment - Admin only
-router.delete('/:taskId/attachments/:attachmentId', verifyToken, checkRole('Admin'), async (req, res) => {
+router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Admin'), async (req, res) => {
   const Task = require('../models/Task');
-  const { taskId, attachmentId } = req.params;
+  const { id, attachmentId } = req.params;
 
   try {
-    const task = await Task.findById(taskId);
+    const task = await Task.findById(id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     const attachment = task.attachments.id(attachmentId);
@@ -216,13 +230,18 @@ router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) 
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    task.attachments.push({
+    const newAttachment = {
+      _id: new require('mongoose').Types.ObjectId(),
       filename: req.file.originalname,
       path: req.file.path,
-    });
+      uploadedAt: new Date()
+    };
 
+    task.attachments.push(newAttachment);
     await task.save();
-    res.status(200).json({ message: 'File uploaded', file: req.file });
+    
+    console.log('File uploaded:', newAttachment);
+    res.status(200).json({ message: 'File uploaded', file: newAttachment });
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
