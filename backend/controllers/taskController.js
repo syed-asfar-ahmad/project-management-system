@@ -10,7 +10,7 @@ const createTask = async (req, res) => {
       title,
       description,
       project,
-      assignedTo,
+      assignedTo: assignedTo || [],
       status,
       priority,
       dueDate,
@@ -207,9 +207,15 @@ const deleteTask = async (req, res) => {
   const { id } = req.params;
 
   try {
-    await Task.findByIdAndDelete(id);
-    res.json({ message: 'Task deleted' });
+    const deletedTask = await Task.findByIdAndDelete(id);
+    
+    if (!deletedTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    
+    res.json({ message: 'Task deleted successfully' });
   } catch (err) {
+    console.error('Error deleting task:', err);
     res.status(500).json({ error: 'Error deleting task' });
   }
 };

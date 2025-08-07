@@ -99,6 +99,8 @@ router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskA
 // Delete Task - Admin or Manager (if assigned to project)
 router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
 
+
+
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);
 

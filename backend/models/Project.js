@@ -49,4 +49,25 @@ const projectSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// Pre-delete hook to automatically delete associated tasks
+projectSchema.pre('findOneAndDelete', async function(next) {
+  const projectId = this.getQuery()._id;
+  if (projectId) {
+    const Task = require('./Task');
+    await Task.deleteMany({ project: projectId });
+    console.log(`Automatically deleted tasks for project ${projectId}`);
+  }
+  next();
+});
+
+projectSchema.pre('deleteOne', async function(next) {
+  const projectId = this.getQuery()._id;
+  if (projectId) {
+    const Task = require('./Task');
+    await Task.deleteMany({ project: projectId });
+    console.log(`Automatically deleted tasks for project ${projectId}`);
+  }
+  next();
+});
+
 module.exports = mongoose.model('Project', projectSchema);

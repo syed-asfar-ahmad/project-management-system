@@ -86,9 +86,10 @@ const checkManagerTaskAccess = async (req, res, next) => {
     }
 
     // Check if the user is a manager and is assigned to the project this task belongs to (as team member or project manager)
-    const isAssignedToProject = task.project.teamMembers.some(memberId => 
-      memberId.toString() === req.user.id
-    );
+    const isAssignedToProject = task.project.teamMembers && 
+      task.project.teamMembers.some(memberId => 
+        memberId.toString() === req.user.id
+      );
     
     const isProjectManager = task.project.projectManager && 
       task.project.projectManager.toString() === req.user.id;

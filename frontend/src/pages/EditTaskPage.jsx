@@ -43,24 +43,37 @@ function EditTaskPage() {
         const task = taskRes.data;
         const projectId = task.project?._id || task.project;
 
-        const teamRes = await axios.get(`${API}/projects/${projectId}/team-members`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Only fetch team members if project exists
+        if (projectId) {
+          try {
+            const teamRes = await axios.get(`${API}/projects/${projectId}/team-members`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
 
-        const options = teamRes.data.map((user) => ({
-          value: user._id,
-          label: `${user.name} (${user.email})`,
-        }));
+            const options = teamRes.data.map((user) => ({
+              value: user._id,
+              label: `${user.name} (${user.email})`,
+            }));
 
-        setTeamOptions(options);
+            setTeamOptions(options);
 
-        const selected = options.find(
-          (opt) => (task.assignedTo[0]?._id || task.assignedTo[0]) === opt.value
-        );
+            const selected = options.find(
+              (opt) => (task.assignedTo[0]?._id || task.assignedTo[0]) === opt.value
+            );
 
-        setAssignedOption(selected || null);
+            setAssignedOption(selected || null);
+          } catch (err) {
+            console.error('Error fetching team members:', err);
+            setTeamOptions([]);
+            setAssignedOption(null);
+          }
+        } else {
+          // If no project, set empty options
+          setTeamOptions([]);
+          setAssignedOption(null);
+        }
 
         setForm({
           title: task.title,
@@ -288,27 +301,27 @@ function EditTaskPage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-              >
-                <XCircle size={18} /> Cancel
-              </button>
+                         {/* Action Buttons */}
+             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+               <button
+                 type="button"
+                 onClick={handleCancel}
+                 className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors justify-center"
+               >
+                 <XCircle size={18} /> Cancel
+               </button>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className={`flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors ${
-                  submitting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                <Save size={18} />
-                {submitting ? 'Updating...' : 'Update Task'}
-              </button>
-            </div>
+               <button
+                 type="submit"
+                 disabled={submitting}
+                 className={`flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors justify-center ${
+                   submitting ? 'opacity-70 cursor-not-allowed' : ''
+                 }`}
+               >
+                 <Save size={18} />
+                 {submitting ? 'Updating...' : 'Update Task'}
+               </button>
+             </div>
           </form>
         </div>
       </main>
