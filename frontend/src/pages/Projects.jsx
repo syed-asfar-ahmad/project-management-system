@@ -190,8 +190,8 @@ function Projects() {
                           </span>
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Calendar size={16} className="text-green-500" />
                               <span className="font-medium">Due:</span>
@@ -207,7 +207,7 @@ function Projects() {
                           
                           <Link
                             to={`/projects/${project._id}`}
-                            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg"
+                            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
                           >
                             <span>View Details</span>
                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
