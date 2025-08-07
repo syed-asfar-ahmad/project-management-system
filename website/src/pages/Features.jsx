@@ -424,7 +424,7 @@ export default function Features() {
               to="https://project-management-system-1emk.vercel.app/signup"
               className="group inline-flex items-center px-10 py-5 bg-white text-green-600 rounded-2xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-2xl"
             >
-              Try It Free
+              Start Using Now
               <ArrowRight size={22} className="ml-3 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
