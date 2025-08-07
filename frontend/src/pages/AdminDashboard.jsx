@@ -41,6 +41,7 @@ function AdminDashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
+  const [contactCount, setContactCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentProjectsPage, setCurrentProjectsPage] = useState(1);
   const [currentTasksPage, setCurrentTasksPage] = useState(1);
@@ -51,7 +52,7 @@ function AdminDashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [projRes, taskRes, memberRes] = await Promise.all([
+        const [projRes, taskRes, memberRes, contactRes] = await Promise.all([
           axios.get(`${API}/projects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
@@ -61,10 +62,14 @@ function AdminDashboard() {
           axios.get(`${API}/users/team-members`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
+          axios.get(`${API}/contact/admin`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
         setProjects(projRes.data);
         setTasks(taskRes.data);
         setMembers(memberRes.data);
+        setContactCount(contactRes.data.length);
       } catch (err) {
         toast.error("Failed to fetch dashboard data");
       } finally {
@@ -237,10 +242,10 @@ function AdminDashboard() {
 
               <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Contact Messages</p>
-                    <p className="text-3xl font-bold text-gray-800">-</p>
-                  </div>
+                                     <div>
+                     <p className="text-sm font-medium text-gray-600">Contact Messages</p>
+                     <p className="text-3xl font-bold text-gray-800">{contactCount}</p>
+                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                     <Mail size={24} className="text-orange-600" />
                   </div>
