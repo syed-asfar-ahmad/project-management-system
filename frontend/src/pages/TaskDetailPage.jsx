@@ -257,7 +257,8 @@ function TaskDetailPage() {
     if (attachment.path.startsWith('http')) {
       window.open(attachment.path, '_blank');
     } else {
-      window.open(`${API}/${attachment.path}`, '_blank');
+      // For local files, use the preview endpoint
+      window.open(`${API}/tasks/${id}/attachments/${attachment._id}/preview`, '_blank');
     }
   };
 

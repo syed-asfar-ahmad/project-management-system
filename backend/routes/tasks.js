@@ -91,44 +91,6 @@ router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), ge
 // Get Tasks for Calendar View - Any logged-in user
 router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
 
-// Get Task by ID - Any logged-in user
-router.get('/:id', verifyToken, getTaskById);
-
-// Update Task - Admin or Manager (if assigned to project)
-router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, updateTask);
-
-// Delete Task - Admin or Manager (if assigned to project)
-router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
-
-
-
-// Add Comment to Task - Any logged-in user
-router.post('/:id/comments', verifyToken, addCommentToTask);
-
-router.post('/:id/upload', verifyToken, upload.single('file'), uploadTaskFile);
-
-
-// Upload File to Task - Any logged-in user
-router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) => {
-  const Task = require('../models/Task');
-
-  try {
-    const task = await Task.findById(req.params.id);
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-
-    task.attachments.push({
-      filename: req.file.originalname,
-      path: req.file.path,
-    });
-
-    await task.save();
-    res.status(200).json({ message: 'File uploaded', file: req.file });
-  } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).json({ error: 'Upload failed' });
-  }
-});
-
 // Download Task Attachment - Any logged-in user
 router.get('/:taskId/attachments/:attachmentId/download', verifyToken, async (req, res) => {
   const Task = require('../models/Task');
@@ -141,21 +103,73 @@ router.get('/:taskId/attachments/:attachmentId/download', verifyToken, async (re
     const attachment = task.attachments.id(attachmentId);
     if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
 
-    // Set headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
-    res.setHeader('Content-Type', 'application/octet-stream');
-
-    // If using Cloudinary, redirect to the file URL
+    // If using Cloudinary or external URL, redirect to the file URL
     if (attachment.path.startsWith('http')) {
       return res.redirect(attachment.path);
     }
 
     // If using local storage, serve the file
     const filePath = path.join(__dirname, '..', attachment.path);
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found on server' });
+    }
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${attachment.filename}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
     res.sendFile(filePath);
   } catch (err) {
     console.error('Download error:', err);
     res.status(500).json({ error: 'Download failed' });
+  }
+});
+
+// Preview Task Attachment - Any logged-in user (without download headers)
+router.get('/:taskId/attachments/:attachmentId/preview', verifyToken, async (req, res) => {
+  const Task = require('../models/Task');
+  const { taskId, attachmentId } = req.params;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    const attachment = task.attachments.id(attachmentId);
+    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    // If using Cloudinary or external URL, redirect to the file URL
+    if (attachment.path.startsWith('http')) {
+      return res.redirect(attachment.path);
+    }
+
+    // If using local storage, serve the file
+    const filePath = path.join(__dirname, '..', attachment.path);
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found on server' });
+    }
+
+    // Set appropriate content type for preview (no download headers)
+    const extension = attachment.filename.split('.').pop()?.toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension)) {
+      contentType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+    } else if (extension === 'pdf') {
+      contentType = 'application/pdf';
+    } else if (extension === 'txt') {
+      contentType = 'text/plain';
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.sendFile(filePath);
+  } catch (err) {
+    console.error('Preview error:', err);
+    res.status(500).json({ error: 'Preview failed' });
   }
 });
 
@@ -179,6 +193,39 @@ router.delete('/:taskId/attachments/:attachmentId', verifyToken, checkRole('Admi
   } catch (err) {
     console.error('Delete attachment error:', err);
     res.status(500).json({ error: 'Delete failed' });
+  }
+});
+
+// Get Task by ID - Any logged-in user
+router.get('/:id', verifyToken, getTaskById);
+
+// Update Task - Admin or Manager (if assigned to project)
+router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, updateTask);
+
+// Delete Task - Admin or Manager (if assigned to project)
+router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
+
+// Add Comment to Task - Any logged-in user
+router.post('/:id/comments', verifyToken, addCommentToTask);
+
+// Upload File to Task - Any logged-in user
+router.post('/:id/upload', verifyToken, upload.single('file'), async (req, res) => {
+  const Task = require('../models/Task');
+
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    task.attachments.push({
+      filename: req.file.originalname,
+      path: req.file.path,
+    });
+
+    await task.save();
+    res.status(200).json({ message: 'File uploaded', file: req.file });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ error: 'Upload failed' });
   }
 });
 
