@@ -44,7 +44,9 @@ const updateProject = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    const updated = await Project.findByIdAndUpdate(id, req.body, { new: true });
+    const updated = await Project.findByIdAndUpdate(id, req.body, { new: true })
+      .populate('teamMembers', 'name email role')
+      .populate('projectManager', 'name email role');
 
     res.json({ message: 'Project updated', project: updated });
   } catch (err) {

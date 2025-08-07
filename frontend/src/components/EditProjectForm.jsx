@@ -26,8 +26,8 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
     description: project.description || "",
     deadline: project.deadline?.slice(0, 10) || "",
          status: project.status || "Pending",
-    projectManager: project.projectManager || "",
-    teamMembers: project.teamMembers?.map((member) => member._id) || [],
+    projectManager: project.projectManager?._id || project.projectManager || "",
+    teamMembers: project.teamMembers?.map((member) => typeof member === 'object' ? member._id : member) || [],
   });
 
   useEffect(() => {
