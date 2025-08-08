@@ -1,15 +1,15 @@
-## <span style="color: #2563eb">🚀 Live Demo</span>
+## Live Demo
 
 - **[Dashboard](https://project-management-system-1emk.vercel.app/)**
 - **[Website](https://project-management-system-navy.vercel.app/)**
 
-## <span style="color: #059669">👤 Default Admin Account</span>
+## Default Admin Account
 
 - **Email**: `ahmad@example.com`
 - **Password**: `123456`
 - **Role**: Admin
 
-## <span style="color: #dc2626">✨ Features</span>
+## Features
 
 - **Project & Task Management** - Create, assign, and track projects with deadlines
 - **Team Collaboration** - Role-based access (Admin, Manager, Team Member)
@@ -20,11 +20,11 @@
 - **Real-time Comments** - Team communication on tasks
 - **Dashboard Analytics** - Project progress and statistics
 
-## <span style="color: #7c3aed">🛠️ Tech Stack</span>
+## Tech Stack
 
 <div align="center">
 
-| <span style="color: #2563eb">**Frontend**</span> | <span style="color: #059669">**Backend**</span> | <span style="color: #dc2626">**Deployment**</span> |
+| **Frontend** | **Backend** | **Deployment** |
 |:-------------:|:-------------:|:-------------:|
 | React 18 | Node.js | Render |
 | Tailwind CSS | Express.js | Vercel |
@@ -33,17 +33,17 @@
 
 </div>
 
-## <span style="color: #ea580c">📥 Clone Repository</span>
+## Clone Repository
 
 ```bash
 git clone https://github.com/syed-asfar-ahmad/project-management-system.git
 ```
 
-## <span style="color: #0891b2">👥 User Roles</span>
+## User Roles
 
 <div align="center">
 
-| <span style="color: #7c3aed">**Role**</span> | <span style="color: #059669">**Permissions**</span> |
+| Role | Permissions |
 |------|-------------|
 | **Admin** | Full system access, manage all projects/tasks, promote users |
 | **Manager** | Manage assigned projects, create tasks, view analytics |
