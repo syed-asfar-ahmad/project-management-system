@@ -1,7 +1,7 @@
 ## Live Demo
 
-- **Dashboard**: [https://project-management-system-1emk.vercel.app/]
-- **Website**: [https://project-management-system-navy.vercel.app/]
+- **[Dashboard]**: (https://project-management-system-1emk.vercel.app/)
+- **[Website]**: (https://project-management-system-navy.vercel.app/)
 
 ## Default Admin Account
 
