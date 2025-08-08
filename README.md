@@ -16,6 +16,8 @@
 - 📅 **Calendar View** - Visual timeline of tasks and projects
 - 📱 **Responsive Design** - Works perfectly on desktop and mobile
 - 🔐 **Secure Authentication** - JWT-based user authentication
+- 💬 **Real-time Comments** - Team communication on tasks
+- 📊 **Dashboard Analytics** - Project progress and statistics
 
 ## 🛠 Tech Stack
 
@@ -26,57 +28,17 @@
 | Lucide React | MongoDB | MongoDB Atlas |
 | FullCalendar | JWT | Vercel Blob |
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v18+)
-- MongoDB Atlas account
-- Vercel account
-
-### Installation
+## 🚀 Clone Repository
 
 ```bash
-# Clone repository
 git clone https://github.com/yourusername/taskpilot.git
 cd taskpilot
-
-# Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
-cd ../website && npm install
-```
-
-### Environment Setup
-
-**Backend (.env)**
-```env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
-```
-
-**Frontend (.env)**
-```env
-REACT_APP_API_BASE_URL=https://your-backend-url.onrender.com/api
-```
-
-### Run Development Servers
-
-```bash
-# Backend
-cd backend && npm run dev
-
-# Frontend (Dashboard)
-cd frontend && npm start
-
-# Website (Marketing)
-cd website && npm start
 ```
 
 ## 👤 Default Admin Account
 
 - **Email**: `ahmad@example.com`
-- **Password**: `admin123`
+- **Password**: `123456`
 - **Role**: Admin
 
 ## 🎭 User Roles
@@ -93,6 +55,7 @@ cd website && npm start
   <img src="https://via.placeholder.com/300x200/16a34a/ffffff?text=Dashboard" alt="Dashboard" width="300"/>
   <img src="https://via.placeholder.com/300x200/7c3aed/ffffff?text=Projects" alt="Projects" width="300"/>
   <img src="https://via.placeholder.com/300x200/059669/ffffff?text=Calendar" alt="Calendar" width="300"/>
+  <img src="https://via.placeholder.com/300x200/dc2626/ffffff?text=Team+Members" alt="Team Members" width="300"/>
 </div>
 
 ## 🌐 Live Demo
@@ -100,46 +63,8 @@ cd website && npm start
 - **Dashboard**: [https://your-dashboard-url.vercel.app](https://your-dashboard-url.vercel.app)
 - **Website**: [https://your-website-url.vercel.app](https://your-website-url.vercel.app)
 
-## 📚 API Endpoints
-
-### Core Routes
-```http
-POST   /api/auth/login          # User authentication
-GET    /api/projects            # Get all projects
-POST   /api/projects            # Create new project
-GET    /api/tasks               # Get all tasks
-POST   /api/tasks               # Create new task
-PUT    /api/users/:id/role      # Update user role
-```
-
-## 🚀 Deployment
-
-### Backend (Render)
-1. Connect GitHub repo to Render
-2. Set environment variables
-3. Deploy as Web Service
-
-### Frontend (Vercel)
-1. Connect GitHub repo to Vercel
-2. Set build command: `npm run build`
-3. Deploy
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
 ---
 
 <div align="center">
   <strong>Made with ❤️ by the TaskPilot Team</strong>
-  
-  [Report Bug](https://github.com/yourusername/taskpilot/issues) • [Request Feature](https://github.com/yourusername/taskpilot/issues)
 </div>
