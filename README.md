@@ -30,16 +30,9 @@
 
 ## Clone Repository
 
-<div align="center">
-  <div style="background: #1f2937; padding: 20px; border-radius: 10px; margin: 20px 0;">
-    <code style="color: #10b981; font-size: 16px;">
-      git clone https://github.com/yourusername/taskpilot.git<br/>
-      cd taskpilot
-    </code>
-  </div>
-</div>
-
----
+```bash
+git clone https://github.com/syed-asfar-ahmad/project-management-system.git
+```
 
 ## Default Admin Account
 
