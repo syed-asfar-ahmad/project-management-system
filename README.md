@@ -1,6 +1,7 @@
 ## Live Demo
 
-- **Dashboard**: [https://project-management-system-1emk.vercel.app/](https://project-management-system-1emk.vercel.app/)
+- **Dashboard**: [https://project-management-system-1emk.vercel.app/]
+- **Website**: [https://project-management-system-navy.vercel.app/]
 
 ## Default Admin Account
 
@@ -8,7 +9,7 @@
 - **Password**: `123456`
 - **Role**: Admin
 
-## [Features](https://project-management-system-1emk.vercel.app/)
+## Features
 
 - **Project & Task Management** - Create, assign, and track projects with deadlines
 - **Team Collaboration** - Role-based access (Admin, Manager, Team Member)
@@ -17,7 +18,7 @@
 - **Responsive Design** - Works perfectly on desktop and mobile
 - **Secure Authentication** - JWT-based user authentication
 - **Real-time Comments** - Team communication on tasks
-- **[Dashboard](https://project-management-system-1emk.vercel.app/) Analytics** - Project progress and statistics
+- **Dashboard Analytics** - Project progress and statistics
 
 ## Tech Stack
 
@@ -40,8 +41,12 @@ git clone https://github.com/syed-asfar-ahmad/project-management-system.git
 
 ## User Roles
 
+<div align="center">
+
 | Role | Permissions |
 |------|-------------|
 | **Admin** | Full system access, manage all projects/tasks, promote users |
 | **Manager** | Manage assigned projects, create tasks, view analytics |
 | **Team Member** | View assigned tasks, update status, add comments |
+
+</div>
