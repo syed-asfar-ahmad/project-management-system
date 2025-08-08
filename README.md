@@ -21,12 +21,16 @@
 
 ## 🛠 Tech Stack
 
-| Frontend | Backend | Deployment |
-|----------|---------|------------|
-| React 18 | Node.js | Render |
-| Tailwind CSS | Express.js | Vercel |
-| Lucide React | MongoDB | MongoDB Atlas |
-| FullCalendar | JWT | Vercel Blob |
+<div align="center">
+
+| **Frontend** | **Backend** | **Deployment** |
+|:-------------:|:-------------:|:-------------:|
+| ![React](https://img.shields.io/badge/React-18.0-61DAFB?style=for-the-badge&logo=react) | ![Node.js](https://img.shields.io/badge/Node.js-18.0-339933?style=for-the-badge&logo=node.js) | ![Render](https://img.shields.io/badge/Render-00ADD9?style=for-the-badge&logo=render) |
+| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) | ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white) | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel) |
+| ![Lucide React](https://img.shields.io/badge/Lucide_React-000000?style=for-the-badge) | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | ![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb) |
+| ![FullCalendar](https://img.shields.io/badge/FullCalendar-4285F4?style=for-the-badge&logo=google&logoColor=white) | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens) | ![Vercel Blob](https://img.shields.io/badge/Vercel_Blob-000000?style=for-the-badge&logo=vercel) |
+
+</div>
 
 ## 🚀 Clone Repository
 
@@ -47,13 +51,6 @@ git clone https://github.com/syed-asfar-ahmad/project-management-system.git
 | **Admin** | Full system access, manage all projects/tasks, promote users |
 | **Manager** | Manage assigned projects, create tasks, view analytics |
 | **Team Member** | View assigned tasks, update status, add comments |
-
-## 📱 Screenshots
-
-![Dashboard](https://via.placeholder.com/400x250/16a34a/ffffff?text=Dashboard)
-![Projects](https://via.placeholder.com/400x250/7c3aed/ffffff?text=Projects)
-![Calendar](https://via.placeholder.com/400x250/059669/ffffff?text=Calendar)
-![Team Members](https://via.placeholder.com/400x250/dc2626/ffffff?text=Team+Members)
 
 ## 🌐 Live Demo
 
