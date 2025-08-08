@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path'); // Added for file path handling
 const multer = require('multer');
 const { put } = require("@vercel/blob");
+const mongoose = require('mongoose');
 
 const {
   createTask,
@@ -242,23 +243,38 @@ router.post('/:id/comments', verifyToken, addCommentToTask);
 
 // Upload File to Task - Any logged-in user
 router.post('/:id/upload', verifyToken, (req, res, next) => {
-  memoryUpload.single('file')(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading
-      console.error('Multer error:', err);
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'File too large. Maximum size is 10MB' });
+  // Use local storage if BLOB_READ_WRITE_TOKEN is not configured
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.log('BLOB_READ_WRITE_TOKEN not configured, using local storage');
+    upload.single('file')(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        console.error('Multer error:', err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: 'File too large. Maximum size is 5MB' });
+        }
+        return res.status(400).json({ error: 'File upload error: ' + err.message });
+      } else if (err) {
+        console.error('Unknown upload error:', err);
+        return res.status(400).json({ error: 'File upload failed: ' + err.message });
       }
-      return res.status(400).json({ error: 'File upload error: ' + err.message });
-    } else if (err) {
-      // An unknown error occurred
-      console.error('Unknown upload error:', err);
-      return res.status(400).json({ error: 'File upload failed: ' + err.message });
-    }
-    
-    // Everything went fine, proceed with the upload
-    next();
-  });
+      next();
+    });
+  } else {
+    // Use Vercel Blob storage
+    memoryUpload.single('file')(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        console.error('Multer error:', err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: 'File too large. Maximum size is 10MB' });
+        }
+        return res.status(400).json({ error: 'File upload error: ' + err.message });
+      } else if (err) {
+        console.error('Unknown upload error:', err);
+        return res.status(400).json({ error: 'File upload failed: ' + err.message });
+      }
+      next();
+    });
+  }
 }, async (req, res) => {
   const Task = require('../models/Task');
 
@@ -267,36 +283,47 @@ router.post('/:id/upload', verifyToken, (req, res, next) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Check if BLOB_READ_WRITE_TOKEN is configured
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('BLOB_READ_WRITE_TOKEN not configured');
-      return res.status(500).json({ error: 'File upload service not configured. Please contact administrator.' });
-    }
-
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    // Generate unique filename for Vercel Blob
-    const timestamp = Date.now();
-    const filename = `task-${req.params.id}-${req.user.id}-${timestamp}-${req.file.originalname}`;
+    let filePath;
+    let attachmentData;
 
-    // Upload to Vercel Blob
-    const blob = await put(filename, req.file.buffer, {
-      access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN
-    });
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      // Upload to Vercel Blob
+      try {
+        const timestamp = Date.now();
+        const filename = `task-${req.params.id}-${req.user.id}-${timestamp}-${req.file.originalname}`;
+
+        const blob = await put(filename, req.file.buffer, {
+          access: "public",
+          token: process.env.BLOB_READ_WRITE_TOKEN
+        });
+
+        filePath = blob.url;
+        console.log('File uploaded to Vercel Blob:', blob.url);
+      } catch (blobError) {
+        console.error('Vercel Blob upload failed, falling back to local storage:', blobError);
+        // Fallback to local storage
+        filePath = req.file.path;
+      }
+    } else {
+      // Use local storage
+      filePath = req.file.path;
+      console.log('File uploaded to local storage:', filePath);
+    }
 
     const newAttachment = {
-      _id: new require('mongoose').Types.ObjectId(),
+      _id: new mongoose.Types.ObjectId(),
       filename: req.file.originalname,
-      path: blob.url, // Store the Vercel Blob URL
+      path: filePath,
       uploadedAt: new Date()
     };
 
     task.attachments.push(newAttachment);
     await task.save();
     
-    console.log('File uploaded to Vercel Blob:', newAttachment);
+    console.log('File uploaded successfully:', newAttachment);
     res.status(200).json({ message: 'File uploaded', file: newAttachment });
   } catch (err) {
     console.error('Upload error:', err);
