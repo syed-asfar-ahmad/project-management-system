@@ -18,6 +18,12 @@ router.post("/", verifyToken, upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    // Check if BLOB_READ_WRITE_TOKEN is configured
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('BLOB_READ_WRITE_TOKEN not configured');
+      return res.status(500).json({ error: 'File upload service not configured. Please contact administrator.' });
+    }
+
     console.log("File received:", file.originalname, "Size:", file.size);
 
     // Generate unique filename
