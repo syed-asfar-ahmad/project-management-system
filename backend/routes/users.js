@@ -42,9 +42,9 @@ router.put('/:userId/role', verifyToken, async (req, res) => {
     const { userId } = req.params;
     const { newRole } = req.body;
 
-    // Validate role
-    if (!['Team Member', 'Manager', 'Admin'].includes(newRole)) {
-      return res.status(400).json({ message: 'Invalid role' });
+    // Validate role - Admin role is reserved for main admin only
+    if (!['Team Member', 'Manager'].includes(newRole)) {
+      return res.status(400).json({ message: 'Invalid role. Admin role is reserved for main administrator only.' });
     }
 
     // Prevent admin from demoting themselves
@@ -58,18 +58,18 @@ router.put('/:userId/role', verifyToken, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Prevent modification of ahmad@example.com (Super Admin)
+    // Prevent modification of main admin account (ahmad@example.com)
     if (userToUpdate.email === 'ahmad@example.com') {
-      return res.status(403).json({ message: 'Cannot modify Super Admin account' });
+      return res.status(403).json({ message: 'Cannot modify main administrator account' });
     }
 
-    // Role hierarchy restrictions
+    // Role hierarchy restrictions - only Team Member ↔ Manager allowed
     if (userToUpdate.role === 'Team Member' && newRole !== 'Manager') {
       return res.status(400).json({ message: 'Team Members can only be promoted to Manager' });
     }
 
-    if (userToUpdate.role === 'Manager' && newRole === 'Admin' && req.user.email !== 'ahmad@example.com') {
-      return res.status(403).json({ message: 'Only Super Admin can promote to Admin' });
+    if (userToUpdate.role === 'Manager' && newRole !== 'Team Member') {
+      return res.status(400).json({ message: 'Managers can only be demoted to Team Member' });
     }
 
     const user = await User.findByIdAndUpdate(

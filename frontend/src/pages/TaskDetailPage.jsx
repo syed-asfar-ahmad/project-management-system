@@ -232,18 +232,28 @@ function TaskDetailPage() {
   };
 
   const handleDownload = async (attachmentId) => {
-
-    
     try {
+      const attachment = task.attachments.find(a => a._id === attachmentId);
+      if (!attachment) {
+        toast.error("Attachment not found");
+        return;
+      }
+
       const response = await axios.get(`${API}/tasks/${id}/attachments/${attachmentId}/download`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Create blob with proper MIME type
+      const blob = new Blob([response.data], { 
+        type: response.headers['content-type'] || 'application/octet-stream' 
+      });
+      
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', task.attachments.find(a => a._id === attachmentId)?.filename || 'file');
+      link.setAttribute('download', attachment.filename || 'file');
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -251,16 +261,39 @@ function TaskDetailPage() {
       
       toast.success("File downloaded successfully!");
     } catch (err) {
+      console.error('Download error:', err);
       toast.error("Failed to download file");
     }
   };
 
-  const handlePreview = (attachment) => {
-    if (attachment.path.startsWith('http')) {
-      window.open(attachment.path, '_blank');
-    } else {
-      // For local files, use the preview endpoint
-      window.open(`${API}/tasks/${id}/attachments/${attachment._id}/preview`, '_blank');
+  const handlePreview = async (attachment) => {
+    try {
+      if (attachment.path.startsWith('http')) {
+        // For Vercel Blob URLs, open directly
+        window.open(attachment.path, '_blank');
+      } else {
+        // For local files, get the file first
+        const response = await axios.get(`${API}/tasks/${id}/attachments/${attachment._id}/download`, {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        });
+
+        // Create blob with proper MIME type
+        const blob = new Blob([response.data], { 
+          type: response.headers['content-type'] || 'application/octet-stream' 
+        });
+        
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up URL after a delay
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Preview error:', err);
+      toast.error("Failed to preview file");
     }
   };
 

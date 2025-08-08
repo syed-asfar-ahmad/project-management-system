@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   ClipboardList,
   BarChart3,
@@ -31,6 +32,10 @@ import {
 import { Link } from "react-router-dom";
 
 export default function Features() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="bg-white text-gray-800">
       {/* Hero Section - Clean Green Theme */}

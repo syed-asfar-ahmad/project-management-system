@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   ClipboardList,
   BarChart3,
@@ -26,6 +27,10 @@ import {
 } from "lucide-react";
 
 export default function Home() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="bg-white text-gray-800">
       {/* Hero Section - Clean Green Theme */}
@@ -259,8 +264,12 @@ export default function Home() {
                   "TaskPilot has completely transformed our workflow. The project management features are excellent!"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-full flex items-center justify-center mr-4 text-white font-bold">
-                    AH
+                  <div className="w-12 h-12 rounded-full mr-4 overflow-hidden shadow-lg">
+                    <img 
+                      src="/images/profile1.jpg" 
+                      alt="Asfar" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">Asfar</div>
@@ -281,8 +290,12 @@ export default function Home() {
                   "Finally, a tool that understands how teams actually work. Simple and effective!"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center mr-4 text-white font-bold">
-                    HT
+                  <div className="w-12 h-12 rounded-full mr-4 overflow-hidden shadow-lg">
+                    <img 
+                      src="/images/profile2.jpg" 
+                      alt="Hussnain" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">Hussnain</div>
@@ -303,8 +316,12 @@ export default function Home() {
                   "The task management and collaboration features have increased our productivity significantly!"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-purple-600 rounded-full flex items-center justify-center mr-4 text-white font-bold">
-                    TQ
+                  <div className="w-12 h-12 rounded-full mr-4 overflow-hidden shadow-lg">
+                    <img 
+                      src="/images/profile3.jpg" 
+                      alt="Taqi" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">Taqi</div>

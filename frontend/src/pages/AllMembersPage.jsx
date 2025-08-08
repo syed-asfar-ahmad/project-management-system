@@ -41,6 +41,10 @@ function AllMembersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchMembers = async () => {
       setLoading(true);
       try {
@@ -247,7 +251,7 @@ function AllMembersPage() {
                   )}
 
                   {/* Role Management - Admin Only */}
-                  {user?.role === "Admin" && member._id !== user._id && member.email !== "ahmad@example.com" && (
+                  {user?.role === "Admin" && member._id !== user._id && (
                     <div className="mt-4 pt-4 border-t border-white/30 relative z-10">
                       <div className="flex flex-wrap gap-2">
                         {member.role === "Team Member" && (
@@ -261,29 +265,11 @@ function AllMembersPage() {
                         )}
                         {member.role === "Manager" && (
                           <button
-                            onClick={() => handleRoleUpdate(member._id, "Admin")}
-                            className="inline-flex items-center px-3 py-1 bg-red-500 text-white rounded-full text-xs font-medium hover:bg-red-600 transition-colors duration-200 cursor-pointer relative z-20"
-                          >
-                            <Crown size={12} className="mr-1" />
-                            Promote to Admin
-                          </button>
-                        )}
-                        {member.role === "Manager" && (
-                          <button
                             onClick={() => handleRoleUpdate(member._id, "Team Member")}
                             className="inline-flex items-center px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-medium hover:bg-gray-600 transition-colors duration-200 cursor-pointer relative z-20"
                           >
                             <ArrowUp size={12} className="mr-1 rotate-180" />
                             Demote to Team Member
-                          </button>
-                        )}
-                        {member.role === "Admin" && member.email !== "ahmad@example.com" && (
-                          <button
-                            onClick={() => handleRoleUpdate(member._id, "Manager")}
-                            className="inline-flex items-center px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-medium hover:bg-gray-600 transition-colors duration-200 cursor-pointer relative z-20"
-                          >
-                            <ArrowUp size={12} className="mr-1 rotate-180" />
-                            Demote to Manager
                           </button>
                         )}
                       </div>
@@ -296,9 +282,9 @@ function AllMembersPage() {
                       <div className="text-center">
                         <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full text-xs font-medium">
                           <Crown size={12} className="mr-1" />
-                          Super Admin (Protected)
+                          Main Admin
                         </div>
-                        <p className="text-xs text-gray-600 mt-2">This account cannot be modified</p>
+                        <p className="text-xs text-gray-600 mt-2">Primary administrator account</p>
                       </div>
                     </div>
                   )}

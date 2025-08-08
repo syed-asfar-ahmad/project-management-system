@@ -20,7 +20,11 @@ function TaskCalendarPage() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
-    useEffect(() => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       try {

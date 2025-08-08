@@ -30,6 +30,10 @@ function TaskListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
       try {

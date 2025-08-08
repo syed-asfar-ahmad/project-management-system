@@ -15,6 +15,10 @@ function Projects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [projectsPerPage] = useState(5);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const loadProjects = useCallback(async () => {
     setLoading(true);
     try {

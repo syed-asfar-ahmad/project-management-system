@@ -3,6 +3,10 @@ import axios from "axios";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function Contact() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);

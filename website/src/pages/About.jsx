@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import { Lightbulb, Rocket, Heart, Users, Target, Award, CheckCircle, ArrowRight, Star, Zap, Shield, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function About() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="bg-white text-gray-800">
       {/* Hero Section */}
