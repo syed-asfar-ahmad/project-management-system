@@ -112,6 +112,34 @@ const getProjectComments = async (req, res) => {
   }
 };
 
+// DELETE comment from a project (Admin only)
+const deleteProjectComment = async (req, res) => {
+  try {
+    const { projectId, commentId } = req.params;
+    
+    // Check if user is admin
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only admins can delete comments' });
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    // Find and remove the comment
+    const commentIndex = project.comments.findIndex(comment => comment._id.toString() === commentId);
+    if (commentIndex === -1) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    project.comments.splice(commentIndex, 1);
+    await project.save();
+
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+};
+
 // GET team members of a specific project
 const getProjectTeamMembers = async (req, res) => {
   try {
@@ -149,6 +177,7 @@ module.exports = {
   deleteProject,
   addCommentToProject,
   getProjectComments,
+  deleteProjectComment,
   getProjectTeamMembers,
   getProjects 
 };

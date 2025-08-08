@@ -22,6 +22,7 @@ import {
   File,
   Image,
   FileText as FileTextIcon,
+  X,
 } from 'lucide-react';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
@@ -38,6 +39,7 @@ function TaskDetailPage() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
   const { token, user } = useAuth();
 
   const fetchTaskDetails = useCallback(async () => {
@@ -60,8 +62,9 @@ function TaskDetailPage() {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || isCommentSubmitting) return;
 
+    setIsCommentSubmitting(true);
     try {
       const res = await axios.post(
         `${API}/tasks/${id}/comments`,
@@ -76,6 +79,8 @@ function TaskDetailPage() {
       toast.success("Comment posted");
     } catch (err) {
       toast.error('Failed to post comment');
+    } finally {
+      setIsCommentSubmitting(false);
     }
   };
 
@@ -341,6 +346,18 @@ function TaskDetailPage() {
     );
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axios.delete(`${API}/tasks/${id}/comments/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Comment deleted successfully");
+      fetchTaskDetails(); // Refresh task details to update comments
+    } catch (err) {
+      toast.error("Failed to delete comment");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
@@ -550,19 +567,31 @@ function TaskDetailPage() {
               ) : (
                 <div className="space-y-4 mb-6">
                   {comments.map((c, index) => (
-                    <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">
-                            {c.author?.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                    <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative group">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">
+                              {c.author?.name?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">{c.author?.name || 'Unknown'}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(c.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{c.author?.name || 'Unknown'}</p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(c.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
+                                                 {/* Delete button for Admin only */}
+                         {user?.role === 'Admin' && (
+                           <button
+                             onClick={() => handleDeleteComment(c._id)}
+                             className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded transition-colors"
+                             title="Delete comment"
+                           >
+                             <Trash2 size={16} />
+                           </button>
+                         )}
                       </div>
                       <p className="text-gray-700 ml-10">{c.text}</p>
                     </div>
@@ -577,13 +606,15 @@ function TaskDetailPage() {
                   placeholder="Write a comment..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  disabled={isCommentSubmitting}
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
                 />
                 <button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors"
+                  disabled={isCommentSubmitting || !commentText.trim()}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  <Send size={16} /> Post
+                  <Send size={16} /> {isCommentSubmitting ? 'Posting...' : 'Post'}
                 </button>
               </form>
             </div>

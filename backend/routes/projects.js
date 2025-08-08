@@ -11,6 +11,7 @@ const {
   deleteProject,
   addCommentToProject,
   getProjectComments,
+  deleteProjectComment,
   getProjectTeamMembers
 } = require('../controllers/projectController');
 
@@ -78,6 +79,9 @@ router.post('/:id/comments', verifyToken, addCommentToProject);
 router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerProjectAccess, deleteProject);
 
 router.get('/:id/comments', verifyToken, getProjectComments);
+
+// Delete comment from project (Admin only)
+router.delete('/:projectId/comments/:commentId', verifyToken, deleteProjectComment);
 
 router.get('/my-projects', verifyToken, async (req, res) => {
   try {

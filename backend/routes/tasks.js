@@ -13,6 +13,7 @@ const {
   updateTask,
   deleteTask,
   addCommentToTask,
+  deleteTaskComment,
   getTasksByDueDate,
   getMyProjectTasks,
   uploadTaskFile,
@@ -304,6 +305,9 @@ router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTa
 
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);
+
+// Delete comment from task (Admin only)
+router.delete('/:taskId/comments/:commentId', verifyToken, deleteTaskComment);
 
 // Upload File to Task - Any logged-in user
 router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req, res) => {

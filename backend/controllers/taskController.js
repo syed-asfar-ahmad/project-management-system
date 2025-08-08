@@ -244,7 +244,33 @@ const uploadTaskFile = async (req, res) => {
   }
 };
 
+// DELETE comment from a task (Admin only)
+const deleteTaskComment = async (req, res) => {
+  try {
+    const { taskId, commentId } = req.params;
+    
+    // Check if user is admin
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only admins can delete comments' });
+    }
 
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    // Find and remove the comment
+    const commentIndex = task.comments.findIndex(comment => comment._id.toString() === commentId);
+    if (commentIndex === -1) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    task.comments.splice(commentIndex, 1);
+    await task.save();
+
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+};
 
 module.exports = {
   createTask,
@@ -254,6 +280,7 @@ module.exports = {
   updateTask,
   deleteTask,
   addCommentToTask,
+  deleteTaskComment,
   getTasksByDueDate,
   getMyProjectTasks,
   uploadTaskFile

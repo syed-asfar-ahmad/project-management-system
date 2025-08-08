@@ -86,6 +86,18 @@ function ProjectDetailPage() {
     }
   }, [id, token]);
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axios.delete(`${API}/projects/${id}/comments/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Comment deleted successfully");
+      fetchComments(); // Refresh comments
+    } catch (err) {
+      toast.error("Failed to delete comment");
+    }
+  };
+
   const handleFileUpload = async () => {
     if (!file) {
       toast.warn("Please select a file to upload");
@@ -576,19 +588,31 @@ function ProjectDetailPage() {
               ) : (
                 <div className="space-y-4 mb-6">
                   {comments.map((comment) => (
-                    <div key={comment._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">
-                            {comment.author?.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                    <div key={comment._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative group">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">
+                              {comment.author?.name?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">{comment.author?.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{comment.author?.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(comment.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
+                        {/* Delete button for Admin only */}
+                        {user?.role === 'Admin' && (
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded transition-colors"
+                            title="Delete comment"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                       <p className="text-gray-700 ml-10">{comment.text}</p>
                     </div>

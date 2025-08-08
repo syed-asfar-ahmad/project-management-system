@@ -6,11 +6,13 @@ const API = process.env.REACT_APP_API_BASE_URL;
 
 function CommentBox({ token, projectId, onCommentAdded }) {
   const [commentText, setCommentText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || isSubmitting) return;
 
+    setIsSubmitting(true);
     try {
       await axios.post(
         `${API}/projects/${projectId}/comments`,
@@ -24,6 +26,8 @@ function CommentBox({ token, projectId, onCommentAdded }) {
       onCommentAdded(); 
     } catch (err) {
       toast.error("Failed to post comment");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -34,12 +38,14 @@ function CommentBox({ token, projectId, onCommentAdded }) {
         placeholder="Add a comment..."
         value={commentText}
         onChange={(e) => setCommentText(e.target.value)}
+        disabled={isSubmitting}
       />
       <button
         type="submit"
-                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        disabled={isSubmitting || !commentText.trim()}
+        className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        Post Comment
+        {isSubmitting ? "Posting..." : "Post Comment"}
       </button>
     </form>
   );
