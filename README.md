@@ -1,7 +1,3 @@
-<div align=""center>
-# TaskPilot 
-</div>
-
 ## Features
 
 - **Project & Task Management** - Create, assign, and track projects with deadlines
