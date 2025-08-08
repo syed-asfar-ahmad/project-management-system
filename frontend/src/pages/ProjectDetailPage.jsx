@@ -20,6 +20,13 @@ import {
   AlertCircle,
   ArrowRight,
   UserCheck,
+  UploadCloud,
+  Download,
+  Eye,
+  FileText,
+  Image,
+  File,
+  X,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -34,6 +41,8 @@ function ProjectDetailPage() {
   const [tasks, setTasks] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -76,6 +85,100 @@ function ProjectDetailPage() {
       toast.error("Failed to fetch comments");
     }
   }, [id, token]);
+
+  const handleFileUpload = async () => {
+    if (!file) {
+      toast.warn("Please select a file to upload");
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("File too large. Max size is 10MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    setUploading(true);
+
+    try {
+      await axios.post(`${API}/projects/${id}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast.success("File uploaded successfully");
+      setFile(null);
+      fetchProject();
+    } catch (err) {
+      toast.error(`Upload failed: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownload = async (attachmentId) => {
+    try {
+      const response = await axios.get(`${API}/projects/${id}/attachments/${attachmentId}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'attachment');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Download failed');
+    }
+  };
+
+  const handlePreview = (attachment) => {
+    if (attachment.path.startsWith('http')) {
+      window.open(attachment.path, '_blank');
+    } else {
+      window.open(`${API}/projects/${id}/attachments/${attachment._id}/preview`, '_blank');
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    try {
+      await axios.delete(`${API}/projects/${id}/attachments/${attachmentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Attachment deleted successfully");
+      fetchProject();
+    } catch (err) {
+      toast.error("Failed to delete attachment");
+    }
+  };
+
+  const getFileIcon = (filename) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'pdf':
+        return <FileText className="w-5 h-5 text-red-500" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return <Image className="w-5 h-5 text-green-500" />;
+      default:
+        return <File className="w-5 h-5 text-blue-500" />;
+    }
+  };
+
+  const isPreviewable = (filename) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt'].includes(ext);
+  };
 
   const handleDeleteProject = () => {
     toast.info(
@@ -286,55 +389,138 @@ function ProjectDetailPage() {
                   <p className="text-gray-500">No tasks for this project yet.</p>
                 </div>
               ) : (
-                                 <div className="space-y-3">
-                   {tasks.map((task) => (
-                     <div
-                       key={task._id}
-                       className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group"
-                       onClick={() => navigate(`/tasks/${task._id}`)}
-                     >
-                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                         <div className="flex-1 min-w-0">
-                           <div className="flex items-start gap-2 mb-2">
-                             <div className="flex-shrink-0 mt-0.5">
-                               {getTaskStatusIcon(task.status)}
-                             </div>
-                             <h3 className="font-medium text-gray-800 group-hover:text-green-600 transition-colors break-words leading-tight">{task.title}</h3>
-                           </div>
-                                                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
-                              <span className="text-gray-600 flex items-center gap-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                                  {task.status}
-                                </span>
-                                Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}
-                              </span>
+                <div className="space-y-3">
+                  {tasks.map((task) => (
+                    <div
+                      key={task._id}
+                      className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                      onClick={() => navigate(`/tasks/${task._id}`)}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-2 mb-2">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getTaskStatusIcon(task.status)}
                             </div>
-                         </div>
-                         <div className="flex items-center gap-2 flex-shrink-0">
-                           <ArrowRight size={16} className="text-gray-400 group-hover:text-green-600 transition-colors" />
-                           {(user?.role === "Admin" || (user?.role === "Manager" && project.teamMembers?.some(member => 
-                             typeof member === "string" ? member === user._id : member._id === user._id
-                           ))) && (
-                             <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                               <Link
-                                 to={`/tasks/${task._id}/edit`}
-                                 className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
-                               >
-                                 <Pencil size={16} />
-                               </Link>
-                               <button
-                                 onClick={() => toast.warn("🛠 Task delete functionality coming soon")}
-                                 className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
-                               >
-                                 <Trash2 size={16} />
-                               </button>
-                             </div>
-                           )}
-                         </div>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
+                            <h3 className="font-medium text-gray-800 group-hover:text-green-600 transition-colors break-words leading-tight">{task.title}</h3>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                            <span className="text-gray-600 flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                                {task.status}
+                              </span>
+                              Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <ArrowRight size={16} className="text-gray-400 group-hover:text-green-600 transition-colors" />
+                          {(user?.role === "Admin" || (user?.role === "Manager" && project.teamMembers?.some(member => 
+                            typeof member === "string" ? member === user._id : member._id === user._id
+                          ))) && (
+                            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                              <Link
+                                to={`/tasks/${task._id}/edit`}
+                                className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
+                              >
+                                <Pencil size={16} />
+                              </Link>
+                              <button
+                                onClick={() => toast.warn("🛠 Task delete functionality coming soon")}
+                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Attachments Section */}
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FileText className="text-blue-500" />
+                Project Attachments ({project.attachments?.length || 0})
+              </h2>
+              
+              {/* File Upload */}
+              <div className="mb-6">
+                <input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                />
+                {file && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200 mt-2">
+                    <p className="text-sm text-green-700">Selected: {file.name}</p>
+                  </div>
+                )}
+                <button
+                  onClick={handleFileUpload}
+                  className={`bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors mt-3 ${
+                    uploading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                  disabled={uploading}
+                >
+                  <UploadCloud size={18} />
+                  {uploading ? 'Uploading...' : 'Upload File'}
+                </button>
+              </div>
+
+              {/* Attachments List */}
+              {!project.attachments || project.attachments.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText size={48} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No attachments uploaded yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {project.attachments.map((attachment) => (
+                    <div key={attachment._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {getFileIcon(attachment.filename)}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-800 truncate">{attachment.filename}</p>
+                          <p className="text-sm text-gray-500">
+                            {attachment.uploadedAt ? new Date(attachment.uploadedAt).toLocaleDateString() : 'Unknown date'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isPreviewable(attachment.filename) && (
+                          <button
+                            onClick={() => handlePreview(attachment)}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Preview"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDownload(attachment._id)}
+                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-lg transition-colors"
+                          title="Download"
+                        >
+                          <Download size={16} />
+                        </button>
+                        {user?.role === "Admin" && (
+                          <button
+                            onClick={() => handleDeleteAttachment(attachment._id)}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
 

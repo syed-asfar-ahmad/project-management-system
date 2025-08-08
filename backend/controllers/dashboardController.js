@@ -19,7 +19,6 @@ const getDashboardStats = async (req, res) => {
       taskStatusBreakdown
     });
   } catch (err) {
-    console.error("Dashboard stats error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
 };

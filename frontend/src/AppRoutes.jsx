@@ -22,7 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
-import NotificationsPage from "./pages/NotificationsPage";
+
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ContactMessagesPage from "./pages/ContactMessagesPage";
@@ -81,7 +81,7 @@ function AppRoutes() {
         <Route path="/tasks" element={<PrivateRoute><TaskListPage /></PrivateRoute>} />
         <Route path="/tasks/:id" element={<PrivateRoute><TaskDetailPage /></PrivateRoute>} />
         <Route path="/calendar" element={<PrivateRoute><TaskCalendarPage /></PrivateRoute>} />
-        <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
+
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members" element={<AllMembersPage />} />

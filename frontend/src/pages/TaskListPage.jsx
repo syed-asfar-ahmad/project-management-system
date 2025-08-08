@@ -47,7 +47,6 @@ function TaskListPage() {
         });
         setTasks(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error('Failed to fetch tasks', err);
       } finally {
         setLoading(false);
       }
@@ -71,11 +70,10 @@ function TaskListPage() {
         if (Array.isArray(res.data)) {
           setTeamOptions(res.data);
         } else {
-          console.log("API did not return array:", res.data);
+    
           setTeamOptions([]); 
         }
       } catch (err) {
-        console.error("Failed to fetch users", err);
         setTeamOptions([]); 
       }
     };

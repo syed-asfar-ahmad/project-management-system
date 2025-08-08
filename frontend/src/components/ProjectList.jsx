@@ -18,7 +18,6 @@ function ProjectList() {
         });
         setProjects(res.data);
       } catch (err) {
-        console.error("Failed to fetch projects:", err);
       }
     };
 

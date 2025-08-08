@@ -48,7 +48,6 @@ function AddProjectForm({ onProjectCreated }) {
         setTeamOptions(teamOptions);
         setManagerOptions(managerOptions);
       } catch (err) {
-        console.error("Error fetching data:", err.response?.data || err);
       }
     };
 
@@ -86,7 +85,6 @@ function AddProjectForm({ onProjectCreated }) {
 
       if (onProjectCreated) onProjectCreated();
     } catch (err) {
-      console.error(err.response?.data);
       toast.error("Failed to create project");
     }
   };

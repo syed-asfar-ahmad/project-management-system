@@ -55,7 +55,6 @@ function TeamDashboard() {
         setProjects(userProjects);
 
       } catch (err) {
-        console.error("Error loading team dashboard:", err.response?.data);
       } finally {
         setLoading(false);
       }

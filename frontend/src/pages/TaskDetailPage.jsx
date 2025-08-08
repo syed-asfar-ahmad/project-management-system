@@ -232,8 +232,7 @@ function TaskDetailPage() {
   };
 
   const handleDownload = async (attachmentId) => {
-    console.log('Downloading attachment:', attachmentId);
-    console.log('Task attachments:', task.attachments);
+
     
     try {
       const response = await axios.get(`${API}/tasks/${id}/attachments/${attachmentId}/download`, {
@@ -252,7 +251,6 @@ function TaskDetailPage() {
       
       toast.success("File downloaded successfully!");
     } catch (err) {
-      console.error('Download error:', err);
       toast.error("Failed to download file");
     }
   };

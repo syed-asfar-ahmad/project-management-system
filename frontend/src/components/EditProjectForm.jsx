@@ -55,7 +55,6 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
         setTeamOptions(teamOptions);
         setManagerOptions(managerOptions);
       } catch (err) {
-        console.error("Failed to fetch data", err.response?.data);
       }
     };
 
@@ -85,7 +84,6 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
       });
       onSuccess();
     } catch (err) {
-      console.error("Failed to update project", err.response?.data);
     } finally {
       setSubmitting(false);
     }

@@ -11,7 +11,6 @@ router.post('/', async (req, res) => {
     await newContact.save();
     res.status(201).json({ message: 'Message sent successfully' });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -26,7 +25,6 @@ router.get('/admin', verifyToken, async (req, res) => {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -45,7 +43,6 @@ router.get('/admin/:id', verifyToken, async (req, res) => {
 
     res.json(contact);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -70,7 +67,6 @@ router.patch('/admin/:id/status', verifyToken, async (req, res) => {
 
     res.json(contact);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -89,7 +85,6 @@ router.delete('/admin/:id', verifyToken, async (req, res) => {
 
     res.json({ message: 'Contact message deleted successfully' });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -78,7 +78,6 @@ router.post('/forgot-password', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -122,7 +121,6 @@ router.post('/reset-password/:token', async (req, res) => {
     res.status(200).json({ message: 'Password has been reset successfully' });
 
   } catch (error) {
-    console.error('Reset password error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -144,7 +142,6 @@ router.get('/verify-reset-token/:token', async (req, res) => {
     res.status(200).json({ message: 'Valid reset token' });
 
   } catch (error) {
-    console.error('Verify reset token error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

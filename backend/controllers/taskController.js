@@ -1,5 +1,5 @@
 const Task = require('../models/Task');
-const { createNotification } = require('./notificationController');
+
 
 // Create Task
 const createTask = async (req, res) => {
@@ -18,25 +18,10 @@ const createTask = async (req, res) => {
 
     await task.save();
 
-    // Create notification for assigned user
-    if (assignedTo) {
-      const notificationTitle = 'New Task Assigned';
-      const notificationMessage = `You have been assigned a new task: "${title}"`;
-      
-      await createNotification(
-        assignedTo,
-        req.user.id,
-        'task_assigned',
-        notificationTitle,
-        notificationMessage,
-        project,
-        task._id
-      );
-    }
+
 
     res.status(201).json({ message: 'Task created', task });
   } catch (err) {
-    console.error('Error creating task:', err);
     res.status(500).json({ error: 'Error creating task' });
   }
 };
@@ -95,7 +80,6 @@ const getTaskById = async (req, res) => {
 
     res.json(task);
   } catch (err) {
-    console.error('Error fetching task:', err);
     res.status(500).json({ error: 'Error fetching task' });
   }
 };
@@ -138,65 +122,10 @@ const updateTask = async (req, res) => {
 
     await task.save();
 
-    // Create notifications for task updates
-    const taskTitle = task.title;
-    const projectId = task.project;
 
-    // Notification for status change
-    if (status && status !== originalStatus) {
-      const notificationTitle = 'Task Status Updated';
-      const notificationMessage = `Task "${taskTitle}" status changed to ${status}`;
-      
-      if (task.assignedTo) {
-        await createNotification(
-          task.assignedTo,
-          req.user.id,
-          'task_updated',
-          notificationTitle,
-          notificationMessage,
-          projectId,
-          task._id
-        );
-      }
-    }
-
-    // Notification for assignment change
-    if (assignedTo && assignedTo.toString() !== originalAssignedTo?.toString()) {
-      const notificationTitle = 'Task Reassigned';
-      const notificationMessage = `Task "${taskTitle}" has been reassigned to you`;
-      
-      await createNotification(
-        assignedTo,
-        req.user.id,
-          'task_assigned',
-        notificationTitle,
-        notificationMessage,
-        projectId,
-        task._id
-      );
-    }
-
-    // Notification for other updates (title, description, priority, dueDate)
-    if (title || description || priority || dueDate) {
-      const notificationTitle = 'Task Updated';
-      const notificationMessage = `Task "${taskTitle}" has been updated`;
-      
-      if (task.assignedTo) {
-        await createNotification(
-          task.assignedTo,
-          req.user.id,
-          'task_updated',
-          notificationTitle,
-          notificationMessage,
-          projectId,
-          task._id
-        );
-      }
-    }
 
     res.json({ message: "Task updated", task });
   } catch (err) {
-    console.error("Error updating task:", err);
     res.status(500).json({ error: "Error updating task" });
   }
 };
@@ -215,7 +144,6 @@ const deleteTask = async (req, res) => {
     
     res.json({ message: 'Task deleted successfully' });
   } catch (err) {
-    console.error('Error deleting task:', err);
     res.status(500).json({ error: 'Error deleting task' });
   }
 };
@@ -237,21 +165,7 @@ const addCommentToTask = async (req, res) => {
     task.comments.push(newComment);
     await task.save();
 
-    // Create notification for task comment
-    if (task.assignedTo && task.assignedTo.toString() !== req.user.id) {
-      const notificationTitle = 'New Task Comment';
-      const notificationMessage = `A new comment has been added to task "${task.title}"`;
-      
-      await createNotification(
-        task.assignedTo,
-        req.user.id,
-        'task_updated',
-        notificationTitle,
-        notificationMessage,
-        task.project,
-        task._id
-      );
-    }
+
 
     const updatedTask = await Task.findById(id).populate({
       path: 'comments',
@@ -264,7 +178,6 @@ const addCommentToTask = async (req, res) => {
     const lastComment = updatedTask.comments.at(-1);
     res.status(200).json(lastComment);
   } catch (err) {
-    console.error('Error adding comment:', err);
     res.status(500).json({ error: 'Failed to add comment' });
   }
 };
@@ -287,7 +200,6 @@ const getTasksByDueDate = async (req, res) => {
 
     res.status(200).json(tasks);
   } catch (err) {
-    console.error('Error fetching calendar tasks:', err);
     res.status(500).json({ error: 'Failed to fetch tasks for calendar' });
   }
 };
@@ -303,7 +215,6 @@ const getMyProjectTasks = async (req, res) => {
 
     res.status(200).json(tasks);
   } catch (err) {
-    console.error("Error fetching member's project tasks:", err);
     res.status(500).json({ error: 'Failed to fetch your assigned tasks for this project' });
   }
 };
@@ -321,7 +232,7 @@ const uploadTaskFile = async (req, res) => {
 
     const fileData = {
       filename: req.file.originalname,
-      path: req.file.path, // Cloudinary URL
+      path: req.file.path,
     };
 
     task.attachments.push(fileData);
@@ -329,7 +240,6 @@ const uploadTaskFile = async (req, res) => {
 
     res.status(200).json({ message: 'File uploaded and attached', file: fileData });
   } catch (err) {
-    console.error('Error uploading file:', err);
     res.status(500).json({ message: 'Error uploading file' });
   }
 };

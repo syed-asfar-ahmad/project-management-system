@@ -24,7 +24,6 @@ export default function ContactMessagesPage() {
       });
       setContacts(response.data);
     } catch (error) {
-      console.error('Error fetching contacts:', error);
       toast.error('Failed to fetch contact messages');
     } finally {
       setLoading(false);
@@ -41,7 +40,6 @@ export default function ContactMessagesPage() {
       fetchContacts(); // Refresh the list
       toast.success(`Status updated to ${status}`);
     } catch (error) {
-      console.error('Error updating status:', error);
       toast.error('Failed to update status');
     }
   };
@@ -55,7 +53,6 @@ export default function ContactMessagesPage() {
       fetchContacts(); // Refresh the list
       toast.success('Message deleted successfully');
     } catch (error) {
-      console.error('Error deleting contact:', error);
       toast.error('Failed to delete message');
     }
   };

@@ -51,7 +51,7 @@ let transporter;
 try {
   transporter = nodemailer.createTransport(emailConfig[emailServiceType]);
 } catch (error) {
-  console.error('Email service configuration error:', error);
+  
   transporter = null;
 }
 
@@ -657,7 +657,6 @@ const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
   try {
     // Check if transporter is configured
     if (!transporter) {
-      console.error('Email transporter not configured');
       return false;
     }
 
@@ -669,10 +668,9 @@ const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent:', info.messageId);
+    
     return true;
   } catch (error) {
-    console.error('Error sending password reset email:', error);
     return false;
   }
 };
@@ -682,7 +680,6 @@ const sendPasswordResetSuccessEmail = async (email) => {
   try {
     // Check if transporter is configured
     if (!transporter) {
-      console.error('Email transporter not configured');
       return false;
     }
 
@@ -696,10 +693,9 @@ const sendPasswordResetSuccessEmail = async (email) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset success email sent:', info.messageId);
+    
     return true;
   } catch (error) {
-    console.error('Error sending password reset success email:', error);
     return false;
   }
 };

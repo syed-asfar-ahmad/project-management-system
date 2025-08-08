@@ -45,6 +45,22 @@ const projectSchema = new mongoose.Schema({
         default: Date.now
       }
     }
+  ],
+
+  // Added Attachments Field
+  attachments: [
+    {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: mongoose.Types.ObjectId
+      },
+      filename: String,
+      path: String,
+      uploadedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
   ]
 
 }, { timestamps: true });
@@ -55,7 +71,6 @@ projectSchema.pre('findOneAndDelete', async function(next) {
   if (projectId) {
     const Task = require('./Task');
     await Task.deleteMany({ project: projectId });
-    console.log(`Automatically deleted tasks for project ${projectId}`);
   }
   next();
 });
@@ -65,7 +80,6 @@ projectSchema.pre('deleteOne', async function(next) {
   if (projectId) {
     const Task = require('./Task');
     await Task.deleteMany({ project: projectId });
-    console.log(`Automatically deleted tasks for project ${projectId}`);
   }
   next();
 });

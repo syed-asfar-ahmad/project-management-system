@@ -10,21 +10,16 @@ const upload = multer({ storage });
 
 router.post("/", verifyToken, upload.single("file"), async (req, res) => {
   try {
-    console.log("Upload request received from user:", req.user.id);
     const file = req.file;
 
     if (!file) {
-      console.log("No file in request");
       return res.status(400).json({ error: "No file uploaded" });
     }
 
     // Check if BLOB_READ_WRITE_TOKEN is configured
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('BLOB_READ_WRITE_TOKEN not configured');
       return res.status(500).json({ error: 'File upload service not configured. Please contact administrator.' });
     }
-
-    console.log("File received:", file.originalname, "Size:", file.size);
 
     // Generate unique filename
     const timestamp = Date.now();
@@ -35,10 +30,8 @@ router.post("/", verifyToken, upload.single("file"), async (req, res) => {
       token: process.env.BLOB_READ_WRITE_TOKEN
     });
 
-    console.log("Blob uploaded successfully:", blob.url);
     res.json({ url: blob.url }); // return the hosted image URL
   } catch (err) {
-    console.error("Blob upload error:", err);
     res.status(500).json({ error: "Upload failed: " + err.message });
   }
 });

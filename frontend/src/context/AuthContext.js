@@ -36,10 +36,9 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
-      } catch (err) {
-        console.error("Failed to fetch user info", err);
-        logout();
-      } finally {
+          } catch (err) {
+      logout();
+    } finally {
         setLoading(false);
       }
     };

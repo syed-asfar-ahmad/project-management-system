@@ -24,7 +24,6 @@ function CommentBox({ token, projectId, onCommentAdded }) {
       onCommentAdded(); 
     } catch (err) {
       toast.error("Failed to post comment");
-      console.error("Failed to add comment", err.response?.data);
     }
   };
 

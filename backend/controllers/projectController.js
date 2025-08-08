@@ -17,7 +17,6 @@ const createProject = async (req, res) => {
 
     res.status(201).json({ message: 'Project created', project });
   } catch (err) {
-    console.error('Error creating project:', err);
     res.status(500).json({ error: 'Error creating project' });
   }
 };
@@ -50,7 +49,6 @@ const updateProject = async (req, res) => {
 
     res.json({ message: 'Project updated', project: updated });
   } catch (err) {
-    console.error('Error updating project:', err);
     res.status(500).json({ error: 'Error updating project' });
   }
 };
@@ -69,7 +67,7 @@ const deleteProject = async (req, res) => {
     const Task = require('../models/Task');
     const deletedTasks = await Task.deleteMany({ project: id });
     
-    console.log(`Deleted ${deletedTasks.deletedCount} tasks associated with project ${id}`);
+
 
     // Delete the project
     await Project.findByIdAndDelete(id);
@@ -78,7 +76,6 @@ const deleteProject = async (req, res) => {
       deletedTasksCount: deletedTasks.deletedCount
     });
   } catch (err) {
-    console.error('Error deleting project:', err);
     res.status(500).json({ error: 'Error deleting project' });
   }
 };
@@ -100,7 +97,6 @@ const addCommentToProject = async (req, res) => {
 
     res.status(201).json({ message: 'Comment added successfully' });
   } catch (err) {
-    console.error('Error adding comment:', err);
     res.status(500).json({ error: 'Failed to add comment' });
   }
 };

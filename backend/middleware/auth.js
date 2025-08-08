@@ -21,7 +21,6 @@ const verifyToken = (req, res, next) => {
     };
     next(); 
   } catch (err) {
-    console.error('JWT verification error:', err);
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
@@ -65,7 +64,6 @@ const checkManagerProjectAccess = async (req, res, next) => {
     req.project = project;
     next();
   } catch (error) {
-    console.error('Error checking manager project access:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -101,7 +99,6 @@ const checkManagerTaskAccess = async (req, res, next) => {
     req.task = task;
     next();
   } catch (error) {
-    console.error('Error checking manager task access:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

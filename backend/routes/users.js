@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { verifyToken } = require('../middleware/auth'); 
-const upload = require('../middleware/upload'); 
+ 
 const User = require('../models/User');
 
 const {
@@ -34,8 +34,8 @@ router.get('/managers', verifyToken, async (req, res) => {
 // GET profile (protected)
 router.get('/profile', verifyToken, getUserProfile);
 
-// PUT profile (with image)
-router.put('/profile', verifyToken, upload.single('profilePicture'), updateUserProfile);
+// PUT profile (without image upload - handled by Vercel Blob)
+router.put('/profile', verifyToken, updateUserProfile);
 
 router.get(
   '/',

@@ -6,7 +6,7 @@ function UserProfileWidget() {
 
   if (!user) return null;
 
-  const avatarUrl = user.avatar?.url || "/uploads/default_avatar.jpg";
+  const avatarUrl = user.profilePicture || "https://via.placeholder.com/32x32?text=U";
 
   return (
     <div className="absolute right-4 top-4 z-50 flex items-center gap-2">

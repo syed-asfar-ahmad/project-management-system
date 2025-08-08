@@ -65,7 +65,6 @@ function EditTaskPage() {
 
             setAssignedOption(selected || null);
           } catch (err) {
-            console.error('Error fetching team members:', err);
             setTeamOptions([]);
             setAssignedOption(null);
           }

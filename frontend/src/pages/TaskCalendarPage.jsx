@@ -94,9 +94,8 @@ function TaskCalendarPage() {
         }));
 
         setEvents([...taskEvents, ...projectEvents]);
-      } catch (error) {
-        console.error("Failed to load calendar data:", error);
-      } finally {
+          } catch (error) {
+    } finally {
         setLoading(false);
       }
     };
