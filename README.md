@@ -1,13 +1,5 @@
 # TaskPilot
 
-**Professional Project Management System for Modern Teams**
-
-[![React](https://img.shields.io/badge/React-18.0-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18.0-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
-
----
-
 ## Features
 
 - **Project & Task Management** - Create, assign, and track projects with deadlines
@@ -31,13 +23,13 @@
 
 </div>
 
-## 🚀 Clone Repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/syed-asfar-ahmad/project-management-system.git
 ```
 
-## 👤 Default Admin Account
+## Default Admin Account
 
 - **Email**: `ahmad@example.com`
 - **Password**: `123456`
