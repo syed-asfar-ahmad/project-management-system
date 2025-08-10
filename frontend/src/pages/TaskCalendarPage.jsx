@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ArrowLeft } from "lucide-react";
 
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
@@ -98,8 +98,9 @@ function TaskCalendarPage() {
         }));
 
         setEvents([...taskEvents, ...projectEvents]);
-          } catch (error) {
-    } finally {
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -107,7 +108,7 @@ function TaskCalendarPage() {
     if (token && user) {
       fetchEvents();
     }
-   }, [token, user]);
+  }, [token, user]);
 
   const handleEventClick = (info) => {
     const { id, extendedProps } = info.event;
@@ -121,40 +122,25 @@ function TaskCalendarPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
-      <BackButton />
-
-      <main className="flex-grow px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="mb-8 text-center">
-            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-green-100">
-              <CalendarDays size={32} className="text-green-600" />
-              <h1 className="text-3xl font-bold text-gray-800">
-                {user?.role === "Team Member" ? "My Tasks & Projects Calendar" : 
-                 user?.role === "Manager" ? "Assigned Tasks & Projects Calendar" : 
-                 "Task & Project Calendar"}
-              </h1>
-            </div>
-            <p className="mt-4 text-gray-600 text-lg">Stay organized with your project timeline</p>
-          </div>
-
+      <main className="flex-grow px-3 py-4">
+        <div className="max-w-6xl mx-auto">
           {loading ? (
-            /* Loading State */
-            <div className="flex flex-col items-center justify-center py-20">
+            /* Loading State - More Compact */
+            <div className="flex flex-col items-center justify-center py-12">
               <div className="relative">
                 {/* Spinning Circle */}
-                <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
                 {/* Calendar Icon Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <CalendarDays size={24} className="text-green-600" />
+                  <CalendarDays size={20} className="text-green-600" />
                 </div>
               </div>
-              <div className="mt-6 text-center">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Calendar</h3>
-                <p className="text-gray-600">Fetching your tasks and projects...</p>
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">Loading Calendar</h3>
+                <p className="text-gray-600 text-sm">Fetching your tasks and projects...</p>
               </div>
               {/* Loading Dots */}
-              <div className="flex space-x-2 mt-4">
+              <div className="flex space-x-1 mt-3">
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -162,14 +148,72 @@ function TaskCalendarPage() {
             </div>
           ) : (
             <>
-              {/* Calendar Container */}
-              <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-green-100">
-                <div className="p-2">
+              {/* Header with Back Button and Title - Responsive */}
+              <div className="mb-4">
+                {/* Back Button - Top Row on Mobile */}
+                <div className="mb-3 md:hidden">
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    <ArrowLeft size={16} />
+                    Back
+                  </button>
+                </div>
+                
+                {/* Desktop Layout - Back Button and Title on Same Line */}
+                <div className="hidden md:flex items-center justify-between">
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    <ArrowLeft size={16} />
+                    Back
+                  </button>
+                  
+                  <div className="inline-flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                      <CalendarDays size={20} className="text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                      {user?.role === "Team Member" ? "My Tasks & Projects Calendar" : 
+                       user?.role === "Manager" ? "Assigned Tasks & Projects Calendar" : 
+                       "Task & Project Calendar"}
+                    </h1>
+                  </div>
+                  
+                  <div className="w-20"></div> {/* Spacer to center the title */}
+                </div>
+                
+                {/* Mobile Layout - Centered Title */}
+                <div className="md:hidden text-center">
+                  <div className="inline-flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                      <CalendarDays size={20} className="text-white" />
+                    </div>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                      {user?.role === "Team Member" ? "My Tasks & Projects Calendar" : 
+                       user?.role === "Manager" ? "Assigned Tasks & Projects Calendar" : 
+                       "Task & Project Calendar"}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center mb-3">
+                <p className="text-base text-gray-600 max-w-2xl mx-auto">
+                  Stay organized with your project timeline
+                </p>
+              </div>
+
+              {/* Calendar Container - More Compact */}
+              <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-green-100">
+                <div className="p-1">
                   <FullCalendar
                     plugins={[dayGridPlugin]}
                     initialView="dayGridMonth"
                     events={events}
-                    height={650}
+                    height="auto"
                     eventClick={handleEventClick}
                     eventDidMount={(info) => {
                       info.el.setAttribute("title", info.event.extendedProps.fullTitle);
@@ -190,27 +234,28 @@ function TaskCalendarPage() {
                     eventDisplay="block"
                     lazyFetching={true}
                     rerenderDelay={10}
-                    eventMinHeight={20}
+                    eventMinHeight={16}
+                    aspectRatio={1.35}
                   />
                 </div>
               </div>
 
-              {/* Enhanced Legend */}
-              <div className="mt-8 flex justify-center">
-                <div className="bg-white px-8 py-6 rounded-2xl shadow-xl border border-green-100">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+              {/* Enhanced Legend - More Compact */}
+              <div className="mt-4 flex justify-center">
+                <div className="bg-white px-6 py-4 rounded-xl shadow-lg border border-green-100">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3 text-center">
                     Calendar Legend
                   </h3>
-                  <div className="flex gap-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-lg bg-gradient-to-r from-green-500 to-green-600 shadow-md"></div>
+                  <div className="flex gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-md bg-gradient-to-r from-green-500 to-green-600 shadow-md"></div>
                       <div>
                         <span className="text-sm font-semibold text-gray-800">Tasks</span>
                         <p className="text-xs text-gray-500">Individual tasks</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 shadow-md"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-md bg-gradient-to-r from-purple-600 to-purple-700 shadow-md"></div>
                       <div>
                         <span className="text-sm font-semibold text-gray-800">Projects</span>
                         <p className="text-xs text-gray-500">Project deadlines</p>

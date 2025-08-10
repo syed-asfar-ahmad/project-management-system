@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema({
 
   profilePicture: { type: String }, 
 
+  // Team fields
+  teamId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team'
+  },
+
   // Password reset fields
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },

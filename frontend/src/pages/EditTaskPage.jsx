@@ -129,7 +129,6 @@ function EditTaskPage() {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
         <Navbar />
-        <BackButton />
         <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
           {/* Loading State */}
           <div className="flex flex-col items-center justify-center py-20">
@@ -161,21 +160,59 @@ function EditTaskPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
-      <BackButton />
       <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Pencil size={24} className="text-white" />
+        {/* Header with Back Button and Title - Responsive */}
+        <div className="mb-4">
+          {/* Back Button - Top Row on Mobile */}
+          <div className="mb-3 md:hidden">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+          
+          {/* Desktop Layout - Back Button and Title on Same Line */}
+          <div className="hidden md:flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            
+            <div className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                <Pencil size={20} className="text-white" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Edit Task</h1>
-                <p className="text-gray-600">Update task information and settings</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                Edit Task
+              </h1>
+            </div>
+            
+            <div className="w-20"></div> {/* Spacer to center the title */}
+          </div>
+          
+          {/* Mobile Layout - Centered Title */}
+          <div className="md:hidden text-center">
+            <div className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                <Pencil size={20} className="text-white" />
               </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                Edit Task
+              </h1>
             </div>
           </div>
+        </div>
+        
+        <div className="text-center mb-3">
+          <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            Update task information and settings
+          </p>
         </div>
 
         {/* Edit Form */}

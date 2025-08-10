@@ -23,6 +23,7 @@ import {
   Image,
   FileText as FileTextIcon,
   X,
+  ArrowLeft,
 } from 'lucide-react';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
@@ -362,7 +363,6 @@ function TaskDetailPage() {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
         <Navbar />
-        <BackButton />
         <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
           {/* Loading State */}
           <div className="flex flex-col items-center justify-center py-20">
@@ -395,7 +395,6 @@ function TaskDetailPage() {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
         <Navbar />
-        <BackButton />
         <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
           <div className="bg-white rounded-xl shadow-lg border border-green-100 p-12 text-center">
             <CheckSquare size={64} className="text-gray-300 mx-auto mb-4" />
@@ -418,9 +417,62 @@ function TaskDetailPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
-      <BackButton />
       <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
-        {/* Header Section */}
+        {/* Header with Back Button and Title - Responsive */}
+        <div className="mb-4">
+          {/* Back Button - Top Row on Mobile */}
+          <div className="mb-3 md:hidden">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+          
+          {/* Desktop Layout - Back Button and Title on Same Line */}
+          <div className="hidden md:flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            
+            <div className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                <CheckSquare size={20} className="text-white" />
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                Task Details
+              </h1>
+            </div>
+            
+            <div className="w-20"></div> {/* Spacer to center the title */}
+          </div>
+          
+          {/* Mobile Layout - Centered Title */}
+          <div className="md:hidden text-center">
+            <div className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                <CheckSquare size={20} className="text-white" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                Task Details
+              </h1>
+            </div>
+          </div>
+        </div>
+        
+        <div className="text-center mb-3">
+          <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            View and manage task information
+          </p>
+        </div>
+        
+        {/* Task Header Card */}
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -429,18 +481,18 @@ function TaskDetailPage() {
                   <CheckSquare size={24} className="text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words leading-tight">{task.title}</h1>
-                  <p className="text-gray-600 mt-1">Task Details</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words leading-tight">{task.title}</h2>
+                  <p className="text-gray-600 mt-1">Task Information</p>
                 </div>
               </div>
-                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)} w-fit`}>
-                   {task.status}
-                 </span>
-                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)} w-fit`}>
-                   {task.priority}
-                 </span>
-               </div>
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(task.status)} w-fit`}>
+                  {task.status}
+                </span>
+                <span className={`px-2 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)} w-fit`}>
+                  {task.priority}
+                </span>
+              </div>
             </div>
             <p className="text-gray-700 text-lg leading-relaxed">{task.description}</p>
           </div>

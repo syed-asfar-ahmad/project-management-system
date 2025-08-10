@@ -60,21 +60,21 @@ function AuthNavbar() {
         ? 'bg-green-600/95 backdrop-blur-md shadow-lg border-b border-green-500/20' 
         : 'bg-green-600 shadow-md'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to={dashboardLink} className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 transform group-hover:scale-105">
-              <span className="text-white font-bold text-xl">T</span>
+          <Link to={dashboardLink} className="flex items-center space-x-2 group">
+            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 transform group-hover:scale-105">
+              <span className="text-white font-bold text-lg">T</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">TaskPilot</h1>
+              <h1 className="text-lg font-bold text-white">TaskPilot</h1>
               <p className="text-xs text-white/70 -mt-1 capitalize">{user?.role}</p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-1">
             <Link to={dashboardLink} className={navLinkStyle(dashboardLink)}>
               <span className="relative">
                 Dashboard
@@ -128,10 +128,10 @@ function AuthNavbar() {
           </div>
 
           {/* User Profile & Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {/* User Profile */}
-            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
                 {user?.profilePicture ? (
                   <img 
                     src={user.profilePicture} 
@@ -140,11 +140,11 @@ function AuthNavbar() {
                   />
                 ) : (
                   <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                    <User size={16} className="text-white" />
+                    <User size={12} className="text-white" />
                   </div>
                 )}
               </div>
-              <div className="text-sm">
+              <div className="text-xs">
                 <p className="text-white font-medium">{user?.name}</p>
                 <p className="text-white/70 text-xs">{user?.email}</p>
               </div>
@@ -153,9 +153,9 @@ function AuthNavbar() {
             {/* Logout Button */}
             <button 
               onClick={handleLogout}
-              className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="flex items-center space-x-1 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
             >
-              <LogOut size={16} />
+              <LogOut size={14} />
               <span>Logout</span>
             </button>
           </div>

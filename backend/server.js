@@ -42,6 +42,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/password-reset', require('./routes/passwordReset'));
+app.use('/api/teams', require('./routes/teams'));
 
 app.use('/api/upload-profile-image', blobUploadRoute);
 
