@@ -63,9 +63,9 @@ router.get('/', verifyToken, async (req, res) => {
     }
 
     const teams = await Team.find()
-      .populate('admin', 'name email')
-      .populate('manager', 'name email')
-      .populate('members', 'name email role');
+      .populate('admin', 'name email profilePicture')
+      .populate('manager', 'name email profilePicture')
+      .populate('members', 'name email role profilePicture');
 
     res.json(teams);
   } catch (error) {
@@ -134,9 +134,9 @@ router.get('/signup-teams', async (req, res) => {
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const team = await Team.findById(req.params.id)
-      .populate('admin', 'name email')
-      .populate('manager', 'name email')
-      .populate('members', 'name email role');
+      .populate('admin', 'name email profilePicture')
+      .populate('manager', 'name email profilePicture')
+      .populate('members', 'name email role profilePicture');
 
     if (!team) {
       return res.status(404).json({ message: 'Team not found' });
