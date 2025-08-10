@@ -51,6 +51,7 @@ function AdminDashboard() {
   // Team management states
   const [teams, setTeams] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
+  const [managers, setManagers] = useState([]);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [createTeamForm, setCreateTeamForm] = useState({
     name: '',
@@ -62,7 +63,7 @@ function AdminDashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [projRes, taskRes, memberRes, contactRes, teamsRes, usersRes] = await Promise.all([
+        const [projRes, taskRes, memberRes, contactRes, teamsRes, usersRes, managersRes] = await Promise.all([
           axios.get(`${API}/projects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
@@ -81,6 +82,9 @@ function AdminDashboard() {
           axios.get(`${API}/teams/available-users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
+          axios.get(`${API}/teams/managers`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
         setProjects(projRes.data);
         setTasks(taskRes.data);
@@ -88,6 +92,7 @@ function AdminDashboard() {
         setContactCount(contactRes.data.length);
         setTeams(teamsRes.data);
         setAvailableUsers(usersRes.data);
+        setManagers(managersRes.data);
       } catch (err) {
         toast.error("Failed to fetch dashboard data");
       } finally {
@@ -925,19 +930,23 @@ function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Assign Manager
                       </label>
-                      <select
-                        required
-                        value={createTeamForm.managerId}
-                        onChange={(e) => setCreateTeamForm({...createTeamForm, managerId: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      >
-                        <option value="">Select a manager...</option>
-                        {availableUsers.filter(user => user.role === 'Manager').map((user) => (
-                          <option key={user._id} value={user._id}>
-                            {user.name} ({user.email})
-                          </option>
-                        ))}
-                      </select>
+                                             <select
+                         required
+                         value={createTeamForm.managerId}
+                         onChange={(e) => setCreateTeamForm({...createTeamForm, managerId: e.target.value})}
+                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                       >
+                         <option value="">Select a manager...</option>
+                         {managers.map((manager) => (
+                           <option key={manager._id} value={manager._id}>
+                             {manager.name} ({manager.email})
+                             {manager.teamId ? ' - Already assigned to team' : ' - Available'}
+                           </option>
+                         ))}
+                       </select>
+                       <p className="text-xs text-gray-500 mt-1">
+                         Managers already assigned to teams will be moved to this new team.
+                       </p>
                     </div>
                     
                     <div className="flex gap-3 pt-4">

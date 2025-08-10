@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -14,7 +14,8 @@ import {
   Sparkles,
   CheckCircle,
   XCircle,
-  ArrowLeft
+  ArrowLeft,
+  Users
 } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL;
@@ -28,12 +29,29 @@ function Signup() {
     password: "",
     gender: "",
     position: "",
+    teamId: "",
     role: "Team Member", // hardcoded default role
   });
 
+  const [teams, setTeams] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch teams for signup
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const response = await axios.get(`${API}/teams/signup-teams`);
+        setTeams(response.data);
+      } catch (error) {
+        console.error('Error fetching teams:', error);
+        // Don't show error toast as teams are optional
+      }
+    };
+
+    fetchTeams();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,7 +79,8 @@ function Signup() {
     setIsLoading(true);
     try {
       await axios.post(`${API}/auth/register`, form);
-      toast.success("Signup successful!");
+      const teamMessage = form.teamId ? " and assigned to team!" : "!";
+      toast.success(`Signup successful${teamMessage}`);
       navigate("/login");
     } catch (err) {
       toast.error(err?.response?.data?.message || "Signup failed. Please try again.");
@@ -238,6 +257,43 @@ function Signup() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                 />
               </div>
+            </div>
+
+            {/* Team Selection Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Team <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Users className="h-5 w-5 text-gray-400" />
+                </div>
+                <select
+                  name="teamId"
+                  value={form.teamId}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem'
+                  }}
+                >
+                  <option value="">Choose a team (optional)</option>
+                  {teams.map((team) => (
+                    <option key={team._id} value={team._id}>
+                      {team.name} - {team.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {teams.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  No teams available. You can join a team later from your dashboard.
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}

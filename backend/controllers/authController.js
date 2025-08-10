@@ -5,24 +5,46 @@ const jwt = require('jsonwebtoken');
 
 // Register new user
 const register = async (req, res) => {
-  const { name, email, password, position, gender } = req.body;
+  const { name, email, password, position, gender, teamId } = req.body;
   const role = "Team Member";
 
   try {
-  
-
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
+    // If teamId is provided, verify the team exists
+    if (teamId) {
+      const Team = require('../models/Team');
+      const team = await Team.findById(teamId);
+      if (!team) {
+        return res.status(400).json({ message: 'Selected team does not exist' });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPassword, role, position, gender });
+    const user = new User({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      role, 
+      position, 
+      gender,
+      teamId: teamId || null
+    });
     await user.save();
 
-
+    // If teamId is provided, add user to team members
+    if (teamId) {
+      const Team = require('../models/Team');
+      await Team.findByIdAndUpdate(teamId, {
+        $push: { members: user._id }
+      });
+    }
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({ error: 'Something went wrong' });
   }
 };

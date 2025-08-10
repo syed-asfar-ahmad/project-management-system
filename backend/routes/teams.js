@@ -26,6 +26,16 @@ router.post('/', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Manager not found' });
     }
 
+    // If manager is already assigned to a team, remove them from that team first
+    if (manager.teamId) {
+      const existingTeam = await Team.findById(manager.teamId);
+      if (existingTeam) {
+        // Remove manager from existing team members
+        existingTeam.members = existingTeam.members.filter(member => member.toString() !== managerId);
+        await existingTeam.save();
+      }
+    }
+
     // Create new team
     const team = new Team({
       name,
@@ -65,6 +75,61 @@ router.get('/', verifyToken, async (req, res) => {
     res.json(teams);
   } catch (error) {
     console.error('Error fetching teams:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get available users for team assignment (Admin only)
+router.get('/available-users', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // First, get all users with Manager or Team Member role
+    const allUsers = await User.find({ 
+      role: { $in: ['Manager', 'Team Member'] }
+    }).select('name email role teamId');
+
+    // Filter out users who are already assigned to teams
+    const availableUsers = allUsers.filter(user => !user.teamId);
+
+    res.json(availableUsers);
+  } catch (error) {
+    console.error('Error fetching available users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all managers for team creation (Admin only)
+router.get('/managers', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Get all users with Manager role (including those already assigned to teams)
+    const managers = await User.find({ 
+      role: 'Manager'
+    }).select('name email teamId');
+
+    res.json(managers);
+  } catch (error) {
+    console.error('Error fetching managers:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get teams for signup form (Public route - no auth required)
+router.get('/signup-teams', async (req, res) => {
+  try {
+    const teams = await Team.find({ status: 'active' })
+      .select('name description')
+      .sort({ name: 1 });
+
+    res.json(teams);
+  } catch (error) {
+    console.error('Error fetching teams for signup:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -152,25 +217,6 @@ router.delete('/:id/members/:memberId', verifyToken, async (req, res) => {
     res.json({ message: 'Member removed successfully', team });
   } catch (error) {
     console.error('Error removing member:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get available users for team assignment (Admin only)
-router.get('/available-users', verifyToken, async (req, res) => {
-  try {
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
-    const users = await User.find({ 
-      role: { $in: ['Manager', 'Team Member'] },
-      teamId: { $exists: false }
-    }).select('name email role');
-
-    res.json(users);
-  } catch (error) {
-    console.error('Error fetching available users:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
