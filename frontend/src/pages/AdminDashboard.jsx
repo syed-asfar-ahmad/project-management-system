@@ -19,6 +19,10 @@ import {
   ArrowRight,
   CheckSquare,
   Mail,
+  X,
+  FileText,
+  UserCheck,
+  Info,
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
 import {
@@ -45,9 +49,11 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [currentProjectsPage, setCurrentProjectsPage] = useState(1);
   const [currentTasksPage, setCurrentTasksPage] = useState(1);
+  const [currentTeamsPage, setCurrentTeamsPage] = useState(1);
   const [projectsPerPage] = useState(4);
   const [tasksPerPage] = useState(4);
-  
+  const [teamsPerPage] = useState(4);
+
   // Team management states
   const [teams, setTeams] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -115,12 +121,22 @@ function AdminDashboard() {
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
   const totalTasksPages = Math.ceil(tasks.length / tasksPerPage);
 
+  // Pagination logic for teams
+  const indexOfLastTeam = currentTeamsPage * teamsPerPage;
+  const indexOfFirstTeam = indexOfLastTeam - teamsPerPage;
+  const currentTeams = teams.slice(indexOfFirstTeam, indexOfLastTeam);
+  const totalTeamsPages = Math.ceil(teams.length / teamsPerPage);
+
   const handleProjectsPageChange = (pageNumber) => {
     setCurrentProjectsPage(pageNumber);
   };
 
   const handleTasksPageChange = (pageNumber) => {
     setCurrentTasksPage(pageNumber);
+  };
+
+  const handleTeamsPageChange = (pageNumber) => {
+    setCurrentTeamsPage(pageNumber);
   };
 
   // Team management functions
@@ -136,11 +152,17 @@ function AdminDashboard() {
       setShowCreateTeamModal(false);
       setCreateTeamForm({ name: '', description: '', managerId: '' });
       
-      // Refresh available users
-      const usersRes = await axios.get(`${API}/teams/available-users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Refresh available users and managers
+      const [usersRes, managersRes] = await Promise.all([
+        axios.get(`${API}/teams/available-users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${API}/teams/managers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ]);
       setAvailableUsers(usersRes.data);
+      setManagers(managersRes.data);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create team');
     }
@@ -299,7 +321,7 @@ function AdminDashboard() {
               </div>
             </div>
 
-                         {/* Stats Cards */}
+            {/* Stats Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                                                {/* Total Projects Card */}
                  <div className="group relative bg-gradient-to-br from-white to-green-50 p-4 rounded-xl shadow-lg border border-green-200 hover:shadow-xl hover:scale-102 transition-all duration-300 overflow-hidden">
@@ -308,11 +330,11 @@ function AdminDashboard() {
                      <div className="flex items-center justify-between mb-3">
                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                          <Briefcase size={20} className="text-white" />
-                       </div>
+                  </div>
                        <div className="text-right">
                          <div className="text-2xl font-bold text-gray-800 group-hover:text-green-700 transition-colors duration-300">
                            {projects.length}
-                         </div>
+                  </div>
                        </div>
                      </div>
                      <div className="space-y-1">
@@ -326,8 +348,8 @@ function AdminDashboard() {
                        <Briefcase size={14} />
                        View Projects
                      </Link>
-                   </div>
-                 </div>
+                </div>
+              </div>
 
                  {/* Total Tasks Card */}
                  <div className="group relative bg-gradient-to-br from-white to-blue-50 p-4 rounded-xl shadow-lg border border-blue-200 hover:shadow-xl hover:scale-102 transition-all duration-300 overflow-hidden">
@@ -336,11 +358,11 @@ function AdminDashboard() {
                      <div className="flex items-center justify-between mb-3">
                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                          <ClipboardList size={20} className="text-white" />
-                       </div>
+                  </div>
                        <div className="text-right">
                          <div className="text-2xl font-bold text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
                            {tasks.length}
-                         </div>
+                  </div>
                        </div>
                      </div>
                      <div className="space-y-1">
@@ -354,8 +376,8 @@ function AdminDashboard() {
                        <ClipboardList size={14} />
                        View Tasks
                      </Link>
-                   </div>
-                 </div>
+                </div>
+              </div>
 
                  {/* Total Members Card */}
                  <div className="group relative bg-gradient-to-br from-white to-purple-50 p-4 rounded-xl shadow-lg border border-purple-200 hover:shadow-xl hover:scale-102 transition-all duration-300 overflow-hidden">
@@ -364,11 +386,11 @@ function AdminDashboard() {
                      <div className="flex items-center justify-between mb-3">
                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                          <Users size={20} className="text-white" />
-                       </div>
+                  </div>
                        <div className="text-right">
                          <div className="text-2xl font-bold text-gray-800 group-hover:text-purple-700 transition-colors duration-300">
                            {members.length}
-                         </div>
+                  </div>
                        </div>
                      </div>
                      <div className="space-y-1">
@@ -382,8 +404,8 @@ function AdminDashboard() {
                        <Users size={14} />
                        View Members
                      </Link>
-                   </div>
-                 </div>
+                </div>
+              </div>
 
                                {/* Contact Messages Card */}
                                  <div className="group relative bg-gradient-to-br from-white to-orange-50 p-4 rounded-xl shadow-lg border border-orange-200 hover:shadow-xl hover:scale-102 transition-all duration-300 overflow-hidden">
@@ -396,20 +418,20 @@ function AdminDashboard() {
                        <div className="text-right">
                          <div className="text-2xl font-bold text-gray-800 group-hover:text-orange-700 transition-colors duration-300">
                            {contactCount}
-                         </div>
-                       </div>
-                     </div>
+                  </div>
+                  </div>
+                </div>
                      <div className="space-y-1">
                        <h3 className="text-base font-semibold text-gray-800">Contact Messages</h3>
                        <p className="text-xs text-gray-600">Customer inquiries</p>
                      </div>
-                     <Link
-                       to="/contact-messages"
+                <Link
+                  to="/contact-messages"
                        className="mt-3 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1.5 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium text-xs shadow-lg hover:shadow-xl w-full justify-center group-hover:scale-105"
-                     >
-                       <Mail size={14} />
-                       View Messages
-                     </Link>
+                >
+                  <Mail size={14} />
+                  View Messages
+                </Link>
                    </div>
                  </div>
 
@@ -439,8 +461,8 @@ function AdminDashboard() {
                        Manage Teams
                      </button>
                    </div>
-                 </div>
-             </div>
+              </div>
+            </div>
 
             {/* Charts */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -805,166 +827,231 @@ function AdminDashboard() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {teams.map((team) => (
-                    <div
-                      key={team._id}
-                      className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden"
-                    >
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-green-700">{team.name}</h3>
-                            <p className="text-gray-600 text-xs mt-1">{team.description}</p>
+                <>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {currentTeams.map((team) => (
+                      <div
+                        key={team._id}
+                        className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                      >
+                        <div className="p-4">
+                          <div className="mb-3">
+                            <div className="flex-1">
+                              <Link
+                                to={`/teams/${team._id}`}
+                                className="group-hover:text-green-800 transition-colors"
+                              >
+                                <h3 className="text-lg font-bold text-green-700 group-hover:text-green-800 transition-colors cursor-pointer">
+                                  {team.name}
+                                </h3>
+                              </Link>
+                              <p className="text-gray-600 text-xs mt-1 line-clamp-2">{team.description}</p>
+                            </div>
                           </div>
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {team.members?.length || 0} members
-                          </span>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                <Users size={14} className="text-green-500" />
+                                <span className="font-medium">Members:</span>
+                                <span>{team.members?.length || 0}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                <span className="font-medium">Manager:</span>
+                                <span>{team.manager?.name || 'Not assigned'}</span>
+                              </div>
+                            </div>
+                            
+                            <Link
+                              to={`/teams/${team._id}`}
+                              className="inline-flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium text-xs shadow-md hover:shadow-lg"
+                            >
+                              <span>View Details</span>
+                              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Teams Pagination */}
+                  <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-600">
+                        Showing {indexOfFirstTeam + 1} to {Math.min(indexOfLastTeam, teams.length)} of {teams.length} teams
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleTeamsPageChange(currentTeamsPage - 1)}
+                          disabled={currentTeamsPage === 1}
+                          className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            currentTeamsPage === 1
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalTeamsPages }, (_, index) => index + 1).map((pageNumber) => (
+                            <button
+                              key={pageNumber}
+                              onClick={() => handleTeamsPageChange(pageNumber)}
+                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                currentTeamsPage === pageNumber
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {pageNumber}
+                            </button>
+                          ))}
                         </div>
                         
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            <span className="font-medium">Manager:</span>
-                            <span>{team.manager?.name || 'Not assigned'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            <span className="font-medium">Status:</span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              team.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                              {team.status}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Team Members List */}
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Team Members:</h4>
-                          <div className="space-y-1">
-                            {team.members?.slice(0, 3).map((member) => (
-                              <div key={member._id} className="flex items-center justify-between text-xs">
-                                <span className="text-gray-600">{member.name}</span>
-                                <span className="text-gray-500">{member.role}</span>
-                              </div>
-                            ))}
-                            {team.members?.length > 3 && (
-                              <div className="text-xs text-gray-500">
-                                +{team.members.length - 3} more members
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Add Member Dropdown */}
-                        {availableUsers.length > 0 && (
-                          <div className="mb-3">
-                            <select
-                              className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-500"
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  handleAddMemberToTeam(team._id, e.target.value);
-                                  e.target.value = '';
-                                }
-                              }}
-                            >
-                              <option value="">Add member to team...</option>
-                              {availableUsers.map((user) => (
-                                <option key={user._id} value={user._id}>
-                                  {user.name} ({user.role})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
+                        <button
+                          onClick={() => handleTeamsPageChange(currentTeamsPage + 1)}
+                          disabled={currentTeamsPage === totalTeamsPages}
+                          className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            currentTeamsPage === totalTeamsPages
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          Next
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </>
               )}
             </section>
 
             {/* Create Team Modal */}
             {showCreateTeamModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Create New Team</h3>
-                    <button
-                      onClick={() => setShowCreateTeamModal(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      ✕
-                    </button>
+              <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all duration-300 scale-100">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl p-6 text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white bg-opacity-20 p-2 rounded-xl">
+                          <Users size={24} className="text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold">Create New Team</h3>
+                          <p className="text-green-100 text-sm">Build your dream team</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCreateTeamModal(false)}
+                        className="bg-white bg-opacity-20 p-2 rounded-xl hover:bg-opacity-30 transition-all duration-200"
+                      >
+                        <X size={20} className="text-white" />
+                      </button>
+                    </div>
                   </div>
                   
-                  <form onSubmit={handleCreateTeam} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Team Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={createTeamForm.name}
-                        onChange={(e) => setCreateTeamForm({...createTeamForm, name: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Enter team name (e.g., ABC, DEF)"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                      </label>
-                      <textarea
-                        required
-                        value={createTeamForm.description}
-                        onChange={(e) => setCreateTeamForm({...createTeamForm, description: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        rows="3"
-                        placeholder="Enter team description"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assign Manager
-                      </label>
-                                             <select
-                         required
-                         value={createTeamForm.managerId}
-                         onChange={(e) => setCreateTeamForm({...createTeamForm, managerId: e.target.value})}
-                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                       >
-                         <option value="">Select a manager...</option>
-                         {managers.map((manager) => (
-                           <option key={manager._id} value={manager._id}>
-                             {manager.name} ({manager.email})
-                             {manager.teamId ? ' - Already assigned to team' : ' - Available'}
-                           </option>
-                         ))}
-                       </select>
-                       <p className="text-xs text-gray-500 mt-1">
-                         Managers already assigned to teams will be moved to this new team.
-                       </p>
-                    </div>
-                    
-                    <div className="flex gap-3 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setShowCreateTeamModal(false)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        Create Team
-                      </button>
-                    </div>
-                  </form>
+                  {/* Form */}
+                  <div className="p-6">
+                    <form onSubmit={handleCreateTeam} className="space-y-6">
+                      {/* Team Name */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">
+                          Team Name <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Users size={18} className="text-gray-400" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={createTeamForm.name}
+                            onChange={(e) => setCreateTeamForm({...createTeamForm, name: e.target.value})}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                            placeholder="Enter team name"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Description */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">
+                          Description <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute top-3 left-4 pointer-events-none">
+                            <FileText size={18} className="text-gray-400" />
+                          </div>
+                          <textarea
+                            required
+                            value={createTeamForm.description}
+                            onChange={(e) => setCreateTeamForm({...createTeamForm, description: e.target.value})}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                            rows="3"
+                            placeholder="Enter team description"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Manager Assignment */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">
+                          Assign Manager <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <UserCheck size={18} className="text-gray-400" />
+                          </div>
+                          <select
+                            required
+                            value={createTeamForm.managerId}
+                            onChange={(e) => setCreateTeamForm({...createTeamForm, managerId: e.target.value})}
+                            className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                            style={{
+                              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                              backgroundPosition: 'right 1rem center',
+                              backgroundRepeat: 'no-repeat',
+                              backgroundSize: '1.5em 1.5em'
+                            }}
+                          >
+                            <option value="">Select manager</option>
+                            {managers.map((manager) => (
+                              <option key={manager._id} value={manager._id}>
+                                {manager.name} ({manager.email})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                          <Info size={14} className="text-blue-500 flex-shrink-0" />
+                          <span>Only available managers are shown. Assigned managers will not appear in this list.</span>
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowCreateTeamModal(false)}
+                          className="flex-1 px-6 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <PlusCircle size={18} />
+                            Create Team
+                          </div>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
             )}

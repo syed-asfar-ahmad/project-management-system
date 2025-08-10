@@ -22,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
+import TeamDetailPage from "./pages/TeamDetailPage";
 
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -85,6 +86,7 @@ function AppRoutes() {
         <Route path="/projects/edit/:id" element={<EditProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members" element={<AllMembersPage />} />
+        <Route path="/teams/:id" element={<PrivateRoute><TeamDetailPage /></PrivateRoute>} />
         <Route path="/contact-messages" element={
           <RoleBasedRoute allowedRoles={["Admin"]}>
             <ContactMessagesPage />

@@ -20,20 +20,15 @@ router.post('/', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Team name already exists' });
     }
 
-    // Check if manager exists and is a valid user
+    // Check if manager exists and is available
     const manager = await User.findById(managerId);
     if (!manager) {
       return res.status(400).json({ message: 'Manager not found' });
     }
 
-    // If manager is already assigned to a team, remove them from that team first
+    // Check if manager is already assigned to a team
     if (manager.teamId) {
-      const existingTeam = await Team.findById(manager.teamId);
-      if (existingTeam) {
-        // Remove manager from existing team members
-        existingTeam.members = existingTeam.members.filter(member => member.toString() !== managerId);
-        await existingTeam.save();
-      }
+      return res.status(400).json({ message: 'Manager is already assigned to a team' });
     }
 
     // Create new team
@@ -101,17 +96,18 @@ router.get('/available-users', verifyToken, async (req, res) => {
   }
 });
 
-// Get all managers for team creation (Admin only)
+// Get available managers for team creation (Admin only)
 router.get('/managers', verifyToken, async (req, res) => {
   try {
     if (req.user.role !== 'Admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Get all users with Manager role (including those already assigned to teams)
+    // Get only managers who are not assigned to any team
     const managers = await User.find({ 
-      role: 'Manager'
-    }).select('name email teamId');
+      role: 'Manager',
+      teamId: { $exists: false }
+    }).select('name email');
 
     res.json(managers);
   } catch (error) {
