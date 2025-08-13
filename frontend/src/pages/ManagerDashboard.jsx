@@ -56,40 +56,29 @@ function ManagerDashboard() {
           axios.get(`${API}/tasks/manager-tasks`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API}/users/team-members`, {
+          axios.get(`${API}/users/my-team-members`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
         
-        // Filter projects to show those where manager is assigned as team member OR project manager
-        const assignedProjects = projRes.data.filter(project => 
-          project.teamMembers?.some(member => 
-            typeof member === "string" ? member === user._id : member._id === user._id
-          ) || 
-          (project.projectManager && 
-           (typeof project.projectManager === "string" ? 
-            project.projectManager === user._id : 
-            project.projectManager._id === user._id))
-        );
-        
-        // Get unique team members from assigned projects only
-        const assignedMemberIds = new Set();
-        assignedProjects.forEach(project => {
-          if (project.teamMembers) {
-            project.teamMembers.forEach(member => {
-              const memberId = typeof member === "string" ? member : member._id;
-              assignedMemberIds.add(memberId);
-            });
-          }
+        // Sort projects by creation date (newest first)
+        const sortedProjects = projRes.data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a._id);
+          const dateB = new Date(b.createdAt || b._id);
+          return dateB - dateA;
         });
+        setProjects(sortedProjects);
         
-        const assignedMembers = memberRes.data.filter(member => 
-          assignedMemberIds.has(member._id)
-        );
+        // Sort tasks by creation date (newest first)
+        const sortedTasks = taskRes.data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a._id);
+          const dateB = new Date(b.createdAt || b._id);
+          return dateB - dateA;
+        });
+        setTasks(sortedTasks);
         
-        setProjects(assignedProjects);
-        setTasks(taskRes.data);
-        setMembers(assignedMembers);
+        // Use the team members directly from the API response
+        setMembers(memberRes.data);
       } catch (err) {
         toast.error("Failed to fetch dashboard data");
       } finally {
@@ -243,7 +232,7 @@ function ManagerDashboard() {
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg flex items-center justify-center transition-transform duration-300">
                   <Briefcase size={20} className="text-white" />
                 </div>
                 <div className="text-right">
@@ -271,7 +260,7 @@ function ManagerDashboard() {
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center transition-transform duration-300">
                   <ClipboardList size={20} className="text-white" />
                 </div>
                 <div className="text-right">
@@ -299,7 +288,7 @@ function ManagerDashboard() {
             <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center transition-transform duration-300">
                   <Users size={20} className="text-white" />
                 </div>
                 <div className="text-right">

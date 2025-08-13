@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const NotificationService = require('../services/notificationService');
 
 
 // Register new user
@@ -40,6 +41,18 @@ const register = async (req, res) => {
       await Team.findByIdAndUpdate(teamId, {
         $push: { members: user._id }
       });
+
+      // Get team details and notify the team manager
+      const team = await Team.findById(teamId).populate('manager', 'name email');
+      if (team && team.manager) {
+        await NotificationService.notifyTeamMemberJoined(team, user, team.manager);
+      }
+    }
+
+    // Notify admin about new user registration
+    const admin = await User.findOne({ role: 'Admin' });
+    if (admin) {
+      await NotificationService.notifyNewUserSignup(user, admin);
     }
 
     res.status(201).json({ message: 'User registered successfully' });

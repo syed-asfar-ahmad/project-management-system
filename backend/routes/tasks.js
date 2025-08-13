@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path'); // Added for file path handling
-const multer = require('multer');
-const { put } = require("@vercel/blob");
-const mongoose = require('mongoose');
-
+const { verifyToken, checkRole, checkManagerTaskAccess } = require('../middleware/auth');
 const {
   createTask,
   getAllTasks,
@@ -13,63 +9,53 @@ const {
   updateTask,
   deleteTask,
   addCommentToTask,
-  deleteTaskComment,
   getTasksByDueDate,
-  getMyProjectTasks,
-  uploadTaskFile,
+  deleteTaskComment,
 } = require('../controllers/taskController');
+const multer = require('multer');
+const { put } = require('@vercel/blob');
+const mongoose = require('mongoose');
+const path = require('path');
+const NotificationService = require('../services/notificationService');
 
-const { verifyToken, checkRole, checkManagerTaskAccess } = require('../middleware/auth');
-
-
-// Use memory storage for Vercel Blob uploads
-const memoryStorage = multer.memoryStorage();
-const memoryUpload = multer({ 
-  storage: memoryStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Max 10MB for Blob
-  fileFilter: (req, file, cb) => {
-    const allowed = ['.jpg', '.jpeg', '.png', '.pdf', '.docx', '.txt', '.xlsx', '.xls'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error(`Unsupported file type: ${ext}. Allowed types: ${allowed.join(', ')}`), false);
-    }
-  }
+// Configure multer for memory storage
+const memoryUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
 });
 
-// Create Task - Admin or Manager
+// Create Task - Admin or Manager (if assigned to project)
 router.post('/', verifyToken, checkRole('Admin', 'Manager'), createTask);
 
-// Get All Tasks - Admin only
-router.get('/', verifyToken, checkRole('Admin'), getAllTasks);
+// Get all tasks (Admin/Manager)
+router.get('/', verifyToken, checkRole('Admin', 'Manager'), getAllTasks);
 
-// Get My Tasks - Team Member
-router.get('/my-tasks', verifyToken, checkRole('Team Member'), getMyTasks);
+// Get tasks assigned to logged-in user
+router.get('/my-tasks', verifyToken, getMyTasks);
 
-// Get Manager's Project Tasks (all tasks from projects they are assigned to)
+// Get tasks by due date
+router.get('/due-date', verifyToken, getTasksByDueDate);
+
+// Get manager tasks
 router.get('/manager-tasks', verifyToken, checkRole('Manager'), async (req, res) => {
   try {
     const Task = require('../models/Task');
     const Project = require('../models/Project');
     
-    // First get all projects the manager is assigned to (as team member or project manager)
-    const assignedProjects = await Project.find({
-      $or: [
-        { teamMembers: req.user.id },
-        { projectManager: req.user.id }
-      ]
-    });
-    const projectIds = assignedProjects.map(project => project._id);
+    // Get projects managed by this manager
+    const managedProjects = await Project.find({ projectManager: req.user.id });
+    const projectIds = managedProjects.map(project => project._id);
     
-    // Then get all tasks from those projects
+    // Get tasks from managed projects
     const tasks = await Task.find({ project: { $in: projectIds } })
-      .populate('assignedTo', 'name email')
-      .populate('project', 'name');
+      .populate('project', 'name')
+      .populate('assignedTo', 'name email role');
     
     res.json(tasks);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch tasks' });
+    res.status(500).json({ error: 'Error fetching manager tasks' });
   }
 });
 
@@ -104,7 +90,21 @@ router.get('/manager-project/:projectId', verifyToken, checkRole('Manager'), asy
 });
 
 // Get project-specific tasks assigned to the team member
-router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), getMyProjectTasks);
+router.get('/project/:projectId/user', verifyToken, checkRole('Team Member'), async (req, res) => {
+  try {
+    const Task = require('../models/Task');
+    const tasks = await Task.find({ 
+      project: req.params.projectId, 
+      assignedTo: req.user.id 
+    })
+      .populate('project', 'name')
+      .populate('assignedTo', 'name email');
+    
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch project tasks' });
+  }
+});
 
 // Get Tasks for Calendar View - Any logged-in user
 router.get('/calendar/tasks', verifyToken, getTasksByDueDate);
@@ -272,17 +272,30 @@ router.get('/:id/attachments/:attachmentId/preview', verifyToken, async (req, re
   }
 });
 
-// Delete Task Attachment - Admin only
-router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Admin'), async (req, res) => {
+// Delete Task Attachment - Manager only (if assigned to project)
+router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'), checkManagerTaskAccess, async (req, res) => {
   const Task = require('../models/Task');
   const { id, attachmentId } = req.params;
 
   try {
-    const task = await Task.findById(id);
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const task = await Task.findById(id)
+      .populate('project', 'name projectManager teamMembers')
+      .populate('assignedTo', 'name email');
+    
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     const attachment = task.attachments.id(attachmentId);
     if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    // Send notification before deleting
+    await NotificationService.notifyAttachmentDeleted(attachment, user, task.project, task);
 
     // Remove the attachment from the array
     task.attachments.pull(attachmentId);
@@ -306,8 +319,41 @@ router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTa
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);
 
-// Delete comment from task (Admin only)
-router.delete('/:taskId/comments/:commentId', verifyToken, deleteTaskComment);
+// Delete comment from task (Manager only)
+router.delete('/:taskId/comments/:commentId', verifyToken, checkRole('Manager'), checkManagerTaskAccess, async (req, res) => {
+  try {
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const Task = require('../models/Task');
+    const task = await Task.findById(req.params.taskId)
+      .populate('project', 'name projectManager teamMembers')
+      .populate('assignedTo', 'name email');
+    
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Find the comment before deleting
+    const comment = task.comments.id(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    // Send notification before deleting
+    await NotificationService.notifyCommentDeleted(comment, user, task.project, task);
+
+    // Delete the comment
+    await deleteTaskComment(req, res);
+  } catch (error) {
+    console.error('Error in task comment deletion route:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
 
 // Upload File to Task - Any logged-in user
 router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req, res) => {
@@ -318,7 +364,17 @@ router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req,
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const task = await Task.findById(req.params.id);
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const task = await Task.findById(req.params.id)
+      .populate('project', 'name projectManager teamMembers')
+      .populate('assignedTo', 'name email');
+    
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     // Upload to Vercel Blob
@@ -339,6 +395,9 @@ router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req,
 
     task.attachments.push(newAttachment);
     await task.save();
+    
+    // Send notification for new attachment
+    await NotificationService.notifyAttachmentAdded(newAttachment, user, task.project, task);
     
     res.status(200).json({ message: 'File uploaded', file: newAttachment });
   } catch (err) {

@@ -99,9 +99,9 @@ function EditProjectPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full px-4 py-8">
         {/* Header with Back Button and Title - Responsive */}
-        <div className="mb-4">
+        <div className="w-full max-w-[1000px] mx-auto mb-4">
           {/* Back Button - Top Row on Mobile */}
           <div className="mb-3 md:hidden">
             <button
@@ -155,8 +155,8 @@ function EditProjectPage() {
         </div>
 
         {/* Edit Form */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+        <div className="w-full max-w-[1000px] mx-auto">
+          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6 w-full min-h-[600px]">
             <EditProjectForm
               project={project}
               token={token}

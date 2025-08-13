@@ -1,22 +1,107 @@
 const Project = require('../models/Project');
+const User = require('../models/User');
+const Team = require('../models/Team');
+const NotificationService = require('../services/notificationService');
 
 // CREATE project
 const createProject = async (req, res) => {
   const { name, description, deadline, teamMembers, status, projectManager } = req.body;
+  
   try {
-    const project = new Project({
-      name,
-      description,
-      deadline,
-      teamMembers,
-      status,
-      projectManager
-    });
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    await project.save();
+    // If user is a Manager, validate that they can only create projects within their team
+    if (req.user.role === 'Manager') {
+      const manager = await User.findById(req.user.id).populate('teamId');
+      
+      if (!manager.teamId) {
+        return res.status(403).json({ error: 'Manager not assigned to any team' });
+      }
 
-    res.status(201).json({ message: 'Project created', project });
+      // Validate teamMembers: ensure all selected team members belong to the manager's team
+      if (teamMembers && teamMembers.length > 0) {
+        const membersInTeam = await User.find({ 
+          _id: { $in: teamMembers }, 
+          teamId: manager.teamId._id 
+        });
+        
+        if (membersInTeam.length !== teamMembers.length) {
+          return res.status(400).json({ error: 'All team members must belong to your team' });
+        }
+      }
+
+      // For managers, set themselves as the project manager
+      const projectData = {
+        name,
+        description,
+        deadline,
+        teamMembers,
+        status,
+        projectManager: req.user.id // Manager becomes the project manager
+      };
+
+      const project = new Project(projectData);
+      await project.save();
+
+      // Populate project for notifications
+      const populatedProject = await Project.findById(project._id)
+        .populate('teamMembers', 'name email')
+        .populate('projectManager', 'name email');
+
+      // Send notifications
+      await NotificationService.notifyProjectCreated(populatedProject, user);
+
+      // Send notifications to team members who were added
+      if (teamMembers && teamMembers.length > 0) {
+        for (const memberId of teamMembers) {
+          const member = await User.findById(memberId);
+          if (member) {
+            await NotificationService.notifyMemberAdded(member, user, populatedProject);
+          }
+        }
+      }
+
+      res.status(201).json({ message: 'Project created', project });
+    } else {
+      // For Admin, use the provided projectManager or null
+      const projectData = {
+        name,
+        description,
+        deadline,
+        teamMembers,
+        status,
+        projectManager: projectManager || null
+      };
+
+      const project = new Project(projectData);
+      await project.save();
+
+      // Populate project for notifications
+      const populatedProject = await Project.findById(project._id)
+        .populate('teamMembers', 'name email')
+        .populate('projectManager', 'name email');
+
+      // Send notifications
+      await NotificationService.notifyProjectCreated(populatedProject, user);
+
+      // Send notifications to team members who were added
+      if (teamMembers && teamMembers.length > 0) {
+        for (const memberId of teamMembers) {
+          const member = await User.findById(memberId);
+          if (member) {
+            await NotificationService.notifyMemberAdded(member, user, populatedProject);
+          }
+        }
+      }
+
+      res.status(201).json({ message: 'Project created', project });
+    }
   } catch (err) {
+    console.error('Error creating project:', err);
     res.status(500).json({ error: 'Error creating project' });
   }
 };
@@ -38,14 +123,51 @@ const updateProject = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const project = await Project.findById(id);
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    // Store original team members for comparison
+    const originalTeamMembers = project.teamMembers || [];
+    const newTeamMembers = req.body.teamMembers || [];
+
     const updated = await Project.findByIdAndUpdate(id, req.body, { new: true })
       .populate('teamMembers', 'name email role')
       .populate('projectManager', 'name email role');
+
+    // Send notifications for project updates
+    await NotificationService.notifyProjectUpdated(updated, user);
+
+    // Check for team member changes and send notifications
+    const addedMembers = newTeamMembers.filter(memberId => 
+      !originalTeamMembers.includes(memberId)
+    );
+    const removedMembers = originalTeamMembers.filter(memberId => 
+      !newTeamMembers.includes(memberId)
+    );
+
+    // Send notifications for added members
+    for (const memberId of addedMembers) {
+      const member = await User.findById(memberId);
+      if (member) {
+        await NotificationService.notifyMemberAdded(member, user, updated);
+      }
+    }
+
+    // Send notifications for removed members
+    for (const memberId of removedMembers) {
+      const member = await User.findById(memberId);
+      if (member) {
+        await NotificationService.notifyMemberRemoved(member, user, updated);
+      }
+    }
 
     res.json({ message: 'Project updated', project: updated });
   } catch (err) {
@@ -58,23 +180,35 @@ const deleteProject = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const project = await Project.findById(id);
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const project = await Project.findById(id)
+      .populate('teamMembers', 'name email')
+      .populate('projectManager', 'name email');
+    
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Delete all tasks associated with this project
-    const Task = require('../models/Task');
-    const deletedTasks = await Task.deleteMany({ project: id });
-    
+    // Send notifications before deleting
+    await NotificationService.notifyProjectDeleted(project, user);
 
+    // If a manager is deleting the project, notify the admin
+    if (req.user.role === 'Manager') {
+      // Find the admin (assuming there's only one admin or we want to notify the main admin)
+      const admin = await User.findOne({ role: 'Admin' });
+      if (admin) {
+        await NotificationService.notifyProjectDeletedByManager(project, user, admin);
+      }
+    }
 
-    // Delete the project
     await Project.findByIdAndDelete(id);
-    res.json({ 
-      message: 'Project and associated tasks deleted successfully',
-      deletedTasksCount: deletedTasks.deletedCount
-    });
+    
+    res.json({ message: 'Project deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Error deleting project' });
   }
@@ -112,15 +246,10 @@ const getProjectComments = async (req, res) => {
   }
 };
 
-// DELETE comment from a project (Admin only)
+// DELETE comment from a project (Admin or Manager)
 const deleteProjectComment = async (req, res) => {
   try {
     const { projectId, commentId } = req.params;
-    
-    // Check if user is admin
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ error: 'Only admins can delete comments' });
-    }
 
     const project = await Project.findById(projectId);
     if (!project) return res.status(404).json({ error: 'Project not found' });

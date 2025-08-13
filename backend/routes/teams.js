@@ -3,6 +3,7 @@ const router = express.Router();
 const Team = require('../models/Team');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/auth');
+const NotificationService = require('../services/notificationService');
 
 // Create a new team (Admin only)
 router.post('/', verifyToken, async (req, res) => {
@@ -44,6 +45,17 @@ router.post('/', verifyToken, async (req, res) => {
 
     // Update manager's teamId
     await User.findByIdAndUpdate(managerId, { teamId: team._id });
+
+    // Send notifications
+    const admin = await User.findById(req.user.id);
+    const populatedTeam = await Team.findById(team._id)
+      .populate('manager', 'name email');
+
+    // Notify admin about team creation
+    await NotificationService.notifyTeamCreated(populatedTeam, admin);
+
+    // Notify manager about being assigned to the team
+    await NotificationService.notifyTeamMemberJoined(populatedTeam, manager, admin);
 
     res.status(201).json({
       message: 'Team created successfully',

@@ -26,6 +26,7 @@ function AddTaskPage() {
     project: '',
     assignedTo: '',
   });
+  const [selectedProjectDeadline, setSelectedProjectDeadline] = useState('');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -33,7 +34,9 @@ function AddTaskPage() {
         const res = await axios.get(`${API}/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProjects(res.data);
+        // Filter out completed projects
+        const activeProjects = res.data.filter(project => project.status !== 'Completed');
+        setProjects(activeProjects);
       } catch (err) {
         toast.error('Error loading projects');
       }
@@ -64,11 +67,27 @@ function AddTaskPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setForm((prev) => ({
       ...prev,
       [name]: value,
       ...(name === 'project' && { assignedTo: '' }), 
     }));
+
+    // If project is selected, get its deadline
+    if (name === 'project') {
+      const selectedProject = projects.find(p => p._id === value);
+      if (selectedProject) {
+        // Ensure the deadline is in YYYY-MM-DD format for HTML date input
+        const deadlineDate = new Date(selectedProject.deadline);
+        const formattedDeadline = deadlineDate.toISOString().split('T')[0];
+        setSelectedProjectDeadline(formattedDeadline);
+        // Reset due date when project changes
+        setForm(prev => ({ ...prev, dueDate: '' }));
+      } else {
+        setSelectedProjectDeadline('');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -89,6 +108,7 @@ function AddTaskPage() {
         assignedTo: '',
       });
       setProjectMembers([]);
+      setSelectedProjectDeadline(''); // Reset project deadline state
     } catch (err) {
       toast.error('Error creating task');
     } finally {
@@ -100,9 +120,10 @@ function AddTaskPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <main className="flex-grow">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-10">
+          <div className="w-full max-w-[1000px] mx-auto">
                   {/* Header with Back Button and Title - Responsive */}
-        <div className="mb-4">
+        <div className="w-full max-w-[1000px] mx-auto mb-4">
           {/* Back Button - Top Row on Mobile */}
           <div className="mb-3 md:hidden">
             <button
@@ -155,7 +176,7 @@ function AddTaskPage() {
           </p>
         </div>
           
-          <div className="bg-white p-8 shadow-md rounded-xl">
+          <div className="bg-white p-8 shadow-md rounded-xl w-full min-h-[600px]">
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Title */}
@@ -208,11 +229,12 @@ function AddTaskPage() {
 
               {/* Assigned To */}
               <div>
-                <label className="block text-gray-700 font-medium mb-1">Assign To</label>
+                <label className="block text-gray-700 font-medium mb-1">Assign To <span className="text-red-500 ml-1">*</span></label>
                 <select
                   name="assignedTo"
                   value={form.assignedTo}
                   onChange={handleChange}
+                  required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="">Select a Team Member</option>
@@ -267,9 +289,27 @@ function AddTaskPage() {
                   name="dueDate"
                   value={form.dueDate}
                   onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]} // Cannot be in the past
+                  max={selectedProjectDeadline} // Cannot exceed project deadline
                   required
                   className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  disabled={!selectedProjectDeadline} // Disable if no project selected
                 />
+                {selectedProjectDeadline && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700">
+                      <span className="font-medium">📅 Project Deadline:</span> {new Date(selectedProjectDeadline).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Task due date must be between today and project deadline
+                    </p>
+                  </div>
+                )}
+                {!selectedProjectDeadline && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Please select a project first to set task deadline
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}
@@ -286,6 +326,7 @@ function AddTaskPage() {
                 </button>
               </div>
             </form>
+          </div>
           </div>
         </div>
       </main>

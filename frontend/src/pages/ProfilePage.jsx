@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
+import { getAvatarUrl } from "../utils/avatarUtils";
+import { useAuth } from "../context/AuthContext";
 
 const roleIcons = {
   Admin: <ShieldCheck className="inline-block w-4 h-4 text-red-500 mr-1" />,
@@ -49,6 +51,7 @@ const roleColors = {
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
     name: "",
@@ -140,6 +143,12 @@ function ProfilePage() {
       toast.success("Profile updated successfully");
       fetchProfile(); // refresh updated info
       setFile(null);  // clear selected file
+      
+      // Refresh user data in AuthContext to update navbar
+      await refreshUser();
+      
+      // Dispatch notification refresh event
+      window.dispatchEvent(new CustomEvent('refreshNotifications'));
     } catch (err) {
       toast.error("Profile update failed");
     }
@@ -304,7 +313,7 @@ function ProfilePage() {
                         src={
                           file
                             ? URL.createObjectURL(file)
-                            : profile.profilePicture || "https://via.placeholder.com/100x100?text=" + profile.name.charAt(0).toUpperCase()
+                            : getAvatarUrl(profile.profilePicture, profile.name, 96)
                         }
                         alt="Profile"
                         className="relative w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
@@ -435,7 +444,7 @@ function ProfilePage() {
 
               {/* LEFT: Profile Card - Same Design as Team Members */}
               <div className="w-full md:w-80">
-                <div className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 ${roleColor.bg} ${roleColor.border} border-2`}>
+                <div className={`relative overflow-hidden rounded-xl shadow-lg hover:-translate-y-1 transition-transform duration-300 ${roleColor.bg} ${roleColor.border} border-2`}>
                   {/* Background Pattern */}
                   <div className="absolute inset-0 opacity-5">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-current to-transparent rounded-full -translate-y-8 translate-x-8"></div>
@@ -447,21 +456,21 @@ function ProfilePage() {
                     {/* Profile Image and Basic Info Row */}
                     <div className="flex items-center mb-3">
                       <div className="relative mr-3">
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-lg opacity-75"></div>
                         <img
                           src={
                             file
                               ? URL.createObjectURL(file)
-                              : profile.profilePicture || "https://via.placeholder.com/60x60?text=" + profile.name.charAt(0).toUpperCase()
+                              : getAvatarUrl(profile.profilePicture, profile.name, 48)
                           }
                           alt={profile.name}
-                          className="relative w-12 h-12 rounded-full object-cover border-2 border-white shadow-md group-hover:scale-105 transition-transform duration-300"
+                          className="relative w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
                         />
 
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h2 className="text-base font-bold text-gray-800 mb-1 group-hover:text-gray-900 transition-colors duration-300 truncate">
+                        <h2 className="text-base font-bold text-gray-800 mb-1 truncate">
                           {profile.name}
                         </h2>
                         <div className="flex items-center space-x-1 mb-1">
@@ -524,8 +533,7 @@ function ProfilePage() {
                       </div>
                     )}
 
-                    {/* Hover Effect Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+
                   </div>
                 </div>
               </div>

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
+const User = require('../models/User');
+const NotificationService = require('../services/notificationService');
 const { verifyToken } = require('../middleware/auth');
 
 // Submit contact form (public)
@@ -9,6 +11,16 @@ router.post('/', async (req, res) => {
     const { name, email, subject, message } = req.body;
     const newContact = new Contact({ name, email, subject, message });
     await newContact.save();
+    
+    // Find all admin users to send notification
+    const adminUsers = await User.find({ role: 'Admin' });
+    
+    if (adminUsers.length > 0) {
+      for (const adminUser of adminUsers) {
+        await NotificationService.notifyContactFormSubmitted(newContact, adminUser);
+      }
+    }
+    
     res.status(201).json({ message: 'Message sent successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

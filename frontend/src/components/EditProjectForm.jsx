@@ -18,48 +18,43 @@ const API = process.env.REACT_APP_API_BASE_URL;
 
 function EditProjectForm({ project, token, onSuccess, onCancel }) {
   const [teamOptions, setTeamOptions] = useState([]);
-  const [managerOptions, setManagerOptions] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     name: project.name || "",
     description: project.description || "",
     deadline: project.deadline?.slice(0, 10) || "",
-         status: project.status || "Pending",
-    projectManager: project.projectManager?._id || project.projectManager || "",
+    status: project.status || "Pending",
     teamMembers: project.teamMembers?.map((member) => typeof member === 'object' ? member._id : member) || [],
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [teamRes, managerRes] = await Promise.all([
-          axios.get(`${API}/users/team-members`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${API}/users/managers`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        ]);
+        const teamRes = await axios.get(`${API}/users/team-members`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        const teamOptions = teamRes.data.map((member) => ({
-          value: member._id,
-          label: `${member.name} (${member.email})`,
-        }));
-
-        const managerOptions = managerRes.data.map((manager) => ({
-          value: manager._id,
-          label: `${manager.name} (${manager.email})`,
-        }));
+        // Create team options with only current project team members
+        const currentTeamMemberIds = project.teamMembers?.map((member) => 
+          typeof member === 'object' ? member._id : member
+        ) || [];
+        
+        const teamOptions = teamRes.data
+          .filter((member) => currentTeamMemberIds.includes(member._id))
+          .map((member) => ({
+            value: member._id,
+            label: `${member.name} (${member.email})`,
+          }));
 
         setTeamOptions(teamOptions);
-        setManagerOptions(managerOptions);
       } catch (err) {
+        console.error('Error fetching data:', err);
       }
     };
 
     fetchData();
-  }, [token]);
+  }, [token, project.teamMembers]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,10 +64,6 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
   const handleTeamChange = (selectedOptions) => {
     const selectedIds = selectedOptions.map((opt) => opt.value);
     setForm((prev) => ({ ...prev, teamMembers: selectedIds }));
-  };
-
-  const handleManagerChange = (selectedOption) => {
-    setForm((prev) => ({ ...prev, projectManager: selectedOption ? selectedOption.value : "" }));
   };
 
   const handleSubmit = async (e) => {
@@ -146,9 +137,9 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
         </div>
       </div>
 
-      {/* Deadline, Status, and Project Manager */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <div className="md:col-span-3">
+      {/* Deadline and Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Deadline <span className="text-red-500 ml-1">*</span>
           </label>
@@ -167,7 +158,7 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
           </div>
         </div>
 
-        <div className="md:col-span-3">
+        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Status <span className="text-red-500 ml-1">*</span>
           </label>
@@ -189,54 +180,10 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
                 paddingRight: '2.5rem'
               }}
             >
-                             <option value="Pending">Pending</option>
-               <option value="In Progress">In Progress</option>
-               <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
-          </div>
-        </div>
-
-        <div className="md:col-span-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Project Manager
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <UserCheck className="h-5 w-5 text-gray-400" />
-            </div>
-            <div className="pl-10">
-              <Select
-                value={managerOptions.find((opt) => opt.value === form.projectManager)}
-                options={managerOptions}
-                onChange={handleManagerChange}
-                placeholder="Select project manager..."
-                isClearable
-                styles={{
-                  control: (provided, state) => ({
-                    ...provided,
-                    minHeight: '48px',
-                    border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
-                    '&:hover': {
-                      border: '1px solid #10b981'
-                    }
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    backgroundColor: state.isSelected ? '#10b981' : state.isFocused ? '#f0fdf4' : 'white',
-                    color: state.isSelected ? 'white' : '#374151',
-                    '&:hover': {
-                      backgroundColor: state.isSelected ? '#10b981' : '#f0fdf4'
-                    }
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    maxHeight: '200px'
-                  })
-                }}
-              />
-            </div>
           </div>
         </div>
       </div>

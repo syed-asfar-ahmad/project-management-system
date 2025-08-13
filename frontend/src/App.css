@@ -36,3 +36,33 @@
     transform: rotate(360deg);
   }
 }
+
+/* React Select Dropdown Z-Index Fix */
+.react-select-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.react-select__menu {
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+.react-select__menu-list {
+  z-index: 9999 !important;
+}
+
+.react-select__option {
+  z-index: 9999 !important;
+}
+
+/* Ensure dropdown appears above footer */
+.react-select__menu-portal {
+  z-index: 9999 !important;
+}
+
+/* Fix for dropdown positioning */
+.react-select-container .react-select__menu {
+  position: fixed !important;
+  z-index: 9999 !important;
+}

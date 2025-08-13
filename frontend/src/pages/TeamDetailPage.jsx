@@ -18,6 +18,7 @@ import {
   Mail,
   ArrowRight
 } from "lucide-react";
+import { getAvatarUrl } from "../utils/avatarUtils";
 
 const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api';
 
@@ -47,20 +48,34 @@ function TeamDetailPage() {
 
         setTeam(teamRes.data);
         
-        // Filter projects for this team
-        const teamProjects = projectsRes.data.filter(project => 
-          project.teamId === id
-        );
+        // Get all team member IDs (including manager)
+        const allTeamMemberIds = [
+          teamRes.data.manager?._id,
+          ...teamRes.data.members.map(member => member._id)
+        ].filter(Boolean);
+        
+        // Filter projects for this team - show projects where the team's manager is the project manager
+        const teamProjects = projectsRes.data.filter(project => {
+          // Check if the team's manager is the project manager
+          const isTeamManagerProject = project.projectManager && 
+            (typeof project.projectManager === 'string' ? project.projectManager : project.projectManager._id) === teamRes.data.manager?._id;
+          
+          // Check if any team member is assigned to the project
+          const hasTeamMember = project.teamMembers && 
+            project.teamMembers.some(member => 
+              allTeamMemberIds.includes(typeof member === 'string' ? member : member._id)
+            );
+          
+          return isTeamManagerProject || hasTeamMember;
+        });
         setProjects(teamProjects);
         
-                 // Filter tasks for this team's members (excluding manager)
-         const teamMemberIds = teamRes.data.members
-           .filter(member => member._id !== teamRes.data.manager?._id)
-           .map(member => member._id);
-         const teamTasks = tasksRes.data.filter(task => 
-           teamMemberIds.includes(task.assignedTo)
-         );
-         setTasks(teamTasks);
+        // Filter tasks for this team's projects
+        const teamProjectIds = teamProjects.map(project => project._id);
+        const teamTasks = tasksRes.data.filter(task => 
+          teamProjectIds.includes(task.project)
+        );
+        setTasks(teamTasks);
       } catch (err) {
         toast.error("Failed to fetch team data");
       } finally {
@@ -279,21 +294,12 @@ function TeamDetailPage() {
                      .map((member) => (
                      <div key={member._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                        <div className="flex items-center gap-2">
-                         <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center">
-                           {member.profilePicture ? (
-                             <img 
-                               src={member.profilePicture} 
-                               alt={member.name}
-                               className="w-full h-full object-cover"
-                               onError={(e) => {
-                                 e.target.style.display = 'none';
-                                 e.target.nextSibling.style.display = 'flex';
-                               }}
-                             />
-                           ) : null}
-                           <span className="text-white font-semibold text-xs" style={{ display: member.profilePicture ? 'none' : 'flex' }}>
-                             {member.name.charAt(0).toUpperCase()}
-                           </span>
+                         <div className="w-8 h-8 rounded-full overflow-hidden">
+                           <img 
+                             src={getAvatarUrl(member.profilePicture, member.name, 32)} 
+                             alt={member.name}
+                             className="w-full h-full object-cover"
+                           />
                          </div>
                          <div>
                            <div className="font-semibold text-gray-800 text-sm">{member.name}</div>
@@ -323,21 +329,12 @@ function TeamDetailPage() {
                                 {team.manager ? (
                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                      <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-                           {team.manager.profilePicture ? (
-                             <img 
-                               src={team.manager.profilePicture} 
-                               alt={team.manager.name}
-                               className="w-full h-full object-cover"
-                               onError={(e) => {
-                                 e.target.style.display = 'none';
-                                 e.target.nextSibling.style.display = 'flex';
-                               }}
-                             />
-                           ) : null}
-                           <span className="text-white font-bold text-sm" style={{ display: team.manager.profilePicture ? 'none' : 'flex' }}>
-                             {team.manager.name.charAt(0).toUpperCase()}
-                           </span>
+                                                <div className="w-12 h-12 rounded-full overflow-hidden">
+                           <img 
+                             src={getAvatarUrl(team.manager.profilePicture, team.manager.name, 48)} 
+                             alt={team.manager.name}
+                             className="w-full h-full object-cover"
+                           />
                          </div>
                        <div className="flex-1">
                          <h3 className="text-base font-semibold text-gray-800">{team.manager.name}</h3>

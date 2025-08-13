@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const NotificationService = require('../services/notificationService');
 
 
 exports.getUserProfile = async (req, res) => {
@@ -42,7 +43,8 @@ exports.updateUserProfile = async (req, res) => {
       { new: true }
     ).select('-password');
 
-
+    // Create notification for profile update
+    await NotificationService.notifyProfileUpdated(updatedUser, user);
 
     res.json(updatedUser);
   } catch (err) {

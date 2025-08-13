@@ -10,16 +10,16 @@ function CreateProject() {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    toast.success("Project created successfully!"); 
     navigate("/projects");
   };
 
   return (
           <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-100">
       <AuthNavbar />
-      <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
+      <main className="flex-1 w-full px-6 py-12">
+        <div className="w-full max-w-[1000px] mx-auto">
         {/* Header with Back Button and Title - Responsive */}
-        <div className="mb-4">
+        <div className="w-full max-w-[1000px] mx-auto mb-4">
           {/* Back Button - Top Row on Mobile */}
           <div className="mb-3 md:hidden">
             <button
@@ -74,6 +74,7 @@ function CreateProject() {
 
         {/* Clean form, already styled inside */}
         <AddProjectForm onProjectCreated={handleSuccess} />
+        </div>
       </main>
 
       <Footer />

@@ -32,7 +32,8 @@ export default function Contact() {
     setStatus("");
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/contact`, formData);
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      await axios.post(`${apiUrl}/contact`, formData);
       setStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {

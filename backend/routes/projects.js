@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const { put } = require("@vercel/blob");
 const mongoose = require('mongoose');
+const NotificationService = require('../services/notificationService');
 
 const {
   createProject,
@@ -46,10 +47,23 @@ router.get('/', verifyToken, async (req, res) => {
         .populate('teamMembers', 'name email')
         .populate('projectManager', 'name email');
     } else if (req.user.role === 'Manager') {
+      // Get manager's team first
+      const User = require('../models/User');
+      const manager = await User.findById(req.user.id).populate('teamId');
+      
+      if (!manager.teamId) {
+        return res.status(403).json({ error: 'Manager not assigned to any team' });
+      }
+
+      // Get all team members of this manager's team
+      const teamMembers = await User.find({ teamId: manager.teamId._id }).select('_id');
+      const teamMemberIds = teamMembers.map(member => member._id);
+
+      // Find projects where THIS manager is project manager OR any of their team members are assigned
       projects = await Project.find({
         $or: [
-          { teamMembers: req.user.id },
-          { projectManager: req.user.id }
+          { projectManager: req.user.id }, // Projects where this manager is project manager
+          { teamMembers: { $in: teamMemberIds } } // Projects where team members are assigned
         ]
       })
         .populate('teamMembers', 'name email')
@@ -66,22 +80,94 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// CREATE new project — Admin only
-router.post('/', verifyToken, checkRole('Admin'), createProject);
+// CREATE new project — Admin or Manager (within their team)
+router.post('/', verifyToken, checkRole('Admin', 'Manager'), createProject);
 
 // UPDATE project — Admin or Manager (if assigned to project)
 router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerProjectAccess, updateProject);
 
 // Add Comment to a Project
-router.post('/:id/comments', verifyToken, addCommentToProject);
+router.post('/:id/comments', verifyToken, async (req, res) => {
+  try {
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Call the controller function directly
+    const project = await require('../models/Project').findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const newComment = {
+      text: req.body.text,
+      author: req.user.id,
+      createdAt: new Date(),
+    };
+
+    project.comments.push(newComment);
+    await project.save();
+
+    // Populate the project for notifications
+    const populatedProject = await require('../models/Project').findById(req.params.id)
+      .populate('teamMembers', 'name email')
+      .populate('projectManager', 'name email');
+
+    // Get the last comment (the one we just added)
+    const lastComment = populatedProject.comments[populatedProject.comments.length - 1];
+
+    // Send notification for new comment
+    await NotificationService.notifyCommentAdded(lastComment, user, populatedProject);
+
+    res.status(200).json(lastComment);
+  } catch (error) {
+    console.error('Error in comment route:', error);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
 
 // DELETE project — Admin or Manager (if assigned to project)
 router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerProjectAccess, deleteProject);
 
 router.get('/:id/comments', verifyToken, getProjectComments);
 
-// Delete comment from project (Admin only)
-router.delete('/:projectId/comments/:commentId', verifyToken, deleteProjectComment);
+// Delete comment from project (Manager only)
+router.delete('/:projectId/comments/:commentId', verifyToken, checkRole('Manager'), checkManagerProjectAccess, async (req, res) => {
+  try {
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const project = await require('../models/Project').findById(req.params.projectId)
+      .populate('teamMembers', 'name email')
+      .populate('projectManager', 'name email');
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Find the comment before deleting
+    const comment = project.comments.id(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    // Send notification before deleting
+    await NotificationService.notifyCommentDeleted(comment, user, project);
+
+    // Delete the comment
+    await deleteProjectComment(req, res);
+  } catch (error) {
+    console.error('Error in comment deletion route:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
 
 router.get('/my-projects', verifyToken, async (req, res) => {
   try {
@@ -286,16 +372,29 @@ router.get('/:id/attachments/:attachmentId/preview', verifyToken, async (req, re
   }
 });
 
-// Delete Project Attachment - Admin only
-router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Admin'), async (req, res) => {
+// Delete Project Attachment - Manager only (if assigned to project)
+router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'), checkManagerProjectAccess, async (req, res) => {
   const { id, attachmentId } = req.params;
 
   try {
-    const project = await Project.findById(id);
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const project = await Project.findById(id)
+      .populate('teamMembers', 'name email')
+      .populate('projectManager', 'name email');
+    
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const attachment = project.attachments.id(attachmentId);
     if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    // Send notification before deleting
+    await NotificationService.notifyAttachmentDeleted(attachment, user, project);
 
     // Remove the attachment from the array
     project.attachments.pull(attachmentId);
@@ -314,7 +413,17 @@ router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req,
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const project = await Project.findById(req.params.id);
+    // Get user details for notifications
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const project = await Project.findById(req.params.id)
+      .populate('teamMembers', 'name email')
+      .populate('projectManager', 'name email');
+    
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
     // Upload to Vercel Blob
@@ -336,10 +445,15 @@ router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req,
     project.attachments.push(newAttachment);
     await project.save();
     
+    // Send notification for new attachment
+    await NotificationService.notifyAttachmentAdded(newAttachment, user, project);
+    
     res.status(200).json({ message: 'File uploaded', file: newAttachment });
   } catch (err) {
     res.status(500).json({ error: 'Upload failed: ' + err.message });
   }
 });
+
+
 
 module.exports = router;

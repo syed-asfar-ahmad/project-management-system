@@ -1,12 +1,13 @@
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { getAvatarUrl } from "../utils/avatarUtils";
 
 function UserProfileWidget() {
   const { user } = useAuth();
 
   if (!user) return null;
 
-  const avatarUrl = user.profilePicture || "https://via.placeholder.com/32x32?text=U";
+  const avatarUrl = getAvatarUrl(user.profilePicture, user.name, 32);
 
   return (
     <div className="absolute right-4 top-4 z-50 flex items-center gap-2">

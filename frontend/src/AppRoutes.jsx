@@ -124,7 +124,7 @@ function AppRoutes() {
           ) : <Navigate to="/login" />
         } />
         <Route path="/projects/create" element={
-          <RoleBasedRoute allowedRoles={["Admin"]}>
+          <RoleBasedRoute allowedRoles={["Admin", "Manager"]}>
             <CreateProject />
           </RoleBasedRoute>
         } />

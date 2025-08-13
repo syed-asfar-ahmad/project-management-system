@@ -38,7 +38,7 @@ const checkRole = (...allowedRoles) => {
 // Middleware to check if manager is assigned to project
 const checkManagerProjectAccess = async (req, res, next) => {
   try {
-    const projectId = req.params.id || req.body.project;
+    const projectId = req.params.id || req.params.projectId || req.body.project;
     
     if (!projectId) {
       return res.status(400).json({ message: 'Project ID is required' });
@@ -72,7 +72,7 @@ const checkManagerProjectAccess = async (req, res, next) => {
 const checkManagerTaskAccess = async (req, res, next) => {
   try {
     const Task = require("../models/Task");
-    const taskId = req.params.id;
+    const taskId = req.params.id || req.params.taskId;
     
     if (!taskId) {
       return res.status(400).json({ message: 'Task ID is required' });

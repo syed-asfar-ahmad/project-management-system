@@ -160,9 +160,10 @@ function EditTaskPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
       <Navbar />
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full px-4 py-8">
+        <div className="w-full max-w-[1000px] mx-auto">
         {/* Header with Back Button and Title - Responsive */}
-        <div className="mb-4">
+        <div className="w-full max-w-[1000px] mx-auto mb-4">
           {/* Back Button - Top Row on Mobile */}
           <div className="mb-3 md:hidden">
             <button
@@ -216,7 +217,7 @@ function EditTaskPage() {
         </div>
 
         {/* Edit Form */}
-        <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+        <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6 w-full min-h-[600px]">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -359,6 +360,7 @@ function EditTaskPage() {
                </button>
              </div>
           </form>
+        </div>
         </div>
       </main>
       <Footer />

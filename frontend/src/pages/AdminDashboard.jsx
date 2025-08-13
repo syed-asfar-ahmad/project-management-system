@@ -47,10 +47,8 @@ function AdminDashboard() {
   const [members, setMembers] = useState([]);
   const [contactCount, setContactCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentProjectsPage, setCurrentProjectsPage] = useState(1);
   const [currentTasksPage, setCurrentTasksPage] = useState(1);
   const [currentTeamsPage, setCurrentTeamsPage] = useState(1);
-  const [projectsPerPage] = useState(4);
   const [tasksPerPage] = useState(4);
   const [teamsPerPage] = useState(4);
 
@@ -64,6 +62,8 @@ function AdminDashboard() {
     description: '',
     managerId: ''
   });
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,11 +109,84 @@ function AdminDashboard() {
     fetchData();
   }, [token]);
 
-  // Pagination logic for projects
-  const indexOfLastProject = currentProjectsPage * projectsPerPage;
-  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-  const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
-  const totalProjectsPages = Math.ceil(projects.length / projectsPerPage);
+
+
+  // Group projects by team
+  const groupProjectsByTeam = () => {
+    const teamProjects = {};
+    
+    projects.forEach(project => {
+      // Get team members from this project
+      const teamMemberIds = project.teamMembers?.map(member => 
+        typeof member === 'string' ? member : member._id
+      ) || [];
+      
+      // Find which team these members belong to
+      let projectTeam = null;
+      
+      teams.forEach(team => {
+        const teamMembers = members.filter(member => member.teamId === team._id);
+        const teamMemberIds = teamMembers.map(member => member._id);
+        
+        // Check if any project member is in this team
+        const hasCommonMember = teamMemberIds.some(id => teamMemberIds.includes(id));
+        if (hasCommonMember) {
+          projectTeam = team;
+        }
+      });
+      
+      // Only add projects that belong to actual teams
+      if (projectTeam) {
+        const teamName = projectTeam.name;
+        
+        if (!teamProjects[teamName]) {
+          teamProjects[teamName] = [];
+        }
+        teamProjects[teamName].push(project);
+      }
+    });
+    
+    return teamProjects;
+  };
+
+  const groupTasksByTeam = () => {
+    const teamTasks = {};
+    
+    tasks.forEach(task => {
+      // Get the assigned user ID
+      const assignedUserId = typeof task.assignedTo === 'string' ? task.assignedTo : task.assignedTo?._id;
+      
+      // Find which team this user belongs to
+      let taskTeam = null;
+      
+      teams.forEach(team => {
+        const teamMembers = members.filter(member => member.teamId === team._id);
+        const teamMemberIds = teamMembers.map(member => member._id);
+        
+        // Check if the assigned user is in this team
+        if (teamMemberIds.includes(assignedUserId)) {
+          taskTeam = team;
+        }
+      });
+      
+      // Only add tasks that belong to actual teams
+      if (taskTeam) {
+        const teamName = taskTeam.name;
+        
+        if (!teamTasks[teamName]) {
+          teamTasks[teamName] = [];
+        }
+        teamTasks[teamName].push(task);
+      }
+    });
+    
+    return teamTasks;
+  };
+
+  const teamProjects = groupProjectsByTeam();
+  const teamNames = Object.keys(teamProjects);
+  const teamTasks = groupTasksByTeam();
+  const teamTaskNames = Object.keys(teamTasks);
 
   // Pagination logic for tasks
   const indexOfLastTask = currentTasksPage * tasksPerPage;
@@ -122,14 +195,11 @@ function AdminDashboard() {
   const totalTasksPages = Math.ceil(tasks.length / tasksPerPage);
 
   // Pagination logic for teams
+  const sortedTeams = teams.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const indexOfLastTeam = currentTeamsPage * teamsPerPage;
   const indexOfFirstTeam = indexOfLastTeam - teamsPerPage;
-  const currentTeams = teams.slice(indexOfFirstTeam, indexOfLastTeam);
+  const currentTeams = sortedTeams.slice(indexOfFirstTeam, indexOfLastTeam);
   const totalTeamsPages = Math.ceil(teams.length / teamsPerPage);
-
-  const handleProjectsPageChange = (pageNumber) => {
-    setCurrentProjectsPage(pageNumber);
-  };
 
   const handleTasksPageChange = (pageNumber) => {
     setCurrentTasksPage(pageNumber);
@@ -328,7 +398,7 @@ function AdminDashboard() {
                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
                    <div className="relative z-10">
                      <div className="flex items-center justify-between mb-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                       <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg flex items-center justify-center">
                          <Briefcase size={20} className="text-white" />
                   </div>
                        <div className="text-right">
@@ -356,7 +426,7 @@ function AdminDashboard() {
                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
                    <div className="relative z-10">
                      <div className="flex items-center justify-between mb-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center">
                          <ClipboardList size={20} className="text-white" />
                   </div>
                        <div className="text-right">
@@ -384,7 +454,7 @@ function AdminDashboard() {
                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
                    <div className="relative z-10">
                      <div className="flex items-center justify-between mb-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                       <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center">
                          <Users size={20} className="text-white" />
                   </div>
                        <div className="text-right">
@@ -412,7 +482,7 @@ function AdminDashboard() {
                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
                    <div className="relative z-10">
                      <div className="flex items-center justify-between mb-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                       <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg flex items-center justify-center">
                          <Mail size={20} className="text-white" />
                        </div>
                        <div className="text-right">
@@ -440,7 +510,7 @@ function AdminDashboard() {
                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-300"></div>
                    <div className="relative z-10">
                      <div className="flex items-center justify-between mb-3">
-                       <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                       <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg flex items-center justify-center">
                          <Users size={20} className="text-white" />
                        </div>
                        <div className="text-right">
@@ -534,14 +604,14 @@ function AdminDashboard() {
                   <div className="bg-white p-1.5 rounded-full shadow-lg border border-green-100">
                     <Briefcase size={20} className="text-green-600" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-800">All Projects</h2>
+                  <h2 className="text-xl font-bold text-gray-800">Recent Projects</h2>
                 </div>
                 <Link
-                  to="/projects/create"
+                  to="/projects"
                   className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
                 >
-                  <FilePlus size={18} />
-                  Add Project
+                  <ArrowRight size={18} />
+                  View All Projects
                 </Link>
               </div>
               
@@ -549,22 +619,15 @@ function AdminDashboard() {
                 <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
                   <Briefcase size={48} className="text-gray-300 mx-auto mb-3" />
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">No Projects Found</h3>
-                  <p className="text-gray-600 mb-3 text-sm">Get started by creating your first project</p>
-                  <Link
-                    to="/projects/create"
-                    className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-                  >
-                    <FilePlus size={16} />
-                    Create Project
-                  </Link>
+                  <p className="text-gray-600 mb-3 text-sm">No projects have been created yet</p>
                 </div>
               ) : (
-                <>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {currentProjects.map((project) => (
+                <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {projects.slice(0, 4).map((project) => (
                       <div
                         key={project._id}
-                        className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                        className="bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden group"
                       >
                         <div className="p-4">
                           <div className="flex items-center justify-between mb-3">
@@ -573,9 +636,9 @@ function AdminDashboard() {
                                 to={`/projects/${project._id}`}
                                 className="group-hover:text-green-800 transition-colors"
                               >
-                                <h3 className="text-lg font-bold text-green-700 group-hover:text-green-800 transition-colors cursor-pointer">
+                                <h4 className="text-base font-bold text-gray-700 group-hover:text-green-800 transition-colors cursor-pointer">
                                   {project.name}
-                                </h3>
+                                </h4>
                               </Link>
                               <p className="text-gray-600 text-xs mt-1 line-clamp-2">{project.description}</p>
                             </div>
@@ -605,59 +668,18 @@ function AdminDashboard() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Projects Pagination */}
-                  {projects.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4 mt-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-600">
-                          Showing {indexOfFirstProject + 1} to {Math.min(indexOfLastProject, projects.length)} of {projects.length} projects
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleProjectsPageChange(currentProjectsPage - 1)}
-                            disabled={currentProjectsPage === 1}
-                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                              currentProjectsPage === 1
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                            }`}
-                          >
-                            Previous
-                          </button>
-                          
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: totalProjectsPages }, (_, index) => index + 1).map((pageNumber) => (
-                              <button
-                                key={pageNumber}
-                                onClick={() => handleProjectsPageChange(pageNumber)}
-                                className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                  currentProjectsPage === pageNumber
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                              >
-                                {pageNumber}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <button
-                            onClick={() => handleProjectsPageChange(currentProjectsPage + 1)}
-                            disabled={currentProjectsPage === totalProjectsPages}
-                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                              currentProjectsPage === totalProjectsPages
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                            }`}
-                          >
-                            Next
-                          </button>
-                        </div>
-                      </div>
+                  {projects.length > 4 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <Link
+                        to="/projects"
+                        className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium text-sm transition-colors"
+                      >
+                        <span>View {projects.length - 4} more projects</span>
+                        <ArrowRight size={16} />
+                      </Link>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </section>
 
@@ -668,14 +690,14 @@ function AdminDashboard() {
                   <div className="bg-white p-1.5 rounded-full shadow-lg border border-green-100">
                     <CheckSquare size={20} className="text-green-600" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-800">All Tasks</h2>
+                  <h2 className="text-xl font-bold text-gray-800">Recent Tasks</h2>
                 </div>
                 <Link
-                  to="/add-task"
+                  to="/tasks"
                   className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
                 >
-                  <PlusCircle size={18} />
-                  Add Task
+                  <ArrowRight size={18} />
+                  View All Tasks
                 </Link>
               </div>
               
@@ -683,22 +705,15 @@ function AdminDashboard() {
                 <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
                   <CheckSquare size={48} className="text-gray-300 mx-auto mb-3" />
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">No Tasks Found</h3>
-                  <p className="text-gray-600 mb-3 text-sm">Get started by creating your first task</p>
-                  <Link
-                    to="/add-task"
-                    className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-                  >
-                    <PlusCircle size={16} />
-                    Create Task
-                  </Link>
+                  <p className="text-gray-600 mb-3 text-sm">No tasks have been created yet</p>
                 </div>
               ) : (
-                <>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {currentTasks.map((task) => (
+                <div className="bg-white rounded-xl shadow-lg border border-green-100 p-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {tasks.slice(0, 4).map((task) => (
                       <div
                         key={task._id}
-                        className="bg-white rounded-xl shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                        className="bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden group"
                       >
                         <div className="p-4">
                           <div className="flex items-center justify-between mb-3">
@@ -707,9 +722,9 @@ function AdminDashboard() {
                                 to={`/tasks/${task._id}`}
                                 className="group-hover:text-green-800 transition-colors"
                               >
-                                <h3 className="text-lg font-bold text-green-700 group-hover:text-green-800 transition-colors cursor-pointer">
+                                <h4 className="text-base font-bold text-gray-700 group-hover:text-green-800 transition-colors cursor-pointer">
                                   {task.title}
-                                </h3>
+                                </h4>
                               </Link>
                               <p className="text-gray-600 text-xs mt-1 line-clamp-2">{task.description}</p>
                             </div>
@@ -739,59 +754,18 @@ function AdminDashboard() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Tasks Pagination */}
-                  {tasks.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4 mt-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-600">
-                          Showing {indexOfFirstTask + 1} to {Math.min(indexOfLastTask, tasks.length)} of {tasks.length} tasks
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleTasksPageChange(currentTasksPage - 1)}
-                            disabled={currentTasksPage === 1}
-                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                              currentTasksPage === 1
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                            }`}
-                          >
-                            Previous
-                          </button>
-                          
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: totalTasksPages }, (_, index) => index + 1).map((pageNumber) => (
-                              <button
-                                key={pageNumber}
-                                onClick={() => handleTasksPageChange(pageNumber)}
-                                className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                  currentTasksPage === pageNumber
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                              >
-                                {pageNumber}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <button
-                            onClick={() => handleTasksPageChange(currentTasksPage + 1)}
-                            disabled={currentTasksPage === totalTasksPages}
-                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                              currentTasksPage === totalTasksPages
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                            }`}
-                          >
-                            Next
-                          </button>
-                        </div>
-                      </div>
+                  {tasks.length > 4 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <Link
+                        to="/tasks"
+                        className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium text-sm transition-colors"
+                      >
+                        <span>View {tasks.length - 4} more tasks</span>
+                        <ArrowRight size={16} />
+                      </Link>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </section>
 

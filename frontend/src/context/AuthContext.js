@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
 // Get backend base URL from environment
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 // Create the context
 const AuthContext = createContext();
@@ -22,6 +22,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+  };
+
+  const refreshUser = async () => {
+    if (!token) return;
+    
+    try {
+      const res = await axios.get(`${API}/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data);
+    } catch (err) {
+      console.error('Error refreshing user data:', err);
+    }
   };
 
   useEffect(() => {
@@ -47,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

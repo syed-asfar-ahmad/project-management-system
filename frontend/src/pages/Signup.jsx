@@ -18,7 +18,7 @@ import {
   Users
 } from "lucide-react";
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 function Signup() {
   const navigate = useNavigate();
@@ -99,27 +99,27 @@ function Signup() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-md">
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-4 shadow-lg">
-            <Sparkles className="w-8 h-8 text-white" />
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-3 shadow-lg">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join TaskPilot and start managing your projects</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">Create Account</h1>
+          <p className="text-sm text-gray-600">Join TaskPilot and start managing your projects</p>
         </div>
 
         {/* Signup Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Full Name <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="text"
@@ -128,19 +128,19 @@ function Signup() {
                   value={form.name}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
             </div>
 
             {/* Email Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Email Address <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="email"
@@ -149,19 +149,19 @@ function Signup() {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -170,7 +170,7 @@ function Signup() {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                 />
                 <button
                   type="button"
@@ -178,26 +178,26 @@ function Signup() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
                   )}
                 </button>
               </div>
 
               {/* Password Validation */}
               {touched && (
-                <div className="mt-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Password Requirements:</h4>
-                  <div className="space-y-2">
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <h4 className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</h4>
+                  <div className="space-y-1">
                     {passwordChecks.map((check, index) => (
                       <div key={index} className="flex items-center space-x-2">
                         {check.test(form.password) ? (
-                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <CheckCircle className="w-3 h-3 text-green-500" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-red-500" />
+                          <XCircle className="w-3 h-3 text-red-500" />
                         )}
-                        <span className={`text-sm ${check.test(form.password) ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={`text-xs ${check.test(form.password) ? 'text-green-600' : 'text-red-600'}`}>
                           {check.label}
                         </span>
                       </div>
@@ -208,26 +208,26 @@ function Signup() {
             </div>
 
             {/* Gender Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Gender <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Venus className="h-5 w-5 text-gray-400" />
+                  <Venus className="h-4 w-4 text-gray-400" />
                 </div>
                 <select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                  className="w-full pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none text-sm"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: 'right 0.5rem center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2.5rem'
+                    paddingRight: '2rem'
                   }}
                 >
                   <option value="">Select Gender</option>
@@ -239,13 +239,13 @@ function Signup() {
             </div>
 
             {/* Position Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Position <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Briefcase className="h-5 w-5 text-gray-400" />
+                  <Briefcase className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="text"
@@ -254,32 +254,32 @@ function Signup() {
                   value={form.position}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
             </div>
 
             {/* Team Selection Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Select Team <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Users className="h-5 w-5 text-gray-400" />
+                  <Users className="h-4 w-4 text-gray-400" />
                 </div>
-                                 <select
-                   name="teamId"
-                   value={form.teamId}
-                   onChange={handleChange}
-                   required
-                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                <select
+                  name="teamId"
+                  value={form.teamId}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none text-sm"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: 'right 0.5rem center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2.5rem'
+                    paddingRight: '2rem'
                   }}
                 >
                   <option value="">Choose a team</option>
@@ -301,16 +301,16 @@ function Signup() {
             <button
               type="submit"
               disabled={isLoading || !isValidPassword()}
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2.5 px-4 rounded-lg font-medium hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-sm"
             >
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Creating account...</span>
                 </>
               ) : (
                 <>
-                  <UserPlus className="w-5 h-5" />
+                  <UserPlus className="w-4 h-4" />
                   <span>Create Account</span>
                 </>
               )}
@@ -318,11 +318,11 @@ function Signup() {
           </form>
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-white text-gray-500">Already have an account?</span>
             </div>
           </div>
@@ -330,7 +330,7 @@ function Signup() {
           {/* Login Link */}
           <Link
             to="/login"
-            className="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium group"
+            className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium group text-sm"
           >
             <ArrowLeft className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span>Sign in to your account</span>
@@ -338,18 +338,18 @@ function Signup() {
         </div>
 
         {/* Features List */}
-        <div className="mt-8 text-center">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+        <div className="mt-6 text-center">
+          <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
             <div className="flex items-center space-x-1">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-3 h-3 text-green-500" />
               <span>Free Forever</span>
             </div>
             <div className="flex items-center space-x-1">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-3 h-3 text-green-500" />
               <span>No Credit Card</span>
             </div>
             <div className="flex items-center space-x-1">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-3 h-3 text-green-500" />
               <span>Instant Access</span>
             </div>
           </div>

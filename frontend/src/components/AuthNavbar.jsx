@@ -2,6 +2,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import { Menu, X, User, LogOut } from "lucide-react";
+import NotificationBell from "./NotificationBell";
+import { getAvatarUrl } from "../utils/avatarUtils";
 
 function AuthNavbar() {
   const { logout, user } = useAuth();
@@ -107,10 +109,10 @@ function AuthNavbar() {
                 )}
               </span>
             </Link>
-            {user?.role === "Admin" && (
+            {(user?.role === "Admin" || user?.role === "Manager") && (
               <Link to="/members" className={navLinkStyle("/members")}>
                 <span className="relative">
-                  Team Members
+                  {user?.role === "Admin" ? "Team Members" : "My Team"}
                   {isActive("/members") && (
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
                   )}
@@ -129,20 +131,19 @@ function AuthNavbar() {
 
           {/* User Profile & Actions */}
           <div className="hidden md:flex items-center space-x-3">
+            {/* Notification Bell */}
+            <div className="text-white">
+              <NotificationBell />
+            </div>
+
             {/* User Profile */}
             <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5">
               <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
-                {user?.profilePicture ? (
-                  <img 
-                    src={user.profilePicture} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                    <User size={12} className="text-white" />
-                  </div>
-                )}
+                <img 
+                  src={getAvatarUrl(user?.profilePicture, user?.name, 24)} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-xs">
                 <p className="text-white font-medium">{user?.name}</p>
@@ -183,59 +184,55 @@ function AuthNavbar() {
             {/* User Info */}
             <div className="flex items-center space-x-3 px-4 py-3 border-b border-gray-200">
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
-                {user?.profilePicture ? (
-                  <img 
-                    src={user.profilePicture} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-green-500 flex items-center justify-center">
-                    <User size={20} className="text-white" />
-                  </div>
-                )}
+                <img 
+                  src={getAvatarUrl(user?.profilePicture, user?.name, 40)} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.name}</p>
-                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                <p className="text-sm text-gray-600">{user?.email}</p>
               </div>
             </div>
 
-            {/* Navigation Links */}
-            <Link to={dashboardLink} onClick={() => setIsOpen(false)} className={mobileLinkStyle(dashboardLink)}>
+            {/* Mobile Navigation Links */}
+            <Link to={dashboardLink} className={mobileLinkStyle(dashboardLink)}>
               Dashboard
             </Link>
-            <Link to="/projects" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/projects")}>
+            <Link to="/projects" className={mobileLinkStyle("/projects")}>
               Projects
             </Link>
-            <Link to="/tasks" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/tasks")}>
+            <Link to="/tasks" className={mobileLinkStyle("/tasks")}>
               Tasks
             </Link>
-            <Link to="/calendar" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/calendar")}>
+            <Link to="/calendar" className={mobileLinkStyle("/calendar")}>
               Calendar
             </Link>
-            {user?.role === "Admin" && (
-              <Link to="/members" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/members")}>
-                Team Members
+            {(user?.role === "Admin" || user?.role === "Manager") && (
+              <Link to="/members" className={mobileLinkStyle("/members")}>
+                {user?.role === "Admin" ? "Team Members" : "My Team"}
               </Link>
             )}
-            <Link to="/profile" onClick={() => setIsOpen(false)} className={mobileLinkStyle("/profile")}>
+            <Link to="/profile" className={mobileLinkStyle("/profile")}>
               Profile
             </Link>
-            
-                                     {/* Mobile Actions */}
-            <div className="pt-4 border-t border-gray-100 space-y-2">
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsOpen(false);
-                }}
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium"
-              >
-                <LogOut size={18} />
-                <span>Logout</span>
-              </button>
+
+            {/* Mobile Notification Bell */}
+            <div className="px-4 py-3 border-t border-gray-200">
+              <div className="text-gray-700">
+                <NotificationBell />
+              </div>
             </div>
+
+            {/* Mobile Logout */}
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-all duration-200"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </div>

@@ -1,11 +1,18 @@
 const Task = require('../models/Task');
-
+const User = require('../models/User');
+const NotificationService = require('../services/notificationService');
 
 // Create Task
 const createTask = async (req, res) => {
   const { title, description, project, assignedTo, status, priority, dueDate } = req.body;
 
   try {
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const task = new Task({
       title,
       description,
@@ -18,7 +25,23 @@ const createTask = async (req, res) => {
 
     await task.save();
 
+    // Populate task with project and assignedTo for notifications
+    const populatedTask = await Task.findById(task._id)
+      .populate('project', 'name projectManager')
+      .populate('assignedTo', 'name email');
 
+    // Send notifications
+    await NotificationService.notifyTaskCreated(populatedTask, user);
+
+    // Send notifications to team members who were assigned
+    if (assignedTo && assignedTo.length > 0) {
+      for (const memberId of assignedTo) {
+        const member = await User.findById(memberId);
+        if (member) {
+          await NotificationService.notifyMemberAdded(member, user, populatedTask.project, populatedTask);
+        }
+      }
+    }
 
     res.status(201).json({ message: 'Task created', task });
   } catch (err) {
@@ -98,6 +121,12 @@ const updateTask = async (req, res) => {
   } = req.body;
 
   try {
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const task = await Task.findById(id);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -122,7 +151,47 @@ const updateTask = async (req, res) => {
 
     await task.save();
 
+    // Populate task for notifications
+    const populatedTask = await Task.findById(task._id)
+      .populate('project', 'name projectManager')
+      .populate('assignedTo', 'name email');
 
+    // Send notifications for task updates
+    const changes = {
+      status: status !== originalStatus ? { from: originalStatus, to: status } : null,
+      assignedTo: JSON.stringify(assignedTo) !== JSON.stringify(originalAssignedTo) ? { from: originalAssignedTo, to: assignedTo } : null
+    };
+
+    await NotificationService.notifyTaskUpdated(populatedTask, user, changes);
+
+    // Send completion notification if status changed to completed
+    if (status === 'Completed' && originalStatus !== 'Completed') {
+      await NotificationService.notifyTaskCompleted(populatedTask, user);
+    }
+
+    // Check for team member changes and send notifications
+    const addedMembers = assignedTo ? assignedTo.filter(memberId => 
+      !originalAssignedTo.includes(memberId)
+    ) : [];
+    const removedMembers = originalAssignedTo.filter(memberId => 
+      !assignedTo.includes(memberId)
+    );
+
+    // Send notifications for added members
+    for (const memberId of addedMembers) {
+      const member = await User.findById(memberId);
+      if (member) {
+        await NotificationService.notifyMemberAdded(member, user, populatedTask.project, populatedTask);
+      }
+    }
+
+    // Send notifications for removed members
+    for (const memberId of removedMembers) {
+      const member = await User.findById(memberId);
+      if (member) {
+        await NotificationService.notifyMemberRemoved(member, user, populatedTask.project, populatedTask);
+      }
+    }
 
     res.json({ message: "Task updated", task });
   } catch (err) {
@@ -136,11 +205,24 @@ const deleteTask = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedTask = await Task.findByIdAndDelete(id);
+    // Get user details for notifications
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const task = await Task.findById(id)
+      .populate('project', 'name projectManager')
+      .populate('assignedTo', 'name email');
     
-    if (!deletedTask) {
+    if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
+
+    // Send notifications before deleting
+    await NotificationService.notifyTaskDeleted(task, user);
+
+    await Task.findByIdAndDelete(id);
     
     res.json({ message: 'Task deleted successfully' });
   } catch (err) {
@@ -165,8 +247,6 @@ const addCommentToTask = async (req, res) => {
     task.comments.push(newComment);
     await task.save();
 
-
-
     const updatedTask = await Task.findById(id).populate({
       path: 'comments',
       populate: {
@@ -176,6 +256,14 @@ const addCommentToTask = async (req, res) => {
     });
 
     const lastComment = updatedTask.comments.at(-1);
+
+    // Send notification for new comment
+    const populatedTask = await Task.findById(id)
+      .populate('project', 'name projectManager teamMembers')
+      .populate('assignedTo', 'name email');
+
+    await NotificationService.notifyCommentAdded(lastComment, req.user, populatedTask.project, populatedTask);
+
     res.status(200).json(lastComment);
   } catch (err) {
     res.status(500).json({ error: 'Failed to add comment' });
@@ -244,15 +332,10 @@ const uploadTaskFile = async (req, res) => {
   }
 };
 
-// DELETE comment from a task (Admin only)
+// DELETE comment from a task (Admin or Manager)
 const deleteTaskComment = async (req, res) => {
   try {
     const { taskId, commentId } = req.params;
-    
-    // Check if user is admin
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ error: 'Only admins can delete comments' });
-    }
 
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ error: 'Task not found' });
