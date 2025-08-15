@@ -4,9 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import AuthNavbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
-import { ShieldCheck, UserCircle, Briefcase, Users, Mail, Calendar, MapPin, Quote, Crown, ArrowUp, ArrowDown, ArrowLeft, X, Filter, ChevronDown } from "lucide-react";
+import { ShieldCheck, UserCircle, Briefcase, Users, Mail, Calendar, MapPin, Quote, Crown, ArrowUp, ArrowDown, ArrowLeft, X, Filter, ChevronDown, Mars, Venus } from "lucide-react";
 import { toast } from "react-toastify";
 import { getAvatarUrl } from "../utils/avatarUtils";
+import Select from 'react-select';
 
 const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api';
 
@@ -52,6 +53,7 @@ function AllMembersPage() {
   const [membersPerPage] = useState(6);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [admins, setAdmins] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -68,18 +70,24 @@ function AllMembersPage() {
           res = await axios.get(`${API}/users`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          setMembers(res.data);
+          setAdmins(res.data.filter(u => u.role === "Admin"));
         } else if (user?.role === "Manager") {
           // Manager gets only their team members
-          res = await axios.get(`${API}/users/my-team-members`, {
+          const teamRes = await axios.get(`${API}/users/my-team-members`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          setMembers(teamRes.data);
+          // Fetch all users to get admin(s)
+          const allRes = await axios.get(`${API}/users`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setAdmins(allRes.data.filter(u => u.role === "Admin"));
         } else {
           // Other roles don't have access
           setLoading(false);
           return;
         }
-        
-        setMembers(res.data);
       } catch (err) {
         console.error('Error fetching members:', err);
         toast.error('Failed to fetch members');
@@ -122,12 +130,19 @@ function AllMembersPage() {
         res = await axios.get(`${API}/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setMembers(res.data);
+        setAdmins(res.data.filter(u => u.role === "Admin"));
       } else if (user?.role === "Manager") {
         res = await axios.get(`${API}/users/my-team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setMembers(res.data);
+        // Fetch all users to get admin(s)
+        const allRes = await axios.get(`${API}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAdmins(allRes.data.filter(u => u.role === "Admin"));
       }
-      setMembers(res.data);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update role");
     } finally {
@@ -154,9 +169,19 @@ function AllMembersPage() {
   });
 
   // Separate members by role
-  const admins = filteredMembers.filter(member => member.role === "Admin");
+  // Remove: const admins = filteredMembers.filter(member => member.role === "Admin");
+  // Use only the state variable 'admins' everywhere for admin cards.
   const managers = filteredMembers.filter(member => member.role === "Manager");
   const teamMembers = filteredMembers.filter(member => member.role === "Team Member");
+
+  // Filter admins by search and gender before rendering
+  const filteredAdmins = admins.filter(admin => {
+    const matchesSearch = admin.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      admin.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      admin.position?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesGender = filterGender ? admin.gender === filterGender : true;
+    return matchesSearch && matchesGender;
+  });
 
   // Pagination logic for each section
   const getPaginatedMembers = (memberList, currentPage) => {
@@ -295,7 +320,7 @@ function AllMembersPage() {
                     Reset Filters
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="Search Members"
@@ -303,46 +328,72 @@ function AllMembersPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
                   />
-
-                  <select
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                    className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em',
-                      paddingRight: '2.5rem'
+                  <Select
+                    value={filterGender ? {
+                      value: filterGender,
+                      label: filterGender,
+                    } : null}
+                    onChange={option => setFilterGender(option ? option.value : '')}
+                    options={[
+                      { value: '', label: 'Filter by Gender', isDisabled: true },
+                      { value: 'Male', label: 'Male', icon: <Mars size={16} className="text-blue-500" />, color: 'bg-blue-100 text-blue-700' },
+                      { value: 'Female', label: 'Female', icon: <Venus size={16} className="text-pink-500" />, color: 'bg-pink-100 text-pink-700' },
+                    ]}
+                    isSearchable={false}
+                    placeholder="Filter by Gender"
+                    classNamePrefix="react-select"
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        minHeight: '42px',
+                        borderRadius: '8px',
+                        borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                        boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                        '&:hover': { borderColor: '#16a34a' },
+                        cursor: 'pointer',
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        backgroundColor: state.isSelected
+                          ? '#16a34a'
+                          : state.isFocused
+                          ? '#f0fdf4'
+                          : 'white',
+                        color: state.isSelected ? 'white' : '#374151',
+                        fontWeight: state.isSelected ? 600 : 500,
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e5e7eb',
+                      }),
                     }}
-                  >
-                    <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Role</option>
-                    <option value="Admin" className="py-2 px-3 hover:bg-green-50">Admin</option>
-                    <option value="Manager" className="py-2 px-3 hover:bg-green-50">Manager</option>
-                    <option value="Team Member" className="py-2 px-3 hover:bg-green-50">Team Member</option>
-                  </select>
-
-                  <select
-                    value={filterGender}
-                    onChange={(e) => setFilterGender(e.target.value)}
-                    className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em',
-                      paddingRight: '2.5rem'
-                    }}
-                  >
-                    <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Gender</option>
-                    <option value="Male" className="py-2 px-3 hover:bg-green-50">Male</option>
-                    <option value="Female" className="py-2 px-3 hover:bg-green-50">Female</option>
-                    <option value="Other" className="py-2 px-3 hover:bg-green-50">Other</option>
-                  </select>
+                    formatOptionLabel={option =>
+                      option.value === '' ? (
+                        <span className="text-gray-400">{option.label}</span>
+                      ) : (
+                        <span className={`flex items-center gap-2 px-2 py-1 rounded ${option.color}`}>
+                          {option.icon}
+                          <span>{option.label}</span>
+                        </span>
+                      )
+                    }
+                  />
                 </div>
-
                 {/* Active Filters Display */}
-                {(searchTerm || filterRole || filterGender) && (
+                {(searchTerm || filterGender) && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className="flex flex-wrap gap-2">
                       {searchTerm && (
@@ -351,17 +402,6 @@ function AllMembersPage() {
                           <button
                             onClick={() => setSearchTerm('')}
                             className="ml-1 hover:text-orange-900"
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      )}
-                      {filterRole && (
-                        <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                          Role: {filterRole}
-                          <button
-                            onClick={() => setFilterRole('')}
-                            className="ml-1 hover:text-blue-900"
                           >
                             <X size={12} />
                           </button>
@@ -381,25 +421,33 @@ function AllMembersPage() {
                     </div>
                   </div>
                 )}
+                {/* Empty State if no members match filters */}
+                {filteredMembers.length === 0 && !loading && (
+                  <div className="w-full flex flex-col items-center justify-center py-16 min-h-[220px]">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <Users size={32} className="text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">No members found for the selected filters.</h3>
+                    <p className="text-gray-600 text-sm">Try changing the search or gender filter to see more results.</p>
+                  </div>
+                )}
               </div>
             )}
 
         {/* Admin Section */}
-        {members.filter(member => member.role === "Admin").length > 0 && (
+        {user?.role === 'Manager' && filteredAdmins.length > 0 && (
           <div className="mb-8">
-            {!searchTerm && (
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
-                  <ShieldCheck size={16} className="text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Administrators</h2>
-                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">
-                  {members.filter(member => member.role === "Admin").length} admin{members.filter(member => member.role === "Admin").length !== 1 ? 's' : ''}
-                </span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
+                <ShieldCheck size={16} className="text-white" />
               </div>
-            )}
-                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-               {admins.map((member) => {
+              <h2 className="text-2xl font-bold text-gray-800">Administrators</h2>
+              <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">
+                {filteredAdmins.length} admin{filteredAdmins.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredAdmins.map((member) => {
                 const roleColor = roleColors[member.role];
                 return (
                   <div
@@ -417,7 +465,6 @@ function AllMembersPage() {
                             className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
                           />
                         </div>
-                        
                         <div className="flex-1 min-w-0">
                           <h2 className="text-base font-bold text-gray-800 mb-1 transition-colors duration-300 truncate">
                             {member.name}
@@ -432,7 +479,6 @@ function AllMembersPage() {
                           </div>
                         </div>
                       </div>
-
                       {/* Member Details - Compact Grid */}
                       <div className="grid grid-cols-2 gap-2 mb-3">
                         {member.position && (
@@ -444,7 +490,6 @@ function AllMembersPage() {
                             </div>
                           </div>
                         )}
-                        
                         {member.gender && (
                           <div className="flex items-center space-x-2 p-2 bg-white/50 rounded-lg backdrop-blur-sm">
                             <UserCircle size={12} className="text-gray-500 flex-shrink-0" />
@@ -454,7 +499,6 @@ function AllMembersPage() {
                             </div>
                           </div>
                         )}
-                        
                         {member.dateOfBirth && (
                           <div className="flex items-center space-x-2 p-2 bg-white/50 rounded-lg backdrop-blur-sm col-span-2">
                             <Calendar size={12} className="text-gray-500 flex-shrink-0" />
@@ -471,7 +515,6 @@ function AllMembersPage() {
                           </div>
                         )}
                       </div>
-
                       {/* Bio Section - Only if exists */}
                       {member.bio && (
                         <div className="relative p-2 bg-white/60 rounded-lg backdrop-blur-sm">
@@ -481,7 +524,6 @@ function AllMembersPage() {
                           </blockquote>
                         </div>
                       )}
-
                       {/* Special Note for Main Admin */}
                       {member.email === "ahmad@example.com" && (
                         <div className="mt-3 pt-3 border-t border-white/30">
@@ -496,14 +538,14 @@ function AllMembersPage() {
                       )}
                     </div>
                   </div>
-                                 );
-               })}
-             </div>
-           </div>
-         )}
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Managers Section */}
-        {members.filter(member => member.role === "Manager").length > 0 && (
+        {managers.length > 0 && (
           <div className="mb-8">
             {!searchTerm && (
               <div className="flex items-center gap-3 mb-4">
@@ -512,7 +554,7 @@ function AllMembersPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Managers</h2>
                 <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-medium">
-                  {members.filter(member => member.role === "Manager").length} manager{members.filter(member => member.role === "Manager").length !== 1 ? 's' : ''}
+                  {managers.length} manager{managers.length !== 1 ? 's' : ''}
                 </span>
               </div>
             )}
@@ -676,7 +718,7 @@ function AllMembersPage() {
          )}
 
         {/* Team Members Section */}
-        {members.filter(member => member.role === "Team Member").length > 0 && (
+        {teamMembers.length > 0 && (
           <div className="mb-8">
             {!searchTerm && (
               <div className="flex items-center gap-3 mb-4">
@@ -685,7 +727,7 @@ function AllMembersPage() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Team Members</h2>
                 <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
-                  {members.filter(member => member.role === "Team Member").length} member{members.filter(member => member.role === "Team Member").length !== 1 ? 's' : ''}
+                  {teamMembers.length} member{teamMembers.length !== 1 ? 's' : ''}
                 </span>
               </div>
             )}
@@ -850,7 +892,7 @@ function AllMembersPage() {
 
         {/* Empty State - More Compact */}
         {members.length === 0 && !loading && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 min-h-[180px] flex flex-col justify-center items-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <Users size={32} className="text-gray-400" />
             </div>

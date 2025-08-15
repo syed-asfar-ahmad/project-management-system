@@ -272,10 +272,22 @@ const deleteProjectComment = async (req, res) => {
 // GET team members of a specific project
 const getProjectTeamMembers = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.projectId).populate('teamMembers', 'name email role');
+    const project = await Project.findById(req.params.projectId).populate('teamMembers', 'name email role profilePicture');
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
-    res.json(project.teamMembers || []);
+    // Add default avatars for users without profile pictures
+    const teamMembersWithAvatars = project.teamMembers?.map(member => {
+      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=16a34a&color=ffffff&size=128`;
+      return {
+        _id: member._id,
+        name: member.name,
+        email: member.email,
+        role: member.role,
+        profilePicture: member.profilePicture ? member.profilePicture : defaultAvatar
+      };
+    }) || [];
+
+    res.json(teamMembersWithAvatars);
   } catch (err) {
     res.status(500).json({ error: 'Error fetching team members' });
   }

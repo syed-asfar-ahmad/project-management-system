@@ -283,7 +283,7 @@ function TeamDetailPage() {
                </div>
               
                              {team.members?.filter(member => member._id !== team.manager?._id).length === 0 ? (
-                 <div className="text-center py-6">
+                 <div className="text-center py-6 min-h-[180px] flex flex-col justify-center items-center">
                    <Users size={32} className="text-gray-300 mx-auto mb-2" />
                    <p className="text-gray-600 text-sm">No team members yet</p>
                  </div>
@@ -366,7 +366,7 @@ function TeamDetailPage() {
              </div>
             
                          {projects.length === 0 ? (
-               <div className="text-center py-6">
+               <div className="text-center py-6 min-h-[180px] flex flex-col justify-center items-center">
                  <Briefcase size={32} className="text-gray-300 mx-auto mb-2" />
                  <p className="text-gray-600 text-sm mb-3">No projects assigned to this team</p>
                  <Link
@@ -418,7 +418,7 @@ function TeamDetailPage() {
              </div>
             
                          {tasks.length === 0 ? (
-               <div className="text-center py-6">
+               <div className="text-center py-6 min-h-[180px] flex flex-col justify-center items-center">
                  <ClipboardList size={32} className="text-gray-300 mx-auto mb-2" />
                  <p className="text-gray-600 text-sm mb-3">No tasks assigned to team members</p>
                  <Link

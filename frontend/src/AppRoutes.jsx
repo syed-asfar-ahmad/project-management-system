@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -17,8 +17,6 @@ import CreateProject from "./pages/CreateProject";
 import EditProjectPage from "./pages/EditProjectPage";
 import TeamDashboard from "./pages/TeamDashboard";
 import { Toaster } from 'react-hot-toast';
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import InLineLoader from "./components/InLineLoader";
 import ProfilePage from "./pages/ProfilePage";
 import AllMembersPage from "./pages/AllMembersPage";
@@ -27,8 +25,8 @@ import TeamDetailPage from "./pages/TeamDetailPage";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ContactMessagesPage from "./pages/ContactMessagesPage";
-
-
+import ChatPage from "./pages/ChatPage";
+import NotificationsPage from './pages/NotificationsPage.jsx';
 
 
 function AppRoutes() {
@@ -44,19 +42,49 @@ function AppRoutes() {
 
 
   return (
-    <Router>
+    <>
       <Toaster 
         position="top-center" 
         toastOptions={{
-          duration: 5000,
+          duration: 4000,
           style: {
             background: '#fff',
             color: '#333',
             fontWeight: '500',
-            border: '1px solid #ccc',
+            border: '1px solid #16a34a',
             padding: '12px 16px',
+            boxShadow: '0 2px 16px 0 rgba(16,185,129,0.08)',
           },
-        }} 
+          success: {
+            iconTheme: {
+              primary: '#16a34a',
+              secondary: '#fff',
+            },
+            style: {
+              border: '1.5px solid #16a34a',
+              color: '#166534',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#dc2626',
+              secondary: '#fff',
+            },
+            style: {
+              border: '1.5px solid #dc2626',
+              color: '#991b1b',
+            },
+          },
+        }}
+        // Always show progress bar
+        containerStyle={{}}
+        toast={(t) => (
+          <div className="flex items-center gap-3">
+            {t.icon}
+            <div className="flex-1">{t.message}</div>
+            <div className="w-24 h-1 bg-green-500 rounded-full animate-pulse absolute bottom-0 left-0" style={{ width: `${(1 - t.visible) * 100}%` }} />
+          </div>
+        )}
       />
       <Routes>
         <Route
@@ -87,11 +115,13 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/members" element={<AllMembersPage />} />
         <Route path="/teams/:id" element={<PrivateRoute><TeamDetailPage /></PrivateRoute>} />
+        <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
         <Route path="/contact-messages" element={
           <RoleBasedRoute allowedRoles={["Admin"]}>
             <ContactMessagesPage />
           </RoleBasedRoute>
         } />
+        <Route path="/notifications" element={<NotificationsPage />} />
 
         {/* Role-based Routes */}
         <Route path="/add-task" element={
@@ -138,18 +168,7 @@ function AppRoutes() {
           }
         />
       </Routes>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-      />
-
-    </Router>
+    </>
   );
 }
 

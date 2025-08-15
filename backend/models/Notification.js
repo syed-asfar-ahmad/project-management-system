@@ -34,7 +34,8 @@ const notificationSchema = new mongoose.Schema({
       'TEAM_MEMBER_JOINED',
       'PROJECT_DELETED_BY_MANAGER',
       'NEW_USER_SIGNUP',
-      'CONTACT_FORM_SUBMITTED'
+      'CONTACT_FORM_SUBMITTED',
+      'NEW_MESSAGE'
     ],
     required: true
   },
@@ -57,6 +58,9 @@ const notificationSchema = new mongoose.Schema({
   relatedContact: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Contact'
+  },
+  relatedChat: {
+    type: String
   },
   isRead: {
     type: Boolean,

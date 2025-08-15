@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -713,7 +713,7 @@ function TaskDetailPage() {
                 Comments ({comments.length})
               </h2>
               {comments.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="text-center py-8 min-h-[180px] flex flex-col justify-center items-center">
                   <MessageCircle size={48} className="text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                 </div>

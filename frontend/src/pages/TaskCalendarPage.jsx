@@ -128,9 +128,7 @@ function TaskCalendarPage() {
             /* Loading State - More Compact */
             <div className="flex flex-col items-center justify-center py-12">
               <div className="relative">
-                {/* Spinning Circle */}
                 <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-                {/* Calendar Icon Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <CalendarDays size={20} className="text-green-600" />
                 </div>
@@ -139,7 +137,6 @@ function TaskCalendarPage() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Loading Calendar</h3>
                 <p className="text-gray-600 text-sm">Fetching your tasks and projects...</p>
               </div>
-              {/* Loading Dots */}
               <div className="flex space-x-1 mt-3">
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -207,7 +204,7 @@ function TaskCalendarPage() {
               </div>
 
               {/* Calendar Container - More Compact */}
-              <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-green-100">
+              <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-green-100 min-h-[400px]">
                 <div className="p-1">
                   <FullCalendar
                     plugins={[dayGridPlugin]}

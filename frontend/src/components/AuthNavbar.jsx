@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Menu, X, User, LogOut } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 import { getAvatarUrl } from "../utils/avatarUtils";
@@ -11,6 +11,8 @@ function AuthNavbar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const logoutButtonRef = useRef();
 
   // Handle scroll effect
   useEffect(() => {
@@ -109,6 +111,22 @@ function AuthNavbar() {
                 )}
               </span>
             </Link>
+            <Link to="/chat" className={navLinkStyle("/chat")}>
+              <span className="relative">
+                Chat
+                {isActive("/chat") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
+            <Link to="/notifications" className={navLinkStyle("/notifications")}>
+              <span className="relative">
+                Notifications
+                {isActive("/notifications") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-white rounded-full"></span>
+                )}
+              </span>
+            </Link>
             {(user?.role === "Admin" || user?.role === "Manager") && (
               <Link to="/members" className={navLinkStyle("/members")}>
                 <span className="relative">
@@ -138,12 +156,15 @@ function AuthNavbar() {
 
             {/* User Profile */}
             <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5">
+              {/* Desktop profile image */}
               <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
-                <img 
-                  src={getAvatarUrl(user?.profilePicture, user?.name, 24)} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
+                {user?.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
               </div>
               <div className="text-xs">
                 <p className="text-white font-medium">{user?.name}</p>
@@ -153,8 +174,9 @@ function AuthNavbar() {
 
             {/* Logout Button */}
             <button 
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center space-x-1 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+              ref={logoutButtonRef}
             >
               <LogOut size={14} />
               <span>Logout</span>
@@ -183,12 +205,15 @@ function AuthNavbar() {
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 space-y-2">
             {/* User Info */}
             <div className="flex items-center space-x-3 px-4 py-3 border-b border-gray-200">
+              {/* Mobile profile image */}
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
-                <img 
-                  src={getAvatarUrl(user?.profilePicture, user?.name, 40)} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
+                {user?.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.name}</p>
@@ -209,6 +234,12 @@ function AuthNavbar() {
             <Link to="/calendar" className={mobileLinkStyle("/calendar")}>
               Calendar
             </Link>
+            <Link to="/chat" className={mobileLinkStyle("/chat")}>
+              Chat
+            </Link>
+            <Link to="/notifications" className={mobileLinkStyle("/notifications")}>
+              Notifications
+            </Link>
             {(user?.role === "Admin" || user?.role === "Manager") && (
               <Link to="/members" className={mobileLinkStyle("/members")}>
                 {user?.role === "Admin" ? "Team Members" : "My Team"}
@@ -227,8 +258,9 @@ function AuthNavbar() {
 
             {/* Mobile Logout */}
             <button 
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-all duration-200"
+              ref={logoutButtonRef}
             >
               <LogOut size={16} />
               <span>Logout</span>
@@ -236,6 +268,51 @@ function AuthNavbar() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog for Logout */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={e => { if (e.target === e.currentTarget) setShowLogoutConfirm(false); }}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
+            {/* Dialog Header */}
+            <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
+                <LogOut size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">Logout</h3>
+                <p className="text-sm text-gray-600">Are you sure you want to logout?</p>
+              </div>
+            </div>
+            {/* Dialog Content */}
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                You will be signed out of your account and redirected to the login page.
+              </p>
+              <p className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+                Warning: Make sure you have saved your work before logging out.
+              </p>
+            </div>
+            {/* Dialog Actions */}
+            <div className="flex gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  handleLogout();
+                }}
+                className="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

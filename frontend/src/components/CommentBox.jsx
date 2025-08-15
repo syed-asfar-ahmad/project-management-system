@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 
 const API = process.env.REACT_APP_API_BASE_URL;
 

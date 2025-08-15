@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, Trash2, Eye, FileText, Edit, CheckCircle, Trash, FolderOpen, FileEdit, PartyPopper, Zap, MessageSquare, Paperclip, UserPlus, UserMinus, Users, UserCheck, AlertTriangle, Mail } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,8 @@ function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+  const clearAllButtonRef = useRef();
 
   useEffect(() => {
     fetchNotifications();
@@ -179,6 +181,8 @@ function NotificationBell() {
         return <UserPlus size={20} className="text-purple-600" />;
       case 'CONTACT_FORM_SUBMITTED':
         return <Mail size={20} className="text-orange-600" />;
+      case 'NEW_MESSAGE':
+        return <MessageSquare size={20} className="text-green-600" />;
       default:
         return <Bell size={20} className="text-gray-600" />;
     }
@@ -218,6 +222,8 @@ function NotificationBell() {
         return 'text-purple-600 bg-purple-50 border-purple-200';
       case 'CONTACT_FORM_SUBMITTED':
         return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'NEW_MESSAGE':
+        return 'text-green-600 bg-green-50 border-green-200';
       default:
         return 'text-gray-600 bg-gray-50 border-gray-200';
     }
@@ -257,6 +263,8 @@ function NotificationBell() {
         return 'bg-purple-100 text-purple-800';
       case 'CONTACT_FORM_SUBMITTED':
         return 'bg-orange-100 text-orange-800';
+      case 'NEW_MESSAGE':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -303,6 +311,7 @@ function NotificationBell() {
       case 'TASK_CREATED':
       case 'TASK_UPDATED':
       case 'TASK_COMPLETED':
+      case 'TASK_DELETED':
         if (notification.relatedTask) {
           navigate(`/tasks/${notification.relatedTask}`);
         } else {
@@ -312,6 +321,8 @@ function NotificationBell() {
       case 'PROJECT_CREATED':
       case 'PROJECT_UPDATED':
       case 'PROJECT_COMPLETED':
+      case 'PROJECT_DELETED':
+      case 'PROJECT_DELETED_BY_MANAGER':
         if (notification.relatedProject) {
           navigate(`/projects/${notification.relatedProject}`);
         } else {
@@ -320,6 +331,44 @@ function NotificationBell() {
         break;
       case 'NEW_USER_SIGNUP':
         navigate('/users');
+        break;
+      case 'MEMBER_ADDED':
+      case 'MEMBER_REMOVED':
+      case 'TEAM_MEMBER_JOINED':
+        navigate('/team-members');
+        break;
+      case 'TEAM_CREATED':
+        navigate('/teams');
+        break;
+      case 'COMMENT_ADDED':
+      case 'COMMENT_DELETED':
+        if (notification.relatedTask) {
+          navigate(`/tasks/${notification.relatedTask}`);
+        } else if (notification.relatedProject) {
+          navigate(`/projects/${notification.relatedProject}`);
+        } else {
+          navigate('/tasks');
+        }
+        break;
+      case 'ATTACHMENT_ADDED':
+      case 'ATTACHMENT_DELETED':
+        if (notification.relatedTask) {
+          navigate(`/tasks/${notification.relatedTask}`);
+        } else if (notification.relatedProject) {
+          navigate(`/projects/${notification.relatedProject}`);
+        } else {
+          navigate('/tasks');
+        }
+        break;
+      case 'PROFILE_UPDATED':
+        navigate('/profile');
+        break;
+      case 'NEW_MESSAGE':
+        if (notification.relatedChat) {
+          navigate('/chat');
+        } else {
+          navigate('/chat');
+        }
         break;
       default:
         // For other notifications, just close the dropdown
@@ -391,63 +440,51 @@ function NotificationBell() {
               notifications.map((notification) => (
                 <div
                   key={notification._id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 cursor-pointer ${
+                  className={`p-3 border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${
                     !notification.isRead ? 'bg-blue-50/50 border-l-4 border-blue-400' : 'border-l-4 border-transparent'
                   }`}
                 >
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="text-sm font-semibold text-gray-800 truncate">
-                              {notification.title}
-                            </h4>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2 leading-relaxed">
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3 text-xs text-gray-500">
-                              <span className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                                <span>by {notification.sender?.name || 'Unknown'}</span>
-                              </span>
-                              <span className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                                <span>{formatTimeAgo(notification.createdAt)}</span>
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              {!notification.isRead && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    markAsRead(notification._id);
-                                  }}
-                                  className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"
-                                  title="Mark as read"
-                                >
-                                  <Check size={14} />
-                                </button>
-                              )}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteNotification(notification._id);
-                                }}
-                                className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-md transition-colors"
-                                title="Delete notification"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </div>
+                      <div className="flex items-start justify-between mb-1">
+                        <h4 className="text-sm font-semibold text-gray-800 truncate">
+                          {notification.title}
+                        </h4>
+                        <div className="flex items-center space-x-1 ml-2">
+                          {!notification.isRead && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notification._id);
+                              }}
+                              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-100 rounded transition-colors"
+                              title="Mark as read"
+                            >
+                              <Check size={12} />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(notification._id);
+                            }}
+                            className="p-1 text-red-600 hover:text-red-700 hover:bg-red-100 rounded transition-colors"
+                            title="Delete notification"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1 leading-relaxed">
+                        {notification.message}
+                      </p>
+                      <div className="flex items-center justify-end">
+                        <span className="text-xs text-gray-500">
+                          {formatTimeAgo(notification.createdAt)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -469,8 +506,9 @@ function NotificationBell() {
                     <span className="text-xs">{unreadCount} unread</span>
                   </span>
                   <button
-                    onClick={clearAllNotifications}
+                    onClick={() => setShowClearAllConfirm(true)}
                     className="text-red-600 hover:text-red-700 font-medium text-xs hover:underline"
+                    ref={clearAllButtonRef}
                   >
                     Clear all
                   </button>
@@ -487,6 +525,51 @@ function NotificationBell() {
           className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
         />
+      )}
+
+      {/* Confirmation Dialog for Clear All */}
+      {showClearAllConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={e => { if (e.target === e.currentTarget) setShowClearAllConfirm(false); }}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
+            {/* Dialog Header */}
+            <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
+                <Trash2 size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">Clear All Notifications</h3>
+                <p className="text-sm text-gray-600">Are you sure you want to clear all notifications?</p>
+              </div>
+            </div>
+            {/* Dialog Content */}
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                This will permanently delete all your notifications. This action cannot be undone.
+              </p>
+              <p className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+                Warning: You will not be able to recover any cleared notifications.
+              </p>
+            </div>
+            {/* Dialog Actions */}
+            <div className="flex gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowClearAllConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowClearAllConfirm(false);
+                  await clearAllNotifications();
+                }}
+                className="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

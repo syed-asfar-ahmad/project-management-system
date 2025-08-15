@@ -174,25 +174,21 @@ function ManagerDashboard() {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-50">
         <AuthNavbar />
         <main className="flex-1 max-w-7xl mx-auto px-3 py-4">
-          {/* Loading State */}
-          <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center py-12 min-h-[60vh]">
             <div className="relative">
-              {/* Spinning Circle */}
               <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-              {/* Dashboard Icon Overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <BarChart size={20} className="text-green-600" />
               </div>
             </div>
             <div className="mt-4 text-center">
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">Loading Manager Dashboard</h3>
-              <p className="text-gray-600 text-sm">Fetching your project and task data...</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">Loading Dashboard</h3>
+              <p className="text-gray-600 text-sm">Fetching your dashboard data...</p>
             </div>
-            {/* Loading Dots */}
             <div className="flex space-x-1 mt-3">
-              <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce"></div>
-              <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </div>
         </main>
@@ -394,7 +390,7 @@ function ManagerDashboard() {
           </div>
           
           {projects.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[180px] flex flex-col justify-center items-center">
               <Briefcase size={48} className="text-gray-300 mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-gray-800 mb-2">No Projects Found</h3>
               <p className="text-gray-600 mb-3 text-sm">You haven't been assigned to any projects yet.</p>
@@ -528,7 +524,7 @@ function ManagerDashboard() {
           </div>
           
           {tasks.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
+            <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[180px] flex flex-col justify-center items-center">
               <CheckSquare size={48} className="text-gray-300 mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-gray-800 mb-2">No Tasks Found</h3>
               <p className="text-gray-600 mb-3 text-sm">Get started by creating your first task</p>

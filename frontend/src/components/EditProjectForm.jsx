@@ -11,8 +11,11 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  UserCheck
+  UserCheck,
+  CalendarDays,
+  PlayCircle
 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
@@ -28,31 +31,29 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
     teamMembers: project.teamMembers?.map((member) => typeof member === 'object' ? member._id : member) || [],
   });
 
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentDate, setCurrentDate] = useState(form.deadline ? new Date(form.deadline) : new Date());
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const teamRes = await axios.get(`${API}/users/team-members`, {
+        // For managers, fetch only their team members
+        // For admins, you can use /users/team-members if you have user context
+        const teamRes = await axios.get(`${API}/users/my-team-members`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        // Create team options with only current project team members
-        const currentTeamMemberIds = project.teamMembers?.map((member) => 
-          typeof member === 'object' ? member._id : member
-        ) || [];
-        
-        const teamOptions = teamRes.data
-          .filter((member) => currentTeamMemberIds.includes(member._id))
-          .map((member) => ({
-            value: member._id,
-            label: `${member.name} (${member.email})`,
-          }));
-
+        const teamOptions = teamRes.data.map((member) => ({
+          value: member._id,
+          label: `${member.name} (${member.email})`,
+          profilePicture: member.profilePicture || null,
+          name: member.name,
+          email: member.email
+        }));
         setTeamOptions(teamOptions);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        // handle error
       }
     };
-
     fetchData();
   }, [token, project.teamMembers]);
 
@@ -80,17 +81,77 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Completed':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'In Progress':
-        return <Clock className="w-4 h-4 text-blue-500" />;
-             case 'Pending':
-         return <AlertCircle className="w-4 h-4 text-gray-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+  // Status options with icons/colors (same as AddProjectForm)
+  const statusOptions = [
+    {
+      value: "Pending",
+      label: "Pending",
+      icon: Clock,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      borderColor: "border-yellow-200"
+    },
+    {
+      value: "In Progress",
+      label: "In Progress",
+      icon: PlayCircle,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200"
+    },
+    {
+      value: "Completed",
+      label: "Completed",
+      icon: CheckCircle,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200"
     }
+  ];
+
+  const handleStatusChange = (selectedOption) => {
+    setForm((prev) => ({ ...prev, status: selectedOption.value }));
+  };
+
+  const getStatusOption = (value) => statusOptions.find(opt => opt.value === value) || statusOptions[0];
+
+  // Custom Calendar Functions (copy from AddProjectForm)
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    const days = [];
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+  const formatDate = (date) => date.toISOString().split('T')[0];
+  const handleDateSelect = (date) => {
+    setForm(prev => ({ ...prev, deadline: formatDate(date) }));
+    setShowCalendar(false);
+  };
+  const goToPreviousMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const goToNextMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+  const isToday = (date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+  const isSelected = (date) => form.deadline === formatDate(date);
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
   };
 
   return (
@@ -139,159 +200,347 @@ function EditProjectForm({ project, token, onSuccess, onCancel }) {
 
       {/* Deadline and Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Deadline - Custom Calendar */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block mb-1 font-medium text-gray-700 flex items-center">
+            <CalendarDays className="w-4 h-4 mr-1" />
             Deadline <span className="text-red-500 ml-1">*</span>
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Calendar className="h-5 w-5 text-gray-400" />
-            </div>
             <input
-              type="date"
+              type="text"
               name="deadline"
-              value={form.deadline}
-              onChange={handleChange}
-              className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+              value={form.deadline ? new Date(form.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+              placeholder="Select deadline date"
+              readOnly
+              onClick={() => setShowCalendar(!showCalendar)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer"
               required
             />
+            {/* Custom Calendar Popup */}
+            {showCalendar && (
+              <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl z-50">
+                {/* Calendar Header */}
+                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-t-xl">
+                  <div className="flex items-center justify-between">
+                    <button type="button" onClick={goToPreviousMonth} className="p-1.5 hover:bg-green-600 rounded-lg transition-colors">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <h3 className="text-sm font-semibold">
+                      {currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </h3>
+                    <button type="button" onClick={goToNextMonth} className="p-1.5 hover:bg-green-600 rounded-lg transition-colors">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+                {/* Calendar Body */}
+                <div className="p-3">
+                  <div className="grid grid-cols-7 gap-0.5 mb-2">
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                      <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">{day}</div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-0.5">
+                    {getDaysInMonth(currentDate).map((date, index) => (
+                      <div key={index} className="aspect-square">
+                        {date ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDateSelect(date);
+                            }}
+                            disabled={isPastDate(date)}
+                            className={`w-full h-full rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center
+                              ${isSelected(date)
+                                ? 'bg-green-500 text-white shadow-md'
+                                : isToday(date)
+                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                                : isPastDate(date)
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border hover:border-green-200'
+                            }`}
+                          >
+                            {date.getDate()}
+                          </button>
+                        ) : (
+                          <div className="w-full h-full"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Calendar Footer */}
+                <div className="border-t border-gray-100 p-2 bg-gray-50 rounded-b-xl">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-yellow-100 border border-yellow-300 rounded"></div>
+                      <span>Today</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded"></div>
+                      <span>Selected</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Click outside to close calendar */}
+            {showCalendar && (
+              <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
+            )}
+            {form.deadline && (
+              <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Deadline set for: {new Date(form.deadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+            )}
           </div>
         </div>
-
+        {/* Status - React Select */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Status <span className="text-red-500 ml-1">*</span>
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              {getStatusIcon(form.status)}
-            </div>
-            <select
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white appearance-none"
-              required
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Team Members - Separate Row */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Team Members
-        </label>
-        <div className="relative">
-          <div className="absolute top-3 left-3 flex items-start pointer-events-none">
-            <Users className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="pl-10">
             <Select
-              isMulti
-              value={teamOptions.filter((opt) =>
-                form.teamMembers.includes(opt.value)
-              )}
-              options={teamOptions}
-              onChange={handleTeamChange}
-              placeholder="Select team members..."
+              value={getStatusOption(form.status)}
+              onChange={handleStatusChange}
+              options={statusOptions}
+              placeholder="Select project status..."
+              className="react-select-container"
+              classNamePrefix="react-select"
+              menuPortalTarget={document.body}
               styles={{
-                control: (provided, state) => ({
-                  ...provided,
-                  minHeight: '48px',
-                  maxHeight: '120px',
-                  width: '100%',
-                  border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
+                control: (base, state) => ({
+                  ...base,
+                  minHeight: '42px',
+                  border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
                   borderRadius: '8px',
-                  boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
-                  '&:hover': {
-                    border: '1px solid #10b981'
-                  }
+                  boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                  '&:hover': { border: '2px solid #16a34a' },
+                  cursor: 'pointer',
                 }),
-                valueContainer: (provided) => ({
-                  ...provided,
-                  maxHeight: '80px',
-                  overflow: 'auto',
-                  flexWrap: 'wrap'
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected ? '#10b981' : state.isFocused ? '#f0fdf4' : 'white',
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected
+                    ? '#16a34a'
+                    : state.isFocused
+                    ? '#f0fdf4'
+                    : 'white',
                   color: state.isSelected ? 'white' : '#374151',
+                  padding: '12px 16px',
+                  cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: state.isSelected ? '#10b981' : '#f0fdf4'
+                    backgroundColor: state.isSelected ? '#16a34a' : '#f0fdf4'
                   }
                 }),
-                multiValue: (provided) => ({
-                  ...provided,
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  flexShrink: 0,
-                  minWidth: 'fit-content'
+                menu: (base) => ({
+                  ...base,
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #e5e7eb'
                 }),
-                multiValueLabel: (provided) => ({
-                  ...provided,
-                  color: '#166534',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '150px'
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999
                 }),
-                multiValueRemove: (provided) => ({
-                  ...provided,
-                  color: '#166534',
-                  '&:hover': {
-                    backgroundColor: '#dcfce7',
-                    color: '#166534'
-                  }
+                singleValue: (base) => ({
+                  ...base,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }),
-                menu: (provided) => ({
-                  ...provided,
-                  maxHeight: '200px'
+                valueContainer: (base) => ({
+                  ...base,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }),
+                input: (base) => ({
+                  ...base,
+                  cursor: 'pointer',
+                  caretColor: 'transparent'
                 })
               }}
+              formatOptionLabel={(option) => (
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${option.bgColor} ${option.borderColor} border`}>
+                    {option.value === "Pending" && <Clock size={16} className={option.color} />}
+                    {option.value === "In Progress" && <PlayCircle size={16} className={option.color} />}
+                    {option.value === "Completed" && <CheckCircle size={16} className={option.color} />}
+                  </div>
+                  <span className="font-medium">{option.label}</span>
+                </div>
+              )}
+              formatValueLabel={(option) => (
+                <div className="flex items-center space-x-2">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${option.bgColor} ${option.borderColor} border`}>
+                    {option.value === "Pending" && <Clock size={14} className={option.color} />}
+                    {option.value === "In Progress" && <PlayCircle size={14} className={option.color} />}
+                    {option.value === "Completed" && <CheckCircle size={14} className={option.color} />}
+                  </div>
+                  <span className="font-medium">{option.label}</span>
+            </div>
+              )}
             />
           </div>
         </div>
-        <p className="mt-2 text-sm text-gray-500">
-          Select team members
-        </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors w-full sm:w-auto"
-        >
-          <XCircle size={18} /> Cancel
-        </button>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className={`flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors w-full sm:w-auto ${
-            submitting ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
-        >
-          <Save size={18} />
-          {submitting ? 'Saving...' : 'Save Changes'}
-        </button>
+      {/* Team Members - React Select with Avatars */}
+      <div>
+        <label className="block mb-1 font-medium text-gray-700 flex items-center">
+          <Users className="w-4 h-4 mr-1" />
+          Assign Team Members <span className="text-red-500 ml-1">*</span>
+        </label>
+        <Select
+          isMulti
+          options={teamOptions}
+          value={teamOptions.filter(opt => form.teamMembers.includes(opt.value))}
+          onChange={handleTeamChange}
+          placeholder="Select team members..."
+          className="react-select-container"
+          classNamePrefix="react-select"
+          menuPortalTarget={document.body}
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              minHeight: '42px',
+              border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
+              borderRadius: '8px',
+              boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+              cursor: 'pointer',
+              '&:hover': {
+                border: '2px solid #16a34a'
+              }
+            }),
+            option: (base, state) => ({
+              ...base,
+              backgroundColor: state.isSelected
+                ? '#16a34a'
+                : state.isFocused
+                ? '#f0fdf4'
+                : 'white',
+              color: state.isSelected ? 'white' : '#374151',
+              padding: '12px 16px',
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: state.isSelected ? '#16a34a' : '#f0fdf4'
+              }
+            }),
+            menu: (base) => ({
+              ...base,
+              borderRadius: '8px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e5e7eb'
+            }),
+            menuPortal: (base) => ({
+              ...base,
+              zIndex: 9999
+            }),
+            multiValue: (base) => ({
+              ...base,
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '6px',
+              padding: '4px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }),
+            multiValueLabel: (base) => ({
+              ...base,
+              color: '#166534',
+              fontWeight: '500',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }),
+            multiValueRemove: (base) => ({
+              ...base,
+              color: '#dc2626',
+              '&:hover': { backgroundColor: '#fef2f2', color: '#dc2626' }
+            }),
+            valueContainer: (base) => ({ ...base, padding: '8px 12px', gap: '6px' }),
+            placeholder: (base) => ({ ...base, color: '#9ca3af', fontSize: '14px' })
+          }}
+          formatOptionLabel={(option) => (
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+                {option.profilePicture ? (
+                  <img
+                    src={option.profilePicture}
+                    alt={option.name}
+                    className="w-full h-full object-cover"
+                    onError={e => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm" style={{ display: option.profilePicture ? 'none' : 'flex' }}>
+                  {option.name.split(' ')[0].charAt(0).toUpperCase()}
+                  {option.name.split(' ')[1] ? option.name.split(' ')[1].charAt(0).toUpperCase() : ''}
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">{option.name}</div>
+                <div className="text-sm text-gray-500">{option.email}</div>
+              </div>
+            </div>
+          )}
+          formatMultiValueLabel={(option) => (
+            <div className="flex items-center space-x-2">
+              <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center">
+                {option.profilePicture ? (
+                  <img
+                    src={option.profilePicture}
+                    alt={option.name}
+                    className="w-full h-full object-cover"
+                    onError={e => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-xs" style={{ display: option.profilePicture ? 'none' : 'flex' }}>
+                  {option.name.split(' ')[0].charAt(0).toUpperCase()}
+                  {option.name.split(' ')[1] ? option.name.split(' ')[1].charAt(0).toUpperCase() : ''}
+                </div>
+              </div>
+              <span>{option.name}</span>
+            </div>
+          )}
+        />
       </div>
-    </form>
-  );
+      <p className="mt-2 text-sm text-gray-500">Select team members</p>
+    {/* Action Buttons */}
+    <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+      <button
+        type="button"
+        onClick={onCancel}
+        className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors w-full sm:w-auto"
+      >
+        <XCircle size={18} /> Cancel
+      </button>
+      <button
+        type="submit"
+        disabled={submitting}
+        className={`flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors w-full sm:w-auto ${
+          submitting ? 'opacity-70 cursor-not-allowed' : ''
+        }`}
+      >
+        <Save size={18} />
+        {submitting ? 'Saving...' : 'Save Changes'}
+      </button>
+    </div>
+  </form>
+);
 }
 
 export default EditProjectForm;

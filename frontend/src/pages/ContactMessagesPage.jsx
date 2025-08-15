@@ -204,7 +204,7 @@ export default function ContactMessagesPage() {
               {/* Messages List */}
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                 {contacts.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 min-h-[220px] flex flex-col justify-center items-center">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <MessageSquare size={32} className="sm:w-10 sm:h-10 text-gray-400" />
                     </div>

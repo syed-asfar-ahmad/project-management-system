@@ -7,6 +7,8 @@ import Footer from "../components/Footer";
 import { toast } from "react-toastify";
 import { Briefcase, Calendar, Users, ArrowRight, Filter, X, ChevronDown, ArrowLeft, Trash2 } from 'lucide-react';
 import axios from "axios";
+import Select from 'react-select';
+import { Clock, Loader2, CheckCircle } from 'lucide-react';
 
 const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api';
 
@@ -267,6 +269,11 @@ function Projects() {
               <h3 className="text-lg font-semibold text-gray-800 mb-1">Loading Projects</h3>
               <p className="text-gray-600 text-sm">Fetching your project data...</p>
             </div>
+            <div className="flex space-x-1 mt-3">
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
           </div>
         ) : (
           <>
@@ -416,26 +423,73 @@ function Projects() {
                     </select>
                   )}
 
-                                     {/* Additional filters for Manager role - you can add more filters here */}
-                   {user?.role === "Manager" && (
-                     <select
-                       value={filterStatus}
-                       onChange={(e) => setFilterStatus(e.target.value)}
-                       className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                       style={{
-                         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                         backgroundPosition: 'right 0.5rem center',
-                         backgroundRepeat: 'no-repeat',
-                         backgroundSize: '1.5em 1.5em',
-                         paddingRight: '2.5rem'
-                       }}
-                     >
-                       <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Status</option>
-                       <option value="Pending" className="py-2 px-3 hover:bg-green-50">Pending</option>
-                       <option value="In Progress" className="py-2 px-3 hover:bg-green-50">In Progress</option>
-                       <option value="Completed" className="py-2 px-3 hover:bg-green-50">Completed</option>
-                     </select>
-                   )}
+                  {/* Filter by Status - For Manager role */}
+                  {user?.role === "Manager" && (
+                    <Select
+                      value={filterStatus ? {
+                        value: filterStatus,
+                        label: filterStatus,
+                      } : null}
+                      onChange={option => setFilterStatus(option ? option.value : '')}
+                      options={[
+                        { value: '', label: 'Filter by Status', isDisabled: true },
+                        { value: 'Pending', label: 'Pending', icon: <Clock size={16} className="text-yellow-500" />, color: 'bg-yellow-100 text-yellow-800' },
+                        { value: 'In Progress', label: 'In Progress', icon: <Loader2 size={16} className="text-blue-500 animate-spin" />, color: 'bg-blue-100 text-blue-800' },
+                        { value: 'Completed', label: 'Completed', icon: <CheckCircle size={16} className="text-green-500" />, color: 'bg-green-100 text-green-800' },
+                      ]}
+                      isSearchable={false}
+                      placeholder="Filter by Status"
+                      classNamePrefix="react-select"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          minHeight: '42px',
+                          borderRadius: '8px',
+                          borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                          boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                          '&:hover': { borderColor: '#16a34a' },
+                          cursor: 'pointer',
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          backgroundColor: state.isSelected
+                            ? '#16a34a'
+                            : state.isFocused
+                            ? '#f0fdf4'
+                            : 'white',
+                          color: state.isSelected ? 'white' : '#374151',
+                          fontWeight: state.isSelected ? 600 : 500,
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                          border: '1px solid #e5e7eb',
+                        }),
+                      }}
+                      formatOptionLabel={option =>
+                        option.value === '' ? (
+                          <span className="text-gray-400">{option.label}</span>
+                        ) : (
+                          <span className={`flex items-center gap-2 px-2 py-1 rounded ${option.color}`}>
+                            {option.icon}
+                            <span>{option.label}</span>
+                          </span>
+                        )
+                      }
+                    />
+                  )}
                 </div>
 
                 {/* Active Filters Display */}
@@ -493,23 +547,23 @@ function Projects() {
             )}
 
             {filteredProjects.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
+              <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[180px] flex flex-col justify-center items-center">
                 <Briefcase size={48} className="text-gray-300 mx-auto mb-3" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">No Projects Found</h3>
-                                 <p className="text-gray-600 mb-3 text-sm">
-                   {user?.role === "Admin" ? "No projects found in the system" : 
-                    user?.role === "Manager" ? "No projects have been assigned to you yet" : 
+                <p className="text-gray-600 mb-3 text-sm">
+                  {user?.role === "Admin" ? "No projects found in the system" :
+                    user?.role === "Manager" ? "No projects have been assigned to you yet" :
                     "No projects found"}
-                 </p>
-                 {user?.role === "Manager" && (
-                   <Link
-                     to="/projects/create"
-                     className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-                   >
-                     <Briefcase size={16} />
-                     Create Project
-                   </Link>
-                 )}
+                </p>
+                {user?.role === "Manager" && (
+                  <Link
+                    to="/projects/create"
+                    className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                  >
+                    <Briefcase size={16} />
+                    Create Project
+                  </Link>
+                )}
               </div>
             ) : (
               <>

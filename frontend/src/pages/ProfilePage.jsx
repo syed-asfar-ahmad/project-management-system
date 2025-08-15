@@ -444,7 +444,7 @@ function ProfilePage() {
 
               {/* LEFT: Profile Card - Same Design as Team Members */}
               <div className="w-full md:w-80">
-                <div className={`relative overflow-hidden rounded-xl shadow-lg hover:-translate-y-1 transition-transform duration-300 ${roleColor.bg} ${roleColor.border} border-2`}>
+                <div className={`relative overflow-hidden rounded-xl shadow-lg hover:-translate-y-1 transition-transform duration-300 ${roleColor.bg} ${roleColor.border} border-2 min-h-[300px]`}>
                   {/* Background Pattern */}
                   <div className="absolute inset-0 opacity-5">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-current to-transparent rounded-full -translate-y-8 translate-x-8"></div>
@@ -533,6 +533,13 @@ function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Empty State Message */}
+                    {!profile.position && !profile.gender && !profile.dateOfBirth && !profile.bio && (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No specific details added yet for this profile.</p>
+                        <p>Click "Edit Profile" to add your details.</p>
+                      </div>
+                    )}
 
                   </div>
                 </div>

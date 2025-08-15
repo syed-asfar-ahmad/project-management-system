@@ -576,7 +576,7 @@ function ProjectDetailPage() {
                 Project Tasks ({tasks.length})
               </h2>
               {tasks.length === 0 ? (
-                     <div className="text-center py-6">
+                     <div className="text-center py-6 min-h-[180px] flex flex-col justify-center items-center">
                        <ClipboardList size={40} className="text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500">No tasks for this project yet.</p>
                 </div>
@@ -788,7 +788,7 @@ function ProjectDetailPage() {
 
               {/* Attachments List */}
               {!project.attachments || project.attachments.length === 0 ? (
-               <div className="text-center py-6">
+               <div className="text-center py-6 min-h-[180px] flex flex-col justify-center items-center">
                  <FileText size={40} className="text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500">No attachments uploaded yet.</p>
                 </div>
@@ -847,7 +847,7 @@ function ProjectDetailPage() {
                 Comments ({comments.length})
               </h2>
               {comments.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="text-center py-8 min-h-[180px] flex flex-col justify-center items-center">
                   <MessageCircle size={48} className="text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                 </div>

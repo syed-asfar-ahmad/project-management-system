@@ -87,6 +87,18 @@ export default function Footer() {
                     Calendar
                   </Link>
                 </li>
+                <li>
+                  <Link to="/chat" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">
+                    <ArrowRight size={14} className="mr-2 group-hover:translate-x-1 transition-transform duration-200" />
+                    Chat
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/notifications" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">
+                    <ArrowRight size={14} className="mr-2 group-hover:translate-x-1 transition-transform duration-200" />
+                    Notifications
+                  </Link>
+                </li>
                 {user?.role === "Admin" && (
                   <li>
                     <Link to="/members" className="flex items-center text-gray-400 hover:text-green-400 transition-colors duration-200 group">

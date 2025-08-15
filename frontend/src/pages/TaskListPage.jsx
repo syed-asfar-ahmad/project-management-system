@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
 import DashboardNavbar from '../components/AuthNavbar';
 import { Trash2, PencilLine, CheckSquare, Clock, AlertCircle, Filter, X, ChevronDown, ArrowLeft, ArrowRight, Users, Briefcase, Plus } from 'lucide-react';
+import Select from 'react-select';
 
 import { toast } from 'react-toastify';
 
@@ -23,7 +24,8 @@ function TaskListPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [teamPages, setTeamPages] = useState({});
   const [projectPages, setProjectPages] = useState({});
-  const [tasksPerPage] = useState(4);
+  const [tasksPerPage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteTask, setDeleteTask] = useState(null);
   const location = useLocation();
@@ -264,16 +266,26 @@ function TaskListPage() {
   };
 
   // Pagination logic for non-Admin view
-  const indexOfLastTask = 1 * tasksPerPage;
+  const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterUser, filterTeam, filterProject, searchTerm]);
 
   const handleResetFilters = () => {
     setFilterUser('');
     setFilterTeam('');
     setFilterProject('');
     setSearchTerm('');
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   // Hierarchical grouping function for Admin view
@@ -560,70 +572,152 @@ function TaskListPage() {
 
                  
 
+                  {/* Filter by User - For Manager/Admin */}
                   {user?.role !== 'Team Member' && (
-                    <select
-                      value={filterUser}
-                      onChange={(e) => setFilterUser(e.target.value)}
-                      className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '1.5em 1.5em',
-                        paddingRight: '2.5rem'
+                    <Select
+                      value={filterUser ? {
+                        value: filterUser,
+                        label: teamOptions.find(u => u._id === filterUser)?.name || 'Unknown',
+                        avatar: teamOptions.find(u => u._id === filterUser)?.profilePicture || '',
+                        email: teamOptions.find(u => u._id === filterUser)?.email || '',
+                      } : null}
+                      onChange={option => setFilterUser(option ? option.value : '')}
+                      options={[
+                        { value: '', label: 'Filter by User', isDisabled: true },
+                        ...teamOptions.map(u => ({
+                          value: u._id,
+                          label: u.name,
+                          avatar: u.profilePicture || '',
+                          email: u.email || '',
+                        }))
+                      ]}
+                      isSearchable={true}
+                      placeholder="Filter by User"
+                      classNamePrefix="react-select"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          minHeight: '42px',
+                          borderRadius: '8px',
+                          borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                          boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                          '&:hover': { borderColor: '#16a34a' },
+                          cursor: 'pointer',
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          backgroundColor: state.isSelected
+                            ? '#16a34a'
+                            : state.isFocused
+                            ? '#f0fdf4'
+                            : 'white',
+                          color: state.isSelected ? 'white' : '#374151',
+                          fontWeight: state.isSelected ? 600 : 500,
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                          border: '1px solid #e5e7eb',
+                        }),
                       }}
-                    >
-                      <option value="" className="py-2 px-3 hover:bg-green-50">Filter by User</option>
-                      {Array.isArray(teamOptions) &&
-                        teamOptions.map((user) => (
-                          <option key={user._id} value={user._id} className="py-2 px-3 hover:bg-green-50">
-                            {user.name}
-                          </option>
-                      ))}
-                    </select>
+                      formatOptionLabel={option =>
+                        option.value === '' ? (
+                          <span className="text-gray-400">{option.label}</span>
+                        ) : (
+                          <span className="flex items-center gap-2 px-2 py-1 rounded">
+                            {option.avatar ? (
+                              <img src={option.avatar} alt={option.label} className="w-6 h-6 rounded-full object-cover" />
+                            ) : (
+                              <span className="w-6 h-6 rounded-full bg-green-200 flex items-center justify-center text-green-700 font-bold text-xs">
+                                {option.label?.charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                            <span>{option.label}</span>
+                            {option.email && <span className="text-xs text-gray-400 ml-2">{option.email}</span>}
+                          </span>
+                        )
+                      }
+                    />
                   )}
 
-                  {user?.role === 'Admin' && (
-                    <select
-                      value={filterTeam}
-                      onChange={(e) => setFilterTeam(e.target.value)}
-                      className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '1.5em 1.5em',
-                        paddingRight: '2.5rem'
-                      }}
-                    >
-                      <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Team</option>
-                      {teams.map((team) => (
-                        <option key={team._id} value={team._id} className="py-2 px-3 hover:bg-green-50">
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  <select
-                    value={filterProject}
-                    onChange={(e) => setFilterProject(e.target.value)}
-                    className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em',
-                      paddingRight: '2.5rem'
+                  {/* Filter by Project */}
+                  <Select
+                    value={filterProject ? {
+                      value: filterProject,
+                      label: projects.find(p => p._id === filterProject)?.name || 'Unknown',
+                    } : null}
+                    onChange={option => setFilterProject(option ? option.value : '')}
+                    options={[
+                      { value: '', label: 'Filter by Project', isDisabled: true },
+                      ...projects.map(p => ({
+                        value: p._id,
+                        label: p.name,
+                      }))
+                    ]}
+                    isSearchable={true}
+                    placeholder="Filter by Project"
+                    classNamePrefix="react-select"
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        minHeight: '42px',
+                        borderRadius: '8px',
+                        borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                        boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                        '&:hover': { borderColor: '#16a34a' },
+                        cursor: 'pointer',
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        backgroundColor: state.isSelected
+                          ? '#16a34a'
+                          : state.isFocused
+                          ? '#f0fdf4'
+                          : 'white',
+                        color: state.isSelected ? 'white' : '#374151',
+                        fontWeight: state.isSelected ? 600 : 500,
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e5e7eb',
+                      }),
                     }}
-                  >
-                    <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Project</option>
-                    {projects.map((project) => (
-                      <option key={project._id} value={project._id} className="py-2 px-3 hover:bg-green-50">
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
+                    formatOptionLabel={option =>
+                      option.value === '' ? (
+                        <span className="text-gray-400">{option.label}</span>
+                      ) : (
+                        <span className="flex items-center gap-2 px-2 py-1 rounded">
+                          <Briefcase size={16} className="text-blue-600" />
+                          <span>{option.label}</span>
+                        </span>
+                      )
+                    }
+                  />
 
 
              </div>
@@ -892,7 +986,7 @@ function TaskListPage() {
               // Grid view for non-Admin users
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentTasks.length === 0 ? (
-                  <div className="col-span-full bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center">
+                  <div className="col-span-full bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[180px] flex flex-col justify-center items-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                       <CheckSquare size={32} className="text-gray-400" />
                     </div>
@@ -1040,10 +1134,64 @@ function TaskListPage() {
                   ))
                 )}
               </div>
+
+
             )}
 
 
           </>
+        )}
+
+        {/* Tasks Pagination */}
+        {filteredTasks.length > 0 && totalPages > 1 && (
+          <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4 mt-4">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-600">
+                Showing {indexOfFirstTask + 1} to {Math.min(indexOfLastTask, filteredTasks.length)} of {filteredTasks.length} tasks
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  }`}
+                >
+                  Previous
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                    <button
+                      key={pageNumber}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        currentPage === pageNumber
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ))}
+                </div>
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
 

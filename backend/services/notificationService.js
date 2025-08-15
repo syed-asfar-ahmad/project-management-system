@@ -68,7 +68,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating task creation notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -125,7 +125,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating task update notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -183,7 +183,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating task deletion notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -209,7 +209,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating task completion notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -245,7 +245,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating project creation notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -280,7 +280,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating project update notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -313,7 +313,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error creating project deletion notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -364,7 +364,7 @@ class NotificationService {
       }
       
     } catch (error) {
-      console.error('Error creating comment notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -392,7 +392,7 @@ class NotificationService {
         // No project manager found
       }
     } catch (error) {
-      console.error('Error creating comment deletion notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -442,7 +442,7 @@ class NotificationService {
         // No team members found
       }
     } catch (error) {
-      console.error('Error creating attachment notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -470,7 +470,7 @@ class NotificationService {
         // No project manager found
       }
     } catch (error) {
-      console.error('Error creating attachment deletion notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -487,7 +487,7 @@ class NotificationService {
         priority: 'low'
       });
     } catch (error) {
-      console.error('Error creating profile update notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -506,7 +506,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('Error creating member addition notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -525,7 +525,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('Error creating member removal notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -542,7 +542,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('Error creating team creation notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -559,7 +559,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('Error creating team member joined notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -576,7 +576,7 @@ class NotificationService {
         priority: 'high'
       });
     } catch (error) {
-      console.error('Error creating project deleted by manager notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -593,7 +593,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('Error creating new user signup notification:', error);
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 
@@ -612,6 +612,28 @@ class NotificationService {
       });
     } catch (error) {
       // Silent error handling
+    }
+  }
+
+  // Notify all chat participants (except sender) about a new message
+  static async notifyNewMessage(message, sender, chat, participants) {
+    try {
+      for (const participant of participants) {
+        const participantId = participant._id ? participant._id.toString() : participant.toString();
+        if (participantId !== sender.id && participantId !== sender._id?.toString()) {
+          await this.createNotification({
+            recipient: participantId,
+            sender: sender.id || sender._id,
+            type: 'NEW_MESSAGE',
+            title: `New message from ${sender.name}`,
+            message: message.content,
+            relatedChat: chat._id || chat.chatId,
+            priority: 'low'
+          });
+        }
+      }
+    } catch (error) {
+      // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
 }

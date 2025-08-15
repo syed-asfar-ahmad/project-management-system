@@ -17,7 +17,7 @@ function CreateProject() {
           <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-green-100">
       <AuthNavbar />
       <main className="flex-1 w-full px-6 py-12">
-        <div className="w-full max-w-[1000px] mx-auto">
+        <div className="w-full max-w-[1000px] mx-auto min-h-[400px]">
         {/* Header with Back Button and Title - Responsive */}
         <div className="w-full max-w-[1000px] mx-auto mb-4">
           {/* Back Button - Top Row on Mobile */}
