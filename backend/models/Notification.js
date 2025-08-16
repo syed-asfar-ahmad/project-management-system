@@ -18,6 +18,7 @@ const notificationSchema = new mongoose.Schema({
       'TASK_UPDATED', 
       'TASK_DELETED',
       'TASK_COMPLETED',
+      'TASK_STATUS_UPDATED',
       'PROJECT_CREATED',
       'PROJECT_UPDATED',
       'PROJECT_DELETED',
