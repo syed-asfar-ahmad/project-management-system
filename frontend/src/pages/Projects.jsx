@@ -84,7 +84,6 @@ function Projects() {
       const response = await axios.get(`${API}/users/managers`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('MANAGERS:', response.data); // DEBUG: Print managers array
       setManagers(response.data);
     } catch (error) {
       // console.error('Error fetching managers:', error);
@@ -384,7 +383,7 @@ function Projects() {
                       value={filterManager ? {
                         value: filterManager,
                         label: managers.find(m => m._id === filterManager)?.name || 'Unknown',
-                        avatar: managers.find(m => m._id === filterManager)?.profilePicture || '/default_avatar.jpg',
+                        profilePicture: managers.find(m => m._id === filterManager)?.profilePicture || '/default_avatar.jpg',
                       } : null}
                       onChange={option => setFilterManager(option ? option.value : '')}
                       options={[
@@ -392,7 +391,7 @@ function Projects() {
                         ...managers.map(manager => ({
                           value: manager._id,
                           label: manager.name,
-                          avatar: manager.profilePicture || '/default_avatar.jpg',
+                          profilePicture: manager.profilePicture || '/default_avatar.jpg',
                         }))
                       ]}
                       isSearchable={true}
@@ -439,8 +438,8 @@ function Projects() {
                         ) : (
                           <span className="flex items-center gap-2 px-2 py-1 rounded">
                             <img
-                              src={option.avatar || '/default_avatar.jpg'}
-                              alt={option.label}
+                              src={option.profilePicture || '/default_avatar.jpg'}
+                              alt={option.profilePicture || 'no-image'}
                               className="w-7 h-7 rounded-full object-cover border border-gray-200 bg-white"
                               onError={e => { e.target.onerror = null; e.target.src = '/default_avatar.jpg'; }}
                             />

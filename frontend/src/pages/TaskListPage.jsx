@@ -85,6 +85,7 @@ function TaskListPage() {
 
         if (Array.isArray(res.data)) {
           setTeamOptions(res.data);
+          console.log('TEAM_OPTIONS:', res.data); // DEBUG: Print teamOptions array
         } else {
           setTeamOptions([]); 
         }
@@ -559,7 +560,7 @@ function TaskListPage() {
                    Reset Filters
                  </button>
                </div>
-                <div className={`grid gap-3 ${user?.role === 'Admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+                <div className={`grid gap-3 ${user?.role === 'Admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                  <input
                    type="text"
                     placeholder="Search Task"

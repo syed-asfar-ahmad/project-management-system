@@ -14,7 +14,7 @@ const {
 // GET only team members
 router.get('/team-members', verifyToken, async (req, res) => {
   try {
-    const teamMembers = await User.find({ role: 'Team Member' }).select('_id name email');
+    const teamMembers = await User.find({ role: 'Team Member' }).select('_id name email profilePicture');
     res.json(teamMembers);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch team members' });
@@ -34,23 +34,13 @@ router.get('/managers', verifyToken, async (req, res) => {
 // GET manager's team members (for managers creating projects)
 router.get('/my-team-members', verifyToken, async (req, res) => {
   try {
-    if (req.user.role !== 'Manager') {
-      return res.status(403).json({ error: 'Access denied: Managers only' });
-    }
-
-    const manager = await User.findById(req.user.id).populate('teamId');
-    if (!manager.teamId) {
-      return res.status(404).json({ error: 'Manager not assigned to any team' });
-    }
-
-    const teamMembers = await User.find({ 
-      teamId: manager.teamId._id,
-      role: 'Team Member'
-    }).select('_id name email role position gender dateOfBirth bio profilePicture');
-    
+    // Find users whose teamId matches any team managed by this manager
+    const teams = await require('../models/Team').find({ manager: req.user.id });
+    const teamIds = teams.map(team => team._id);
+    const teamMembers = await User.find({ teamId: { $in: teamIds } }).select('_id name email profilePicture');
     res.json(teamMembers);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch team members' });
+    res.status(500).json({ error: 'Failed to fetch manager team members' });
   }
 });
 
