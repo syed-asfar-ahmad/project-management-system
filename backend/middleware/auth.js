@@ -68,34 +68,38 @@ const checkManagerProjectAccess = async (req, res, next) => {
   }
 };
 
-// Middleware to check if manager has access to task (via project)
+// Middleware to check if manager or team member has access to task (via project)
 const checkManagerTaskAccess = async (req, res, next) => {
   try {
     const Task = require("../models/Task");
     const taskId = req.params.id || req.params.taskId;
-    
     if (!taskId) {
       return res.status(400).json({ message: 'Task ID is required' });
     }
-
     const task = await Task.findById(taskId).populate('project');
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
-
-    // Check if the user is a manager and is assigned to the project this task belongs to (as team member or project manager)
-    const isAssignedToProject = task.project.teamMembers && 
-      task.project.teamMembers.some(memberId => 
-        memberId.toString() === req.user.id
-      );
-    
-    const isProjectManager = task.project.projectManager && 
-      task.project.projectManager.toString() === req.user.id;
-
+    // Admins: always allowed
+    if (req.user.role === 'Admin') {
+      req.task = task;
+      return next();
+    }
+    // Team Member: must be assigned to this task
+    if (req.user.role === 'Team Member') {
+      const isAssigned = Array.isArray(task.assignedTo) && task.assignedTo.some(u => u.toString() === req.user.id);
+      if (!isAssigned) {
+        return res.status(403).json({ message: 'You do not have access to this task' });
+      }
+      req.task = task;
+      return next();
+    }
+    // Manager: must be assigned to project or be project manager
+    const isAssignedToProject = task.project.teamMembers && task.project.teamMembers.some(memberId => memberId.toString() === req.user.id);
+    const isProjectManager = task.project.projectManager && task.project.projectManager.toString() === req.user.id;
     if (req.user.role === 'Manager' && !isAssignedToProject && !isProjectManager) {
       return res.status(403).json({ message: 'You do not have access to this task' });
     }
-
     req.task = task;
     next();
   } catch (error) {

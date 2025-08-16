@@ -68,6 +68,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -137,6 +138,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -195,6 +197,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -221,6 +224,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -257,6 +261,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -292,6 +297,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -325,6 +331,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -376,6 +383,7 @@ class NotificationService {
       }
       
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -404,6 +412,7 @@ class NotificationService {
         // No project manager found
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -454,6 +463,7 @@ class NotificationService {
         // No team members found
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -482,6 +492,7 @@ class NotificationService {
         // No project manager found
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -499,6 +510,7 @@ class NotificationService {
         priority: 'low'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -518,6 +530,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -537,6 +550,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -554,6 +568,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -571,6 +586,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -588,6 +604,7 @@ class NotificationService {
         priority: 'high'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -605,6 +622,7 @@ class NotificationService {
         priority: 'medium'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
@@ -623,6 +641,7 @@ class NotificationService {
         priority: 'high'
       });
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Silent error handling
     }
   }
@@ -645,6 +664,7 @@ class NotificationService {
         }
       }
     } catch (error) {
+      console.error('NotificationService error:', error);
       // Remove all console.log, console.error, and debugging alerts from the file for clean production code.
     }
   }
