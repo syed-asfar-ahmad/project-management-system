@@ -56,7 +56,7 @@ function TaskDetailPage() {
   const statusOptions = ['To Do', 'In Progress', 'Completed'];
 
   // Only allow if user is assigned Team Member
-  const isAssignedTeamMember = user?.role === 'Team Member' && task?.assignedTo?.[0]?._id === user?._id;
+  const isAssignedTeamMember = user?.role === 'Team Member' && Array.isArray(task?.assignedTo) && task.assignedTo.some(u => (u?._id || u) === user?._id);
 
   const handleStatusBadgeClick = () => {
     if (isAssignedTeamMember) setShowStatusDropdown((prev) => !prev);

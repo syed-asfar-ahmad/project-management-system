@@ -311,7 +311,7 @@ router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'
 router.get('/:id', verifyToken, getTaskById);
 
 // Update Task - Admin or Manager (if assigned to project)
-router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, updateTask);
+router.put('/:id', verifyToken, checkRole('Admin', 'Manager', 'Team Member'), checkManagerTaskAccess, updateTask);
 
 // Delete Task - Admin or Manager (if assigned to project)
 router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
