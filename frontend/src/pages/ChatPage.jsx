@@ -83,19 +83,21 @@ const ChatPage = () => {
       {/* Navbar */}
       <AuthNavbar />
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-6 mb-2">
-        <div className="flex items-center justify-between mb-2">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
-          {/* Title Centered */}
-          <div className="flex-1 flex justify-center">
-            <div className="inline-flex items-center gap-3">
+      {!loading && (
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-6 mb-2">
+          {/* Mobile: Back button on its own line */}
+          <div className="md:hidden mb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+          {/* Mobile: Title and description center aligned */}
+          <div className="md:hidden flex flex-col items-center justify-center mb-2">
+            <div className="inline-flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
                 <MessageCircle size={20} className="text-white" />
               </div>
@@ -103,15 +105,36 @@ const ChatPage = () => {
                 Chat
               </h1>
             </div>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Stay connected with your team and manage all your conversations in one place.
+            </p>
           </div>
-          <div className="w-20"></div> {/* Spacer to center the title */}
+          {/* Desktop: Back button, title, description in a row */}
+          <div className="hidden md:flex items-center justify-between mb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 font-medium text-sm"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            <div className="flex-1 flex flex-col items-center">
+              <div className="inline-flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg flex items-center justify-center">
+                  <MessageCircle size={20} className="text-white" />
+                </div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
+                  Chat
+                </h1>
+              </div>
+              <p className="text-base text-gray-600 max-w-2xl mx-auto mt-1">
+                Stay connected with your team and manage all your conversations in one place.
+              </p>
+            </div>
+            <div className="w-20"></div> {/* Spacer to center the title */}
+          </div>
         </div>
-        <div className="text-center mb-3">
-          <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            Stay connected with your team and manage all your conversations in one place.
-          </p>
-        </div>
-      </div>
+      )}
       {/* Main Chat Container or Loader */}
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center py-16">

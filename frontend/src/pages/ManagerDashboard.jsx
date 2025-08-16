@@ -311,11 +311,11 @@ function ManagerDashboard() {
         {/* Charts */}
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           {/* Pie Chart */}
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-green-100 md:h-[300px] h-[240px] flex flex-col overflow-hidden">
+          <div className="bg-white p-4 rounded-xl shadow-lg border border-green-100 md:h-[300px] h-[240px] flex flex-col overflow-hidden w-full min-w-0">
             <h2 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
               <ClipboardList size={18} className="text-green-600" /> Task Status Overview
             </h2>
-            <div className="flex-grow relative">
+            <div className="flex-grow relative w-full min-w-0">
               <Pie
                 data={taskStatusData}
                 options={{
@@ -331,6 +331,7 @@ function ManagerDashboard() {
                     },
                   },
                 }}
+                style={{ width: '100%', height: '100%' }}
               />
             </div>
           </div>

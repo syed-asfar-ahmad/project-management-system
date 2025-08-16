@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
       });
       setUser(res.data);
     } catch (err) {
-      console.error('Error refreshing user data:', err);
     }
   };
 

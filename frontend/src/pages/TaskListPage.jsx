@@ -135,7 +135,6 @@ function TaskListPage() {
             setProjects(sortedProjects);
           }
         } catch (error) {
-          console.error('Error fetching teams and projects:', error);
         }
       }
     };
@@ -179,7 +178,6 @@ function TaskListPage() {
       };
       fetchTasks();
     } catch (error) {
-      console.error('Error deleting task:', error);
       toast.error('Failed to delete task');
     } finally {
       setShowDeleteDialog(false);

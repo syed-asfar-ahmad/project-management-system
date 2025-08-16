@@ -183,8 +183,11 @@ function AuthNavbar() {
             </button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Notification Bell and Menu Button (Mobile Only) */}
+          <div className="md:hidden flex items-center space-x-2">
+            <div className="text-white">
+              <NotificationBell />
+            </div>
             <button 
               onClick={() => setIsOpen(!isOpen)} 
               className="p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200"
@@ -248,13 +251,6 @@ function AuthNavbar() {
             <Link to="/profile" className={mobileLinkStyle("/profile")}>
               Profile
             </Link>
-
-            {/* Mobile Notification Bell */}
-            <div className="px-4 py-3 border-t border-gray-200">
-              <div className="text-gray-700">
-                <NotificationBell />
-              </div>
-            </div>
 
             {/* Mobile Logout */}
             <button 

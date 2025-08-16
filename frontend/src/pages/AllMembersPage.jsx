@@ -89,7 +89,6 @@ function AllMembersPage() {
           return;
         }
       } catch (err) {
-        console.error('Error fetching members:', err);
         toast.error('Failed to fetch members');
       } finally {
         setLoading(false);

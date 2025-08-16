@@ -99,7 +99,6 @@ function TaskCalendarPage() {
 
         setEvents([...taskEvents, ...projectEvents]);
       } catch (error) {
-        console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }

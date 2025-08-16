@@ -272,7 +272,6 @@ function TaskDetailPage() {
       // Refresh notifications immediately
       window.dispatchEvent(new CustomEvent('refreshNotifications'));
     } catch (err) {
-      console.error('Download error:', err);
       toast.error("Failed to download file");
     }
   };
@@ -303,7 +302,6 @@ function TaskDetailPage() {
         }, 1000);
       }
     } catch (err) {
-      console.error('Preview error:', err);
       toast.error("Failed to preview file");
     }
   };

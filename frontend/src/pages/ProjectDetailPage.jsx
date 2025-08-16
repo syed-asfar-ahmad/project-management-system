@@ -196,7 +196,6 @@ function ProjectDetailPage() {
       
       toast.success("File downloaded successfully!");
     } catch (err) {
-      console.error('Download error:', err);
       toast.error("Failed to download file");
     }
   };
@@ -227,7 +226,6 @@ function ProjectDetailPage() {
         }, 1000);
       }
     } catch (err) {
-      console.error('Preview error:', err);
       toast.error("Failed to preview file");
     }
   };

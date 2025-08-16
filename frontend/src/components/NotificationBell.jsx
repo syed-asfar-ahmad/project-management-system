@@ -45,7 +45,7 @@ function NotificationBell() {
       });
       setNotifications(response.data);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // console.error('Error fetching notifications:', error);
     }
   };
 
@@ -56,7 +56,7 @@ function NotificationBell() {
       });
       setUnreadCount(response.data.count);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      // console.error('Error fetching unread count:', error);
     }
   };
 
@@ -75,7 +75,7 @@ function NotificationBell() {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      // console.error('Error marking notification as read:', error);
       toast.error('Failed to mark notification as read');
     }
   };
@@ -93,7 +93,7 @@ function NotificationBell() {
       setUnreadCount(0);
       toast.success('All notifications marked as read');
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      // console.error('Error marking all notifications as read:', error);
       toast.error('Failed to mark all notifications as read');
     } finally {
       setLoading(false);
@@ -117,7 +117,7 @@ function NotificationBell() {
       
       toast.success('Notification deleted');
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      // console.error('Error deleting notification:', error);
       toast.error('Failed to delete notification');
     }
   };
@@ -134,7 +134,7 @@ function NotificationBell() {
       setUnreadCount(0);
       toast.success('All notifications cleared');
     } catch (error) {
-      console.error('Error clearing notifications:', error);
+      // console.error('Error clearing notifications:', error);
       toast.error('Failed to clear notifications');
     }
   };
@@ -395,7 +395,8 @@ function NotificationBell() {
 
       {/* Notification Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[450px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-[500px] overflow-hidden transform transition-all duration-200">
+        <div className="fixed left-1/2 top-20 -translate-x-1/2 z-50 w-[95vw] max-w-sm sm:w-[350px] md:w-[450px] max-h-[500px] overflow-hidden overflow-x-auto bg-white rounded-xl shadow-2xl border border-gray-200
+          md:absolute md:right-0 md:left-auto md:top-auto md:mt-3 md:translate-x-0">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-blue-50">
             <div className="flex items-center space-x-2">

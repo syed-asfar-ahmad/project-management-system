@@ -45,7 +45,6 @@ function Signup() {
         const response = await axios.get(`${API}/teams/signup-teams`);
         setTeams(response.data);
       } catch (error) {
-        console.error('Error fetching teams:', error);
         // Don't show error toast as teams are optional
       }
     };

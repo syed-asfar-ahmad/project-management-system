@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
-import { Pencil, XCircle, CheckSquare, ArrowLeft, Save } from 'lucide-react';
+import { Pencil, XCircle, CheckSquare, ArrowLeft, Save, FileText, AlignLeft, CalendarDays, ListChecks, AlertTriangle, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import BackButton from '../components/backButton';
 import { toast } from 'react-toastify';
 
@@ -29,6 +29,8 @@ function EditTaskPage() {
   const [assignedOption, setAssignedOption] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentDate, setCurrentDate] = useState(form.dueDate ? new Date(form.dueDate) : new Date());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +57,9 @@ function EditTaskPage() {
             const options = teamRes.data.map((user) => ({
               value: user._id,
               label: `${user.name} (${user.email})`,
+              profilePicture: user.profilePicture,
+              name: user.name,
+              email: user.email,
             }));
 
             setTeamOptions(options);
@@ -113,7 +118,7 @@ function EditTaskPage() {
         }
       );
       toast.success('Task updated successfully!');
-      navigate(`/tasks/${id}`);
+      setTimeout(() => navigate(`/tasks/${id}`), 500);
     } catch (err) {
       toast.error('Failed to update task');
     } finally {
@@ -123,6 +128,45 @@ function EditTaskPage() {
 
   const handleCancel = () => {
     navigate(`/tasks/${id}`);
+  };
+
+  // Calendar logic from AddProjectForm
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    const days = [];
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+  const formatDate = (date) => date.toISOString().split('T')[0];
+  const handleDateSelect = (date) => {
+    setForm((prev) => ({ ...prev, dueDate: formatDate(date) }));
+    setShowCalendar(false);
+  };
+  const goToPreviousMonth = () => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const goToNextMonth = () => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+  const isToday = (date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+  const isSelected = (date) => form.dueDate === formatDate(date);
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
   };
 
   if (loading) {
@@ -221,10 +265,11 @@ function EditTaskPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <div>
-                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                   Task Title <span className="text-red-500 ml-1">*</span>
-                 </label>
+              {/* Task Title */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <FileText size={16} className="inline-block mr-2 mb-1" /> Task Title <span className="text-red-500 ml-1">*</span>
+                </label>
                 <input
                   type="text"
                   name="title"
@@ -235,27 +280,115 @@ function EditTaskPage() {
                   required
                 />
               </div>
-
-                             <div>
-                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                   Due Date <span className="text-red-500 ml-1">*</span>
-                 </label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={form.dueDate}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
+              {/* Due Date with Calendar */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <CalendarDays size={16} className="inline-block mr-2 mb-1" /> Due Date <span className="text-red-500 ml-1">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="dueDate"
+                    value={form.dueDate ? new Date(form.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                    placeholder="Select due date"
+                    readOnly
+                    onClick={() => setShowCalendar(!showCalendar)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white hover:bg-gray-50 cursor-pointer"
+                    required
+                  />
+                  {showCalendar && (
+                    <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl z-50">
+                      {/* Calendar Header */}
+                      <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-t-xl">
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); goToPreviousMonth(); }}
+                            className="p-1.5 hover:bg-green-600 rounded-lg transition-colors"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          <h3 className="text-sm font-semibold">
+                            {currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); goToNextMonth(); }}
+                            className="p-1.5 hover:bg-green-600 rounded-lg transition-colors"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      {/* Calendar Body */}
+                      <div className="p-3">
+                        {/* Day Headers */}
+                        <div className="grid grid-cols-7 gap-0.5 mb-2">
+                          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                            <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">{day}</div>
+                          ))}
+                        </div>
+                        {/* Calendar Days */}
+                        <div className="grid grid-cols-7 gap-0.5">
+                          {getDaysInMonth(currentDate).map((date, index) => (
+                            <div key={index} className="aspect-square">
+                              {date ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDateSelect(date); }}
+                                  disabled={isPastDate(date)}
+                                  className={`w-full h-full rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center
+                                    ${isSelected(date)
+                                      ? 'bg-green-500 text-white shadow-md'
+                                      : isToday(date)
+                                      ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                                      : isPastDate(date)
+                                      ? 'text-gray-300 cursor-not-allowed'
+                                      : 'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border hover:border-green-200'
+                                    }`}
+                                >
+                                  {date.getDate()}
+                                </button>
+                              ) : (
+                                <div className="w-full h-full"></div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Calendar Footer */}
+                      <div className="border-t border-gray-100 p-2 bg-gray-50 rounded-b-xl">
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-yellow-100 border border-yellow-300 rounded"></div>
+                            <span>Today</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-green-500 rounded"></div>
+                            <span>Selected</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* Click outside to close calendar */}
+                  {showCalendar && (
+                    <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
+                  )}
+                  {form.dueDate && (
+                    <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Due date set for: {new Date(form.dueDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-
+            </div> {/* CLOSE grid grid-cols-1 md:grid-cols-2 gap-6 */}
             {/* Description */}
-                         <div>
-               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                 Description <span className="text-red-500 ml-1">*</span>
-               </label>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <AlignLeft size={16} className="inline-block mr-2 mb-1" /> Description <span className="text-red-500 ml-1">*</span>
+              </label>
               <textarea
                 name="description"
                 value={form.description}
@@ -266,46 +399,105 @@ function EditTaskPage() {
                 placeholder="Enter task description"
               ></textarea>
             </div>
-
             {/* Status, Priority, and Assignment */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              <div>
                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                   Status <span className="text-red-500 ml-1">*</span>
+                   <ListChecks size={16} className="inline-block mr-2 mb-1" /> Status <span className="text-red-500 ml-1">*</span>
                  </label>
-                <select
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white"
-                >
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                <Select
+                  options={[
+                    { value: 'To Do', label: 'To Do' },
+                    { value: 'In Progress', label: 'In Progress' },
+                    { value: 'Completed', label: 'Completed' },
+                  ]}
+                  value={{ value: form.status, label: form.status }}
+                  onChange={(selected) => setForm({ ...form, status: selected.value })}
+                  className="mt-1"
+                  placeholder="Select status"
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      minHeight: '48px',
+                      border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
+                      '&:hover': {
+                        border: '1px solid #10b981'
+                      }
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isSelected ? '#10b981' : state.isFocused ? '#f0fdf4' : 'white',
+                      color: state.isSelected ? 'white' : '#374151',
+                      '&:hover': {
+                        backgroundColor: state.isSelected ? '#10b981' : '#f0fdf4'
+                      }
+                    })
+                  }}
+                  formatOptionLabel={(option) => (
+                    <div className="flex items-center">
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                  formatValueLabel={(option) => (
+                    <div className="flex items-center">
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                />
               </div>
 
                              <div>
                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                   Priority <span className="text-red-500 ml-1">*</span>
+                   <AlertTriangle size={16} className="inline-block mr-2 mb-1" /> Priority <span className="text-red-500 ml-1">*</span>
                  </label>
-                <select
-                  name="priority"
-                  value={form.priority}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white"
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
+                <Select
+                  options={[
+                    { value: 'Low', label: 'Low' },
+                    { value: 'Medium', label: 'Medium' },
+                    { value: 'High', label: 'High' },
+                  ]}
+                  value={{ value: form.priority, label: form.priority }}
+                  onChange={(selected) => setForm({ ...form, priority: selected.value })}
+                  className="mt-1"
+                  placeholder="Select priority"
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      minHeight: '48px',
+                      border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
+                      '&:hover': {
+                        border: '1px solid #10b981'
+                      }
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isSelected ? '#10b981' : state.isFocused ? '#f0fdf4' : 'white',
+                      color: state.isSelected ? 'white' : '#374151',
+                      '&:hover': {
+                        backgroundColor: state.isSelected ? '#10b981' : '#f0fdf4'
+                      }
+                    })
+                  }}
+                  formatOptionLabel={(option) => (
+                    <div className="flex items-center">
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                  formatValueLabel={(option) => (
+                    <div className="flex items-center">
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Assign To
+                  <Users size={16} className="inline-block mr-2 mb-1" /> Assign To <span className="text-red-500 ml-1">*</span>
                 </label>
                 <Select
                   isMulti={false}
@@ -314,6 +506,30 @@ function EditTaskPage() {
                   onChange={(selected) => setAssignedOption(selected)}
                   className="mt-1"
                   placeholder="Select team member"
+                  formatOptionLabel={(option) => (
+                    <div className="flex items-center">
+                      {option.profilePicture ? (
+                        <img src={option.profilePicture} alt={option.label} className="w-5 h-5 rounded-full mr-2" />
+                      ) : (
+                        <span className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-semibold">
+                          {option.label.split(' ')[0][0]}
+                        </span>
+                      )}
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                  formatValueLabel={(option) => (
+                    <div className="flex items-center">
+                      {option.profilePicture ? (
+                        <img src={option.profilePicture} alt={option.label} className="w-5 h-5 rounded-full mr-2" />
+                      ) : (
+                        <span className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-semibold">
+                          {option.label.split(' ')[0][0]}
+                        </span>
+                      )}
+                      <span>{option.label}</span>
+                    </div>
+                  )}
                   styles={{
                     control: (provided, state) => ({
                       ...provided,

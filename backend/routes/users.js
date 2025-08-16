@@ -24,7 +24,7 @@ router.get('/team-members', verifyToken, async (req, res) => {
 // GET only managers
 router.get('/managers', verifyToken, async (req, res) => {
   try {
-    const managers = await User.find({ role: 'Manager' }).select('_id name email');
+    const managers = await User.find({ role: 'Manager' }).select('_id name email profilePicture');
     res.json(managers);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch managers' });

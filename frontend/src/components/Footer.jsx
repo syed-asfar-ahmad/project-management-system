@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Twitter, Linkedin, Instagram, Facebook, Mail, Phone, MapPin, ArrowRight, CheckCircle, Users, Calendar, BarChart3 } from "lucide-react";
+import { Twitter, Linkedin, Instagram, Facebook, Mail, Phone, MapPin, ArrowRight, CheckCircle, Users, Calendar, BarChart3, Bell, MessageSquare } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Footer() {
@@ -164,41 +164,47 @@ export default function Footer() {
                  Key Features
                </h4>
                <ul className="space-y-2">
-                 <li className="flex items-center space-x-3">
+                 <li className="flex items-center space-x-3 group relative">
                    <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                      <CheckCircle size={14} className="text-green-400" />
                    </div>
                    <span className="text-gray-400 text-sm">Task Management</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Create, assign, and track tasks easily</span>
                  </li>
-                 <li className="flex items-center space-x-3">
+                 <li className="flex items-center space-x-3 group relative">
                    <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                      <Users size={14} className="text-green-400" />
                    </div>
                    <span className="text-gray-400 text-sm">Team Collaboration</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Work together with your team in real time, including instant messaging</span>
                  </li>
-                 <li className="flex items-center space-x-3">
+                 <li className="flex items-center space-x-3 group relative">
                    <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                      <Calendar size={14} className="text-green-400" />
                    </div>
                    <span className="text-gray-400 text-sm">Calendar Integration</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Sync tasks and deadlines with your calendar</span>
                  </li>
-                 <li className="flex items-center space-x-3">
+                 <li className="flex items-center space-x-3 group relative">
                    <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                      <BarChart3 size={14} className="text-green-400" />
                    </div>
                    <span className="text-gray-400 text-sm">Progress Tracking</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Visualize and monitor project progress</span>
                  </li>
-                 <li className="flex items-center space-x-3">
-                   <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                     <CheckCircle size={14} className="text-green-400" />
-                   </div>
-                   <span className="text-gray-400 text-sm">Real-time Updates</span>
-                 </li>
-                 <li className="flex items-center space-x-3">
+                 <li className="flex items-center space-x-3 group relative">
                    <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                      <Users size={14} className="text-green-400" />
                    </div>
                    <span className="text-gray-400 text-sm">Role-based Access</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Permissions for Admin, Manager, and Team Member</span>
+                 </li>
+                 <li className="flex items-center space-x-3 group relative">
+                   <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                     <Bell size={14} className="text-green-400" />
+                   </div>
+                   <span className="text-gray-400 text-sm">Notifications</span>
+                   <span className="absolute left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-gray-100 text-xs rounded px-2 py-1 ml-2 transition-opacity whitespace-nowrap z-20">Stay informed with alerts and reminders</span>
                  </li>
                </ul>
              </div>

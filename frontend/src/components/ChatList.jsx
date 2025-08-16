@@ -52,7 +52,6 @@ const ChatList = ({ onChatSelect, selectedChatId, onChatDeleted, chats = [], loa
       
       toast.success('Chat deleted successfully');
     } catch (err) {
-      console.error('Failed to delete chat:', err);
       toast.error('Failed to delete chat. Please try again.');
     } finally {
       setDeleting(false);
@@ -230,7 +229,7 @@ const ChatList = ({ onChatSelect, selectedChatId, onChatDeleted, chats = [], loa
                 {/* Delete Button - Shows on hover */}
                 <button
                   onClick={(e) => handleDeleteClick(e, chat)}
-                  className="p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110"
+                  className="p-1.5 bg-red-500 text-white rounded-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110"
                   title="Delete chat"
                 >
                   <Trash2 size={14} />

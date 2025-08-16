@@ -84,9 +84,10 @@ function Projects() {
       const response = await axios.get(`${API}/users/managers`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('MANAGERS:', response.data); // DEBUG: Print managers array
       setManagers(response.data);
     } catch (error) {
-      console.error('Error fetching managers:', error);
+      // console.error('Error fetching managers:', error);
     }
   }, [token]);
 
@@ -97,7 +98,7 @@ function Projects() {
       });
       setTeams(response.data);
     } catch (error) {
-      console.error('Error fetching teams:', error);
+      // console.error('Error fetching teams:', error);
     }
   }, [token]);
 
@@ -187,7 +188,7 @@ function Projects() {
       toast.success('Project deleted successfully');
       loadProjects(); // Reload the projects list
     } catch (error) {
-      console.error('Error deleting project:', error);
+      // console.error('Error deleting project:', error);
       toast.error('Failed to delete project');
     } finally {
       setShowDeleteDialog(false);
@@ -379,48 +380,135 @@ function Projects() {
 
                   {/* Filter by Manager - Only for Admin */}
                   {user?.role === "Admin" && (
-                    <select
-                      value={filterManager}
-                      onChange={(e) => setFilterManager(e.target.value)}
-                      className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '1.5em 1.5em',
-                        paddingRight: '2.5rem'
+                    <Select
+                      value={filterManager ? {
+                        value: filterManager,
+                        label: managers.find(m => m._id === filterManager)?.name || 'Unknown',
+                        avatar: managers.find(m => m._id === filterManager)?.profilePicture || '/default_avatar.jpg',
+                      } : null}
+                      onChange={option => setFilterManager(option ? option.value : '')}
+                      options={[
+                        { value: '', label: 'Filter by Manager', isDisabled: true },
+                        ...managers.map(manager => ({
+                          value: manager._id,
+                          label: manager.name,
+                          avatar: manager.profilePicture || '/default_avatar.jpg',
+                        }))
+                      ]}
+                      isSearchable={true}
+                      placeholder="Filter by Manager"
+                      classNamePrefix="react-select"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          minHeight: '42px',
+                          borderRadius: '8px',
+                          borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                          boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                          '&:hover': { borderColor: '#16a34a' },
+                          cursor: 'pointer',
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? '#16a34a'
+                            : state.isFocused
+                            ? '#f0fdf4'
+                            : 'white',
+                          color: state.isSelected ? 'white' : '#374151',
+                          fontWeight: state.isSelected ? 600 : 500,
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                          border: '1px solid #e5e7eb',
+                        }),
                       }}
-                    >
-                      <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Manager</option>
-                      {managers.map((manager) => (
-                        <option key={manager._id} value={manager._id} className="py-2 px-3 hover:bg-green-50">
-                          {manager.name}
-                        </option>
-                      ))}
-                    </select>
+                      formatOptionLabel={option =>
+                        option.value === '' ? (
+                          <span className="text-gray-400">{option.label}</span>
+                        ) : (
+                          <span className="flex items-center gap-2 px-2 py-1 rounded">
+                            <img
+                              src={option.avatar || '/default_avatar.jpg'}
+                              alt={option.label}
+                              className="w-7 h-7 rounded-full object-cover border border-gray-200 bg-white"
+                              onError={e => { e.target.onerror = null; e.target.src = '/default_avatar.jpg'; }}
+                            />
+                            <span>{option.label}</span>
+                          </span>
+                        )
+                      }
+                    />
                   )}
 
                   {/* Filter by Team - Only for Admin */}
                   {user?.role === "Admin" && (
-                    <select
-                      value={filterTeam}
-                      onChange={(e) => setFilterTeam(e.target.value)}
-                      className="p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white cursor-pointer appearance-none relative text-sm"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: 'right 0.5rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '1.5em 1.5em',
-                        paddingRight: '2.5rem'
+                    <Select
+                      value={filterTeam ? {
+                        value: filterTeam,
+                        label: teams.find(t => t._id === filterTeam)?.name || 'Unknown',
+                      } : null}
+                      onChange={option => setFilterTeam(option ? option.value : '')}
+                      options={[
+                        { value: '', label: 'Filter by Team', isDisabled: true },
+                        ...teams.map(team => ({ value: team._id, label: team.name }))
+                      ]}
+                      isSearchable={true}
+                      placeholder="Filter by Team"
+                      classNamePrefix="react-select"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          minHeight: '42px',
+                          borderRadius: '8px',
+                          borderColor: state.isFocused ? '#16a34a' : '#d1d5db',
+                          boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                          '&:hover': { borderColor: '#16a34a' },
+                          cursor: 'pointer',
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? '#16a34a'
+                            : state.isFocused
+                            ? '#f0fdf4'
+                            : 'white',
+                          color: state.isSelected ? 'white' : '#374151',
+                          fontWeight: state.isSelected ? 600 : 500,
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                          border: '1px solid #e5e7eb',
+                        }),
                       }}
-                    >
-                      <option value="" className="py-2 px-3 hover:bg-green-50">Filter by Team</option>
-                      {teams.map((team) => (
-                        <option key={team._id} value={team._id} className="py-2 px-3 hover:bg-green-50">
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
+                      formatOptionLabel={option =>
+                        option.value === '' ? (
+                          <span className="text-gray-400">{option.label}</span>
+                        ) : (
+                          <span className="flex items-center gap-2 px-2 py-1 rounded">{option.label}</span>
+                        )
+                      }
+                    />
                   )}
 
                   {/* Filter by Status - For Manager role */}

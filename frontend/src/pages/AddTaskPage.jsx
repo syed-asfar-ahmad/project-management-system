@@ -10,15 +10,6 @@ import { toast } from 'react-hot-toast';
 
 const API = process.env.REACT_APP_API_BASE_URL;
 
-// DEBUGGING: Log all <img> tags and their src attributes on initial render and after 3 seconds
-if (typeof window !== 'undefined') {
-  setTimeout(() => {
-    const imgs = document.querySelectorAll('img');
-    console.log('All <img> tags on page:', imgs);
-    console.log('All <img> srcs:', [...imgs].map(img => img.src));
-  }, 3000);
-}
-
 function AddTaskPage() {
   const { token, user } = useAuth();
   const navigate = useNavigate();
