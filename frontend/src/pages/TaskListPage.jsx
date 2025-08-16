@@ -85,7 +85,6 @@ function TaskListPage() {
 
         if (Array.isArray(res.data)) {
           setTeamOptions(res.data);
-          console.log('TEAM_OPTIONS:', res.data); // DEBUG: Print teamOptions array
         } else {
           setTeamOptions([]); 
         }
@@ -141,6 +140,24 @@ function TaskListPage() {
     };
     
     fetchTeamsAndProjects();
+  }, [token, user?.role]);
+
+  // Fetch projects for Team Member
+  useEffect(() => {
+    const fetchMyProjects = async () => {
+      if (user?.role === 'Team Member') {
+        try {
+          const res = await axios.get(`${API}/projects/my-projects`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const sortedProjects = Array.isArray(res.data) ? res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+          setProjects(sortedProjects);
+        } catch (error) {
+          setProjects([]);
+        }
+      }
+    };
+    fetchMyProjects();
   }, [token, user?.role]);
 
 
@@ -560,7 +577,7 @@ function TaskListPage() {
                    Reset Filters
                  </button>
                </div>
-                <div className={`grid gap-3 ${user?.role === 'Admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+                <div className={`grid gap-3 ${user?.role === 'Admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : user?.role === 'Team Member' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                  <input
                    type="text"
                     placeholder="Search Task"
@@ -711,7 +728,6 @@ function TaskListPage() {
                         <span className="text-gray-400">{option.label}</span>
                       ) : (
                         <span className="flex items-center gap-2 px-2 py-1 rounded">
-                          <Briefcase size={16} className="text-blue-600" />
                           <span>{option.label}</span>
                         </span>
                       )
@@ -776,6 +792,17 @@ function TaskListPage() {
                 )}
                </div>
              )}
+
+            {/* No records found message if no tasks after filtering/searching */}
+            {filteredTasks.length === 0 && (
+              <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[120px] flex flex-col justify-center items-center mt-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <AlertCircle size={32} className="text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">No records found</h3>
+                <p className="text-gray-600 mb-1 text-sm">Try changing your search or filters to see more results.</p>
+              </div>
+            )}
 
             {/* Task Display - Hierarchical for Admin, Grid for others */}
             {user?.role === 'Admin' ? (

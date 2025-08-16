@@ -132,6 +132,25 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    // If Team Member, only allow status change and only if assigned
+    if (user.role === 'Team Member') {
+      const isAssigned = Array.isArray(task.assignedTo) && task.assignedTo.some(u => u.toString() === user._id.toString());
+      if (!isAssigned) {
+        return res.status(403).json({ error: 'You are not assigned to this task.' });
+      }
+      // Only allow status change
+      if (
+        (title && title !== task.title) ||
+        (description && description !== task.description) ||
+        (priority && priority !== task.priority) ||
+        (dueDate && dueDate !== (task.dueDate ? task.dueDate.toISOString().slice(0,10) : '')) ||
+        (assignedTo && JSON.stringify(assignedTo) !== JSON.stringify(task.assignedTo.map(u => u.toString()))) ||
+        (attachments && attachments.length > 0)
+      ) {
+        return res.status(403).json({ error: 'Team Members can only change the status of their assigned tasks.' });
+      }
+    }
+
     // Store original values for comparison
     const originalStatus = task.status;
     const originalAssignedTo = task.assignedTo;

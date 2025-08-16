@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import AuthNavbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
-import { Briefcase, Calendar, Users, ArrowRight, Filter, X, ChevronDown, ArrowLeft, Trash2 } from 'lucide-react';
+import { Briefcase, Calendar, Users, ArrowRight, Filter, X, ChevronDown, ArrowLeft, Trash2, AlertCircle } from 'lucide-react';
 import axios from "axios";
 import Select from 'react-select';
 import { Clock, Loader2, CheckCircle } from 'lucide-react';
@@ -632,6 +632,8 @@ function Projects() {
                 )}
               </div>
             )}
+
+            {/* Remove the No records found message. Do not show any empty state message. */}
 
             {filteredProjects.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg border border-green-100 p-8 text-center min-h-[180px] flex flex-col justify-center items-center">
