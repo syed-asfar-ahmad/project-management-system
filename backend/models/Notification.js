@@ -15,10 +15,9 @@ const notificationSchema = new mongoose.Schema({
     type: String,
     enum: [
       'TASK_CREATED',
-      'TASK_UPDATED', 
+      'TASK_UPDATED',
       'TASK_DELETED',
       'TASK_COMPLETED',
-      'TASK_STATUS_UPDATED',
       'PROJECT_CREATED',
       'PROJECT_UPDATED',
       'PROJECT_DELETED',
@@ -79,4 +78,4 @@ const notificationSchema = new mongoose.Schema({
 // Index for efficient querying
 notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
 
-module.exports = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model('Notification', notificationSchema);

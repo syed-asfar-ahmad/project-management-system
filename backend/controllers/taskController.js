@@ -140,25 +140,10 @@ const updateTask = async (req, res) => {
       reqBody: req.body
     });
 
-    // If Team Member, only allow status change and only if assigned
-    if (user.role === 'Team Member') {
-      const isAssigned = Array.isArray(task.assignedTo) && task.assignedTo.some(u => u.toString() === user._id.toString());
-      if (!isAssigned) {
-        console.log('DEBUG: Team Member not assigned to this task');
-        return res.status(403).json({ error: 'You are not assigned to this task.' });
-      }
-      // Only allow status change
-      if (
-        (title && title !== task.title) ||
-        (description && description !== task.description) ||
-        (priority && priority !== task.priority) ||
-        (dueDate && dueDate !== (task.dueDate ? task.dueDate.toISOString().slice(0,10) : '')) ||
-        (assignedTo && JSON.stringify(assignedTo) !== JSON.stringify(task.assignedTo.map(u => u.toString()))) ||
-        (attachments && attachments.length > 0)
-      ) {
-        console.log('DEBUG: Team Member tried to update forbidden fields', { title, description, priority, dueDate, assignedTo, attachments });
-        return res.status(403).json({ error: 'Team Members can only change the status of their assigned tasks.' });
-      }
+    // Only allow Admin/Manager to update tasks
+    if (user.role !== 'Admin' && user.role !== 'Manager') {
+      console.log('DEBUG: User not authorized to update task');
+      return res.status(403).json({ error: 'You do not have permission to update this task.' });
     }
 
     // Store original values for comparison

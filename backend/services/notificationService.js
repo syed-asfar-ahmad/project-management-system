@@ -86,19 +86,6 @@ class NotificationService {
         relatedTask: task._id,
         priority: 'medium'
       });
-      // If updater is a Team Member and status changed, send a special notification
-      if (updater.role === 'Team Member' && changes.status) {
-        await this.createNotification({
-          recipient: updater.id,
-          sender: updater.id,
-          type: 'TASK_STATUS_UPDATED',
-          title: 'Task Status Updated',
-          message: `You have updated the status of task "${task.title}" to ${changes.status.to}.`,
-          relatedProject: task.project._id,
-          relatedTask: task._id,
-          priority: 'medium'
-        });
-      }
       // Notify project manager (only if different from updater)
       if (task.project && task.project.projectManager) {
         const projectManagerId = typeof task.project.projectManager === 'string' 

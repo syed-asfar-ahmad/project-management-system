@@ -58,35 +58,6 @@ function TaskDetailPage() {
   // Only allow if user is assigned Team Member
   const isAssignedTeamMember = user?.role === 'Team Member' && Array.isArray(task?.assignedTo) && task.assignedTo.some(u => (u?._id || u) === user?._id);
 
-  const handleStatusBadgeClick = () => {
-    if (isAssignedTeamMember) setShowStatusDropdown((prev) => !prev);
-  };
-  const handleStatusSelect = (status) => {
-    setPendingStatus(status);
-    setShowStatusDropdown(false);
-    setShowStatusModal(true);
-  };
-  const confirmStatusChange = async () => {
-    if (!pendingStatus) return;
-    try {
-      await axios.put(`${API}/tasks/${id}`, { status: pendingStatus }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Status updated!');
-      setShowStatusModal(false);
-      setPendingStatus(null);
-      fetchTaskDetails();
-      window.dispatchEvent(new CustomEvent('refreshNotifications'));
-    } catch (err) {
-      toast.error('Failed to update status');
-      setShowStatusModal(false);
-      setPendingStatus(null);
-    }
-  };
-  const cancelStatusChange = () => {
-    setShowStatusModal(false);
-    setPendingStatus(null);
-  };
   // Close dropdown on outside click
   useEffect(() => {
     if (!showStatusDropdown) return;
@@ -572,29 +543,10 @@ function TaskDetailPage() {
                     <div className="flex items-center gap-2 relative">
                       <button
                         type="button"
-                        className={`font-semibold px-3 py-1 rounded-full shadow-sm text-sm border border-green-200 flex items-center gap-1 transition-all duration-150 ${getStatusColor(task.status)} ${isAssignedTeamMember ? 'cursor-pointer hover:shadow-lg hover:scale-105' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); handleStatusBadgeClick(); }}
+                        className={`font-semibold px-3 py-1 rounded-full shadow-sm text-sm border border-green-200 flex items-center gap-1 transition-all duration-150 ${getStatusColor(task.status)}`}
                       >
                         {task.status}
-                        {isAssignedTeamMember && (
-                          <ChevronDown size={16} className="ml-1 text-green-600" />
-                        )}
                       </button>
-                      {/* Custom dropdown */}
-                      {showStatusDropdown && (
-                        <div className="absolute left-0 top-10 z-30 w-40 bg-white rounded-xl shadow-2xl border border-green-100 animate-fadeIn">
-                          {statusOptions.map((opt) => (
-                            <button
-                              key={opt}
-                              className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-all duration-100 ${opt === task.status ? 'bg-green-100 text-green-700 cursor-not-allowed' : 'hover:bg-green-50 hover:text-green-700 text-gray-700'}`}
-                              disabled={opt === task.status}
-                              onClick={(e) => { e.stopPropagation(); handleStatusSelect(opt); }}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -974,39 +926,6 @@ function TaskDetailPage() {
                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-colors"
               >
                 Delete Task
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Status Change Confirmation Modal */}
-      {showStatusModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={e => { if (e.target === e.currentTarget) cancelStatusChange(); }}>
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
-            {/* Dialog Header */}
-            <div className="flex items-center gap-3 p-6 border-b border-gray-200">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                <CheckSquare size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-800">Change Task Status</h3>
-                <p className="text-sm text-gray-600">Are you sure you want to change the status to <span className="font-semibold text-green-700">{pendingStatus}</span>?</p>
-              </div>
-            </div>
-            {/* Dialog Actions */}
-            <div className="flex gap-3 p-6 border-t border-gray-200">
-              <button
-                onClick={cancelStatusChange}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmStatusChange}
-                className="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
-              >
-                Confirm
               </button>
             </div>
           </div>
