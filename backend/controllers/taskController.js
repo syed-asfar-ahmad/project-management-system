@@ -132,10 +132,19 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    // DEBUG LOGS
+    console.log('UPDATE TASK DEBUG:', {
+      userId: user._id,
+      userRole: user.role,
+      assignedTo: task.assignedTo,
+      reqBody: req.body
+    });
+
     // If Team Member, only allow status change and only if assigned
     if (user.role === 'Team Member') {
       const isAssigned = Array.isArray(task.assignedTo) && task.assignedTo.some(u => u.toString() === user._id.toString());
       if (!isAssigned) {
+        console.log('DEBUG: Team Member not assigned to this task');
         return res.status(403).json({ error: 'You are not assigned to this task.' });
       }
       // Only allow status change
@@ -147,6 +156,7 @@ const updateTask = async (req, res) => {
         (assignedTo && JSON.stringify(assignedTo) !== JSON.stringify(task.assignedTo.map(u => u.toString()))) ||
         (attachments && attachments.length > 0)
       ) {
+        console.log('DEBUG: Team Member tried to update forbidden fields', { title, description, priority, dueDate, assignedTo, attachments });
         return res.status(403).json({ error: 'Team Members can only change the status of their assigned tasks.' });
       }
     }
