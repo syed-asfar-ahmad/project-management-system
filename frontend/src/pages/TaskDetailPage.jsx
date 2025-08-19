@@ -54,6 +54,8 @@ function TaskDetailPage() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
   const statusOptions = ['To Do', 'In Progress', 'Completed'];
+  // Add state for team member edit modal
+  const [showTeamMemberEditModal, setShowTeamMemberEditModal] = useState(false);
 
   // Only allow if user is assigned Team Member
   const isAssignedTeamMember = user?.role === 'Team Member' && Array.isArray(task?.assignedTo) && task.assignedTo.some(u => (u?._id || u) === user?._id);
@@ -928,6 +930,85 @@ function TaskDetailPage() {
                 Delete Task
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Member Edit Modal */}
+      {showTeamMemberEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all duration-300 scale-100">
+            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-t-2xl p-6 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Pencil size={24} className="text-white" />
+                <h3 className="text-xl font-bold">Update Task Status</h3>
+              </div>
+              <button
+                onClick={() => setShowTeamMemberEditModal(false)}
+                className="bg-white bg-opacity-20 p-2 rounded-xl hover:bg-opacity-30 transition-all duration-200"
+              >
+                <X size={20} className="text-white" />
+              </button>
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  await axios.put(`${API}/tasks/${task._id}`, { status: pendingStatus || task.status }, { headers: { Authorization: `Bearer ${token}` } });
+                  toast.success('Task status updated');
+                  setShowTeamMemberEditModal(false);
+                  fetchTaskDetails();
+                } catch (err) {
+                  toast.error('Failed to update status');
+                }
+              }}
+              className="p-6 space-y-6"
+            >
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">Title</label>
+                <input type="text" value={task.title} disabled className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-700" />
+              </div>
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">Description</label>
+                <textarea value={task.description} disabled className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-700" rows={3} />
+              </div>
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">Due Date</label>
+                <input type="text" value={task.dueDate ? new Date(task.dueDate).toLocaleDateString() : ''} disabled className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-700" />
+              </div>
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">Priority</label>
+                <input type="text" value={task.priority} disabled className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-700" />
+              </div>
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700">Status</label>
+                <select
+                  value={pendingStatus || task.status}
+                  onChange={e => setPendingStatus(e.target.value)}
+                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-700 bg-white"
+                  required
+                >
+                  {statusOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowTeamMemberEditModal(false)}
+                  className="flex-1 px-6 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  Update Status
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -14,7 +14,7 @@ function NotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const perPage = 10;
+  const perPage = 20;
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   useEffect(() => {
@@ -212,7 +212,7 @@ function NotificationsPage() {
               <div className="w-20"></div> {/* Spacer to center the title */}
             </div>
             {/* Action Buttons: Mark all as read & Clear all */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 mb-6">
               <button
                 onClick={markAllAsRead}
                 disabled={notifications.length === 0 || unreadCount === 0}
@@ -247,41 +247,92 @@ function NotificationsPage() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {paginatedNotifications.map((notification) => (
-                  <div
-                    key={notification._id}
-                    className="bg-white rounded-lg shadow-md p-4 flex items-start gap-3"
-                  >
-                    <div className="flex-shrink-0">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800">{notification.title}</p>
-                      <p className="text-xs text-gray-600">{notification.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatTimeAgo(notification.createdAt)}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!notification.isRead && (
+              <>
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                  {paginatedNotifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      className="bg-white rounded-lg shadow-md p-4 flex items-start gap-3"
+                    >
+                      <div className="flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{notification.title}</p>
+                        <p className="text-xs text-gray-600">{notification.message}</p>
+                        <p className="text-xs text-gray-500 mt-1">{formatTimeAgo(notification.createdAt)}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {!notification.isRead && (
+                          <button
+                            onClick={() => markAsRead(notification._id)}
+                            className="p-2 text-green-600 hover:bg-green-100 rounded-full"
+                            title="Mark as read"
+                          >
+                            <Check size={16} />
+                          </button>
+                        )}
                         <button
-                          onClick={() => markAsRead(notification._id)}
-                          className="p-2 text-green-600 hover:bg-green-100 rounded-full"
-                          title="Mark as read"
+                          onClick={() => deleteNotification(notification._id)}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-full"
+                          title="Delete notification"
                         >
-                          <Check size={16} />
+                          <Trash2 size={16} />
                         </button>
-                      )}
-                      <button
-                        onClick={() => deleteNotification(notification._id)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-full"
-                        title="Delete notification"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Pagination Controls - TaskListPage style */}
+                {totalPages > 1 && (
+                  <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-600">
+                        Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, sortedNotifications.length)} of {sortedNotifications.length} notifications
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setPage(page - 1)}
+                          disabled={page === 1}
+                          className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            page === 1
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pg) => (
+                            <button
+                              key={pg}
+                              onClick={() => setPage(pg)}
+                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                page === pg
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {pg}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setPage(page + 1)}
+                          disabled={page === totalPages}
+                          className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            page === totalPages
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </>
         )}
