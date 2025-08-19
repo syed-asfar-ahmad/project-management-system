@@ -14,7 +14,7 @@ const API = process.env.REACT_APP_API_BASE_URL;
 function EditTaskPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [form, setForm] = useState({
     title: '',
@@ -31,6 +31,7 @@ function EditTaskPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentDate, setCurrentDate] = useState(form.dueDate ? new Date(form.dueDate) : new Date());
+  const [isAssignedTeamMember, setIsAssignedTeamMember] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,8 +46,14 @@ function EditTaskPage() {
         const task = taskRes.data;
         const projectId = task.project?._id || task.project;
 
-        // Only fetch team members if project exists
-        if (projectId) {
+        // Check if current user is assigned team member
+        const isAssigned = task.assignedTo.some(assignedUser => 
+          (assignedUser._id || assignedUser) === user?._id
+        );
+        setIsAssignedTeamMember(isAssigned && user?.role === 'Team Member');
+
+        // Only fetch team members if project exists and user is not assigned team member
+        if (projectId && !isAssignedTeamMember) {
           try {
             const teamRes = await axios.get(`${API}/projects/${projectId}/team-members`, {
               headers: {
@@ -74,7 +81,7 @@ function EditTaskPage() {
             setAssignedOption(null);
           }
         } else {
-          // If no project, set empty options
+          // If no project or user is assigned team member, set empty options
           setTeamOptions([]);
           setAssignedOption(null);
         }
@@ -95,32 +102,50 @@ function EditTaskPage() {
     };
 
     fetchData();
-  }, [id, token]);
+  }, [id, token, user, isAssignedTeamMember]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    // Only allow changes if user is not assigned team member, or if it's the status field
+    if (!isAssignedTeamMember || e.target.name === 'status') {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.put(
-        `${API}/tasks/${id}`,
-        {
-          ...form,
-          assignedTo: assignedOption ? [assignedOption.value] : [],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      if (isAssignedTeamMember) {
+        // Team member can only update status
+        await axios.put(
+          `${API}/tasks/${id}`,
+          { status: form.status },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success('Task status updated successfully!');
+      } else {
+        // Manager can update all fields
+        await axios.put(
+          `${API}/tasks/${id}`,
+          {
+            ...form,
+            assignedTo: assignedOption ? [assignedOption.value] : [],
           },
-        }
-      );
-      toast.success('Task updated successfully!');
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success('Task updated successfully!');
+      }
       setTimeout(() => navigate(`/tasks/${id}`), 500);
     } catch (err) {
-      toast.error('Failed to update task');
+      toast.error(isAssignedTeamMember ? 'Failed to update task status' : 'Failed to update task');
     } finally {
       setSubmitting(false);
     }
@@ -234,7 +259,7 @@ function EditTaskPage() {
                 <Pencil size={20} className="text-white" />
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
-                Edit Task
+                {isAssignedTeamMember ? 'Update Task Status' : 'Edit Task'}
               </h1>
             </div>
             
@@ -248,7 +273,7 @@ function EditTaskPage() {
                 <Pencil size={20} className="text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-green-700 bg-clip-text text-transparent">
-                Edit Task
+                {isAssignedTeamMember ? 'Update Task Status' : 'Edit Task'}
               </h1>
             </div>
           </div>
@@ -256,7 +281,7 @@ function EditTaskPage() {
         
         <div className="text-center mb-3">
           <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            Update task information and settings
+            {isAssignedTeamMember ? 'Update the status of your assigned task' : 'Update task information and settings'}
           </p>
         </div>
 
@@ -275,7 +300,10 @@ function EditTaskPage() {
                   name="title"
                   value={form.title}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                  disabled={isAssignedTeamMember}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                    isAssignedTeamMember ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Enter task title"
                   required
                 />
@@ -292,11 +320,14 @@ function EditTaskPage() {
                     value={form.dueDate ? new Date(form.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
                     placeholder="Select due date"
                     readOnly
-                    onClick={() => setShowCalendar(!showCalendar)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors bg-white hover:bg-gray-50 cursor-pointer"
+                    disabled={isAssignedTeamMember}
+                    onClick={() => !isAssignedTeamMember && setShowCalendar(!showCalendar)}
+                    className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      isAssignedTeamMember ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white hover:bg-gray-50 cursor-pointer'
+                    }`}
                     required
                   />
-                  {showCalendar && (
+                  {showCalendar && !isAssignedTeamMember && (
                     <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl z-50">
                       {/* Calendar Header */}
                       <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-t-xl">
@@ -372,7 +403,7 @@ function EditTaskPage() {
                     </div>
                   )}
                   {/* Click outside to close calendar */}
-                  {showCalendar && (
+                  {showCalendar && !isAssignedTeamMember && (
                     <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
                   )}
                   {form.dueDate && (
@@ -393,9 +424,12 @@ function EditTaskPage() {
                 name="description"
                 value={form.description}
                 onChange={handleChange}
+                disabled={isAssignedTeamMember}
                 rows="4"
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none"
+                className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none ${
+                  isAssignedTeamMember ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                }`}
                 placeholder="Enter task description"
               ></textarea>
             </div>
@@ -413,6 +447,7 @@ function EditTaskPage() {
                   ]}
                   value={{ value: form.status, label: form.status }}
                   onChange={(selected) => setForm({ ...form, status: selected.value })}
+                  isDisabled={false} // Status is always editable
                   className="mt-1"
                   placeholder="Select status"
                   styles={{
@@ -460,6 +495,7 @@ function EditTaskPage() {
                   ]}
                   value={{ value: form.priority, label: form.priority }}
                   onChange={(selected) => setForm({ ...form, priority: selected.value })}
+                  isDisabled={isAssignedTeamMember}
                   className="mt-1"
                   placeholder="Select priority"
                   styles={{
@@ -469,8 +505,9 @@ function EditTaskPage() {
                       border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
                       borderRadius: '8px',
                       boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
+                      backgroundColor: isAssignedTeamMember ? '#f3f4f6' : 'white',
                       '&:hover': {
-                        border: '1px solid #10b981'
+                        border: isAssignedTeamMember ? '1px solid #d1d5db' : '1px solid #10b981'
                       }
                     }),
                     option: (provided, state) => ({
@@ -504,6 +541,7 @@ function EditTaskPage() {
                   options={teamOptions}
                   value={assignedOption}
                   onChange={(selected) => setAssignedOption(selected)}
+                  isDisabled={isAssignedTeamMember}
                   className="mt-1"
                   placeholder="Select team member"
                   formatOptionLabel={(option) => (
@@ -537,8 +575,9 @@ function EditTaskPage() {
                       border: state.isFocused ? '2px solid #10b981' : '1px solid #d1d5db',
                       borderRadius: '8px',
                       boxShadow: state.isFocused ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none',
+                      backgroundColor: isAssignedTeamMember ? '#f3f4f6' : 'white',
                       '&:hover': {
-                        border: '1px solid #10b981'
+                        border: isAssignedTeamMember ? '1px solid #d1d5db' : '1px solid #10b981'
                       }
                     }),
                     option: (provided, state) => ({
@@ -572,7 +611,7 @@ function EditTaskPage() {
                  }`}
                >
                  <Save size={18} />
-                 {submitting ? 'Updating...' : 'Update Task'}
+                 {submitting ? 'Updating...' : (isAssignedTeamMember ? 'Update Status' : 'Update Task')}
                </button>
              </div>
           </form>

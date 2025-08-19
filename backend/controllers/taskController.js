@@ -140,12 +140,43 @@ const updateTask = async (req, res) => {
       reqBody: req.body
     });
 
-    // Only allow Admin/Manager to update tasks
-    if (user.role !== 'Admin' && user.role !== 'Manager') {
+    // Check permissions based on user role
+    if (user.role === 'Team Member') {
+      // Team Member can only update status if assigned to this task
+      const isAssigned = task.assignedTo.some(assignedUser => 
+        assignedUser.toString() === user._id.toString()
+      );
+      
+      if (!isAssigned) {
+        console.log('DEBUG: Team Member not assigned to this task');
+        return res.status(403).json({ error: 'You do not have permission to update this task.' });
+      }
+      
+      // Only allow status update for team members
+      if (Object.keys(req.body).length > 1 || !req.body.hasOwnProperty('status')) {
+        console.log('DEBUG: Team Member trying to update more than status');
+        return res.status(403).json({ error: 'Team members can only update task status.' });
+      }
+      
+      // Update only status
+      task.status = status || task.status;
+      await task.save();
+      
+      // Populate task for notifications
+      const populatedTask = await Task.findById(task._id)
+        .populate('project', 'name projectManager')
+        .populate('assignedTo', 'name email');
+      
+      // Send notification for status change
+      await NotificationService.notifyTaskUpdated(populatedTask, user, { status: { from: task.status, to: status } });
+      
+      return res.json(task);
+    } else if (user.role !== 'Manager') {
       console.log('DEBUG: User not authorized to update task');
       return res.status(403).json({ error: 'You do not have permission to update this task.' });
     }
 
+    // Manager can update all fields
     // Store original values for comparison
     const originalStatus = task.status;
     const originalAssignedTo = task.assignedTo;

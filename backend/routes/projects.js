@@ -80,11 +80,11 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// CREATE new project — Admin or Manager (within their team)
-router.post('/', verifyToken, checkRole('Admin', 'Manager'), createProject);
+// CREATE new project — Manager only
+router.post('/', verifyToken, checkRole('Manager'), createProject);
 
-// UPDATE project — Admin or Manager (if assigned to project)
-router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerProjectAccess, updateProject);
+// UPDATE project — Manager only (if assigned to project)
+router.put('/:id', verifyToken, checkRole('Manager'), checkManagerProjectAccess, updateProject);
 
 // Add Comment to a Project
 router.post('/:id/comments', verifyToken, async (req, res) => {
@@ -129,8 +129,8 @@ router.post('/:id/comments', verifyToken, async (req, res) => {
   }
 });
 
-// DELETE project — Admin or Manager (if assigned to project)
-router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerProjectAccess, deleteProject);
+// DELETE project — Manager only (if assigned to project)
+router.delete('/:id', verifyToken, checkRole('Manager'), checkManagerProjectAccess, deleteProject);
 
 router.get('/:id/comments', verifyToken, getProjectComments);
 

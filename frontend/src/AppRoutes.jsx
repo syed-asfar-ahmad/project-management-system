@@ -104,8 +104,21 @@ function AppRoutes() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Protected Routes */}
-        <Route path="/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-        <Route path="/manager-dashboard" element={<PrivateRoute><ManagerDashboard /></PrivateRoute>} />
+        <Route path="/dashboard" element={
+          <RoleBasedRoute allowedRoles={["Admin"]}>
+            <AdminDashboard />
+          </RoleBasedRoute>
+        } />
+        <Route path="/manager-dashboard" element={
+          <RoleBasedRoute allowedRoles={["Manager"]}>
+            <ManagerDashboard />
+          </RoleBasedRoute>
+        } />
+        <Route path="/team-dashboard" element={
+          <RoleBasedRoute allowedRoles={["Team Member"]}>
+            <TeamDashboard />
+          </RoleBasedRoute>
+        } />
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/tasks" element={<PrivateRoute><TaskListPage /></PrivateRoute>} />
         <Route path="/tasks/:id" element={<PrivateRoute><TaskDetailPage /></PrivateRoute>} />
@@ -130,7 +143,7 @@ function AppRoutes() {
           </RoleBasedRoute>
         } />
         <Route path="/tasks/:id/edit" element={
-          <RoleBasedRoute allowedRoles={["Admin", "Manager"]}>
+          <RoleBasedRoute allowedRoles={["Admin", "Manager", "Team Member"]}>
             <EditTaskPage />
           </RoleBasedRoute>
         } />
@@ -158,15 +171,6 @@ function AppRoutes() {
             <CreateProject />
           </RoleBasedRoute>
         } />
-
-        <Route
-          path="/team-dashboard"
-          element={
-            <RoleBasedRoute allowedRoles={["Team Member"]}>
-              <TeamDashboard />
-            </RoleBasedRoute>
-          }
-        />
       </Routes>
     </>
   );

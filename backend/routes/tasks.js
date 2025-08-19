@@ -26,8 +26,8 @@ const memoryUpload = multer({
   },
 });
 
-// Create Task - Admin or Manager (if assigned to project)
-router.post('/', verifyToken, checkRole('Admin', 'Manager'), createTask);
+// Create Task - Manager only
+router.post('/', verifyToken, checkRole('Manager'), createTask);
 
 // Get all tasks (Admin/Manager)
 router.get('/', verifyToken, checkRole('Admin', 'Manager'), getAllTasks);
@@ -310,11 +310,11 @@ router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'
 // Get Task by ID - Any logged-in user
 router.get('/:id', verifyToken, getTaskById);
 
-// Update Task - Admin or Manager (if assigned to project)
-router.put('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, updateTask);
+// Update Task - Manager and Team Member (with different permissions handled in controller)
+router.put('/:id', verifyToken, updateTask);
 
-// Delete Task - Admin or Manager (if assigned to project)
-router.delete('/:id', verifyToken, checkRole('Admin', 'Manager'), checkManagerTaskAccess, deleteTask);
+// Delete Task - Manager only (if assigned to project)
+router.delete('/:id', verifyToken, checkRole('Manager'), checkManagerTaskAccess, deleteTask);
 
 // Add Comment to Task - Any logged-in user
 router.post('/:id/comments', verifyToken, addCommentToTask);

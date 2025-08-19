@@ -596,26 +596,15 @@ function TaskDetailPage() {
                    <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                      <Pencil className="text-white" size={12} />
                    </div>
-                   Task Actions
+                   Manager Actions
                  </h2>
-                 <div className="space-y-3 min-h-[120px] flex flex-col justify-center">
+                 <div className="space-y-3 min-h-[60px] flex flex-col justify-center">
                    <button
-                     onClick={handleEdit}
-                     className="flex items-center gap-3 w-full p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-800 rounded-lg hover:from-yellow-100 hover:to-yellow-200 transition-all duration-200 border border-yellow-200 hover:shadow-md"
+                     onClick={() => navigate(`/tasks/${id}/edit`)}
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                    >
-                     <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
-                       <Pencil className="text-white" size={16} />
-                     </div>
-                     <span className="font-semibold text-sm">Edit Task</span>
-                   </button>
-                   <button
-                     onClick={handleDelete}
-                     className="flex items-center gap-3 w-full p-3 bg-gradient-to-r from-red-50 to-red-100 text-red-800 rounded-lg hover:from-red-100 hover:to-red-200 transition-all duration-200 border border-red-200 hover:shadow-md"
-                   >
-                     <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                       <Trash2 className="text-white" size={16} />
-                     </div>
-                     <span className="font-semibold text-sm">Delete Task</span>
+                     <Pencil size={16} />
+                     Edit Task
                    </button>
                  </div>
                </div>
@@ -633,6 +622,26 @@ function TaskDetailPage() {
                  <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                    <p className="font-semibold text-gray-800 mb-1">{task.project.name}</p>
                    <p className="text-sm text-gray-600 leading-relaxed">{task.project.description}</p>
+                 </div>
+               </div>
+             )}
+
+             {isAssignedTeamMember && (
+               <div className="bg-white rounded-xl shadow-lg border border-green-100 p-4">
+                 <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                   <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+                     <CheckSquare className="text-white" size={12} />
+                   </div>
+                   Task Actions
+                 </h2>
+                 <div className="space-y-3 min-h-[60px] flex flex-col justify-center">
+                   <button
+                     onClick={() => navigate(`/tasks/${id}/edit`)}
+                     className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                   >
+                     <CheckSquare size={16} />
+                     Update Status
+                   </button>
                  </div>
                </div>
              )}
